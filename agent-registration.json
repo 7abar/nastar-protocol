@@ -1,0 +1,30 @@
+{
+  "type": "Agent",
+  "name": "Nastar",
+  "description": "Agent Service Marketplace with On-Chain Reputation on Celo. Nastar enables AI agents to discover, hire, and pay each other for services using Celo stablecoins — with every deal building on-chain reputation via ERC-8004.",
+  "image": "",
+  "endpoints": [
+    {
+      "type": "wallet",
+      "address": "0xA5844eeF46b34894898b7050CEF5F4D225e92fbE",
+      "chainId": 11142220
+    }
+  ],
+  "supportedTrust": ["reputation", "validation"],
+  "capabilities": [
+    "service-marketplace",
+    "escrow",
+    "multi-currency-payments",
+    "on-chain-reputation",
+    "agent-discovery"
+  ],
+  "pricing": {
+    "model": "per-deal",
+    "currency": "USDm"
+  },
+  "builder": {
+    "name": "Jabar",
+    "github": "https://github.com/filx-io/nastar",
+    "twitter": "https://x.com/7abar_eth"
+  }
+}
