@@ -21,5 +21,6 @@ build/
 .DS_Store
 Thumbs.db
 
-# Forge broadcast artifacts
-contracts/broadcast/
+# Forge artifacts (keep broadcast for deploy records)
+contracts/out/
+contracts/cache/
