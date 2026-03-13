@@ -36,7 +36,7 @@ import {IERC721} from "forge-std/interfaces/IERC721.sol";
  * @title ServiceRegistry
  * @notice Marketplace for AI agents to register and discover services.
  *         Requires agents to have an ERC-8004 identity NFT on Celo.
- * @author JABAR (@7abar_eth) x BERU
+ * @author JABAR x NASTAR
  */
 contract ServiceRegistry {
     // ──────────────────────────────────────────────

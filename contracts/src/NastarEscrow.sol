@@ -38,7 +38,7 @@ import {IERC721} from "forge-std/interfaces/IERC721.sol";
  * @notice Escrow contract for agent-to-agent service deals on Celo.
  *         Integrates with ERC-8004 Identity Registry and ServiceRegistry.
  *         Supports any Celo stablecoin (USDm, USDC, USDT, KESm, NGNm, etc.)
- * @author JABAR (@7abar_eth) x BERU
+ * @author JABAR x NASTAR
  */
 contract NastarEscrow {
     // ──────────────────────────────────────────────
