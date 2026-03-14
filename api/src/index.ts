@@ -19,6 +19,8 @@ import servicesRouter from "./routes/services.js";
 import dealsRouter from "./routes/deals.js";
 import realtimeRouter from "./routes/realtime.js";
 import hostedRouter from "./routes/hosted.js";
+import judgeRouter from "./routes/judge.js";
+import reputationRouter from "./routes/reputation.js";
 import { startIndexer } from "./lib/indexer.js";
 
 const app = express();
@@ -121,7 +123,9 @@ app.get("/health", async (_req, res) => {
 app.use("/services", servicesRouter);
 app.use("/deals", dealsRouter);
 app.use("/v1", realtimeRouter);       // Real-time indexed data
-app.use("/v1/hosted", hostedRouter);  // No-Code Agent Launcher runtime
+app.use("/v1/hosted", hostedRouter);       // No-Code Agent Launcher runtime
+app.use("/v1/judge", judgeRouter);         // AI Dispute Judge
+app.use("/v1/reputation", reputationRouter); // Reputation Oracle
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((_req, res) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { formatUnits } from "viem";
+import Link from "next/link";
 import { DEAL_STATUS, DEAL_STATUS_COLOR } from "@/lib/contracts";
 
 interface Deal {
@@ -106,6 +107,14 @@ export function DealCard({
               Claim Refund
             </button>
           )}
+        {deal.status === 4 && (
+          <Link
+            href={`/disputes/${deal.dealId.toString()}`}
+            className="flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-[#F4C430]/20 text-[#F4C430] hover:bg-[#F4C430]/30 transition text-center"
+          >
+            AI Judge
+          </Link>
+        )}
       </div>
     </div>
   );

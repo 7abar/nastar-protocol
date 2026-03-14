@@ -28,8 +28,8 @@ export const celoSepoliaCustom = defineChain({
 });
 
 export const CONTRACTS = {
-  SERVICE_REGISTRY: "0x1aB9810d5E135f02fC66E875a77Da8fA4e49758e" as `0x${string}`,
-  NASTAR_ESCROW: "0xEE51f3CA1bcDeb58a94093F759BafBC9157734AF" as `0x${string}`,
+  SERVICE_REGISTRY: "0xB36454609b2bdaf2b688228492e23F3DddAE7206" as `0x${string}`,
+  NASTAR_ESCROW: "0xAE17AaccD135BD434E13990Dd2fAAA743f32b1e1" as `0x${string}`,
   IDENTITY_REGISTRY: "0x8004A818BFB912233c491871b3d84c89A494BD9e" as `0x${string}`,
   MOCK_USDC: "0x93C86be298bcF530E183954766f103B061BF64Ef" as `0x${string}`,
 } as const;
@@ -159,6 +159,17 @@ export const ESCROW_ABI = [
     type: "function", name: "nextDealId",
     inputs: [], outputs: [{ type: "uint256" }],
     stateMutability: "view",
+  },
+  {
+    type: "event", name: "DisputeResolved",
+    inputs: [
+      { name: "dealId", type: "uint256", indexed: true },
+      { name: "sellerBps", type: "uint256", indexed: false },
+      { name: "buyerAmount", type: "uint256", indexed: false },
+      { name: "sellerAmount", type: "uint256", indexed: false },
+      { name: "feeAmount", type: "uint256", indexed: false },
+      { name: "reasoning", type: "string", indexed: false },
+    ],
   },
 ] as const;
 

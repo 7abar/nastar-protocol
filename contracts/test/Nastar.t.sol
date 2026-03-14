@@ -16,6 +16,7 @@ contract NastarTest is Test {
     address public alice = makeAddr("alice"); // buyer
     address public bob = makeAddr("bob");     // seller agent owner
     address public treasury = makeAddr("treasury");
+    address public judge = makeAddr("judge");
 
     uint256 public aliceAgentId;
     uint256 public bobAgentId;
@@ -25,7 +26,7 @@ contract NastarTest is Test {
         usdc = new MockERC20();
 
         registry = new ServiceRegistry(address(identity));
-        escrow = new NastarEscrow(address(identity), address(registry), treasury);
+        escrow = new NastarEscrow(address(identity), address(registry), treasury, judge);
 
         aliceAgentId = identity.mint(alice);
         bobAgentId = identity.mint(bob);
@@ -587,6 +588,57 @@ contract NastarTest is Test {
         // Funds still in escrow
         assertEq(usdc.balanceOf(address(escrow)), 10e6);
         assertEq(usdc.balanceOf(bob), 0);
+    }
+
+    // ── AI Judge Tests ────────────────────────────────────────────────────────
+
+    function test_judgeResolvesDispute_sellerWins() public {
+        uint256 serviceId = _createTestService();
+        uint256 dealId = _createTestDeal(serviceId);
+        vm.prank(bob); escrow.acceptDeal(dealId);
+        vm.prank(bob); escrow.deliverDeal(dealId, "ipfs://QmDeliv123");
+        vm.prank(alice); escrow.disputeDeal(dealId);
+
+        uint256 bobBefore = usdc.balanceOf(bob);
+        uint256 aliceBefore = usdc.balanceOf(alice);
+
+        // Judge gives 80% to seller
+        vm.prank(judge);
+        escrow.resolveDisputeWithJudge(dealId, 8000, "Delivery matches requirements. Minor issues noted.");
+
+        uint256 fee = (10e6 * 250) / 10000;
+        uint256 remaining = 10e6 - fee;
+        assertApproxEqAbs(usdc.balanceOf(bob) - bobBefore, (remaining * 8000) / 10000, 1);
+        assertApproxEqAbs(usdc.balanceOf(alice) - aliceBefore, (remaining * 2000) / 10000, 1);
+        assertEq(uint8(escrow.getDeal(dealId).status), uint8(NastarEscrow.DealStatus.Resolved));
+    }
+
+    function test_judgeResolvesDispute_buyerWins() public {
+        uint256 serviceId = _createTestService();
+        uint256 dealId = _createTestDeal(serviceId);
+        vm.prank(bob); escrow.acceptDeal(dealId);
+        vm.prank(bob); escrow.deliverDeal(dealId, "ipfs://QmDeliv123");
+        vm.prank(alice); escrow.disputeDeal(dealId);
+
+        vm.prank(judge);
+        escrow.resolveDisputeWithJudge(dealId, 0, "Delivery does not match task description.");
+
+        uint256 fee = (10e6 * 250) / 10000;
+        uint256 remaining = 10e6 - fee;
+        assertApproxEqAbs(usdc.balanceOf(alice), 1000e6 - 10e6 + remaining, 1);
+        assertEq(usdc.balanceOf(bob), 0);
+    }
+
+    function test_judgeRevertIfNotJudge() public {
+        uint256 serviceId = _createTestService();
+        uint256 dealId = _createTestDeal(serviceId);
+        vm.prank(bob); escrow.acceptDeal(dealId);
+        vm.prank(bob); escrow.deliverDeal(dealId, "ipfs://QmDeliv123");
+        vm.prank(alice); escrow.disputeDeal(dealId);
+
+        vm.expectRevert(NastarEscrow.NotJudge.selector);
+        vm.prank(alice);
+        escrow.resolveDisputeWithJudge(dealId, 5000, "Should not work");
     }
 
     function test_getBuyerAndSellerDeals() public {

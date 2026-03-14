@@ -93,6 +93,9 @@ contract NastarEscrow {
     address public immutable serviceRegistry;
     address public immutable feeRecipient;
 
+    /// @notice Trusted AI judge address — only address that can call resolveDisputeWithJudge.
+    address public immutable judgeAddress;
+
     uint256 public nextDealId;
     mapping(uint256 => Deal) public deals;
 
@@ -147,6 +150,7 @@ contract NastarEscrow {
     event DealCompleted(uint256 indexed dealId, uint256 sellerAmount, uint256 feeAmount);
     event DealDisputed(uint256 indexed dealId, uint256 indexed buyerAgentId, uint256 disputedAt);
     event DealContested(uint256 indexed dealId, uint256 buyerAmount, uint256 sellerAmount, uint256 feeAmount);
+    event DisputeResolved(uint256 indexed dealId, uint256 sellerBps, uint256 buyerAmount, uint256 sellerAmount, uint256 feeAmount, string reasoning);
     event DealRefunded(uint256 indexed dealId, uint256 amount);
     event DealExpired(uint256 indexed dealId);
 
@@ -154,6 +158,7 @@ contract NastarEscrow {
     // Errors
     // ──────────────────────────────────────────────
 
+    error NotJudge();
     error NotAgentOwner();
     error NotBuyer();
     error NotSeller();
@@ -189,13 +194,14 @@ contract NastarEscrow {
     // Constructor
     // ──────────────────────────────────────────────
 
-    constructor(address _identityRegistry, address _serviceRegistry, address _feeRecipient) {
+    constructor(address _identityRegistry, address _serviceRegistry, address _feeRecipient, address _judgeAddress) {
         if (_identityRegistry == address(0) || _serviceRegistry == address(0) || _feeRecipient == address(0)) {
             revert ZeroAddress();
         }
         identityRegistry = IERC721(_identityRegistry);
         serviceRegistry = _serviceRegistry;
         feeRecipient = _feeRecipient;
+        judgeAddress = _judgeAddress == address(0) ? _feeRecipient : _judgeAddress;
     }
 
     // ──────────────────────────────────────────────
@@ -373,6 +379,44 @@ contract NastarEscrow {
         if (sellerAmount > 0) {
             _safeTransfer(IERC20(token), deal.seller, sellerAmount);
         }
+    }
+
+    /**
+     * @notice AI judge resolves a disputed deal with a custom split.
+     *         Only callable by the trusted judgeAddress (our AI server wallet).
+     *
+     * @param dealId    The disputed deal to resolve.
+     * @param sellerBps Basis points awarded to seller (0–10000). e.g. 7500 = 75% to seller.
+     * @param reasoning Short human-readable reasoning string stored on-chain for transparency.
+     */
+    function resolveDisputeWithJudge(
+        uint256 dealId,
+        uint256 sellerBps,
+        string calldata reasoning
+    ) external nonReentrant {
+        if (msg.sender != judgeAddress) revert NotJudge();
+        if (sellerBps > 10000) sellerBps = 10000;
+
+        Deal storage deal = deals[dealId];
+        _requireStatus(deal, DealStatus.Disputed);
+
+        // CEI: update state before transfers
+        deal.status = DealStatus.Resolved;
+        deal.completedAt = block.timestamp;
+
+        address token = deal.paymentToken;
+        uint256 amount = deal.amount;
+
+        uint256 fee = (amount * PROTOCOL_FEE_BPS) / 10000;
+        uint256 remaining = amount - fee;
+        uint256 sellerAmount = (remaining * sellerBps) / 10000;
+        uint256 buyerAmount = remaining - sellerAmount;
+
+        emit DisputeResolved(dealId, sellerBps, buyerAmount, sellerAmount, fee, reasoning);
+
+        if (fee > 0)          _safeTransfer(IERC20(token), feeRecipient, fee);
+        if (sellerAmount > 0) _safeTransfer(IERC20(token), deal.seller, sellerAmount);
+        if (buyerAmount > 0)  _safeTransfer(IERC20(token), deal.buyer, buyerAmount);
     }
 
     /**

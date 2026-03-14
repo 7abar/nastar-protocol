@@ -31,9 +31,12 @@ contract DeployNastar is Script {
 
         // Fee recipient = deployer wallet (protocol treasury)
         address feeRecipient = vm.addr(deployerKey);
-        NastarEscrow escrow = new NastarEscrow(identityRegistry, address(registry), feeRecipient);
+        // Judge address: set via env or fallback to deployer (our AI server wallet)
+        address judgeAddress = vm.envOr("JUDGE_ADDRESS", feeRecipient);
+        NastarEscrow escrow = new NastarEscrow(identityRegistry, address(registry), feeRecipient, judgeAddress);
         console.log("NastarEscrow:     ", address(escrow));
         console.log("Fee Recipient:    ", feeRecipient);
+        console.log("Judge Address:    ", judgeAddress);
         console.log("Protocol Fee:      2.5%");
 
         vm.stopBroadcast();
