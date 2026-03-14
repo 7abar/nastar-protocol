@@ -154,6 +154,7 @@ function ProfileDropdown() {
 export function Header() {
   const { authenticated, login } = usePrivy();
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -166,11 +167,13 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 h-16">
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 h-14 md:h-16">
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-green-400 font-bold text-xl">Nastar</span>
+          <span className="text-green-400 font-bold text-lg md:text-xl">Nastar</span>
         </Link>
 
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1 text-sm">
           {navItems.map((item) => (
             <Link
@@ -193,27 +196,83 @@ export function Header() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-3">
+        {/* Right side */}
+        <div className="flex items-center gap-2 md:gap-3">
           {authenticated ? (
             <ProfileDropdown />
           ) : (
             <>
               <Link
                 href="/join"
-                className="px-4 py-1.5 rounded-full bg-green-500 text-black text-sm font-medium hover:bg-green-400 transition"
+                className="hidden sm:inline-block px-4 py-1.5 rounded-full bg-green-500 text-black text-sm font-medium hover:bg-green-400 transition"
               >
                 Join Us
               </Link>
               <button
                 onClick={login}
-                className="px-4 py-1.5 rounded-full border border-white/20 text-white text-sm font-medium hover:bg-white/5 transition"
+                className="px-3 md:px-4 py-1.5 rounded-full border border-white/20 text-white text-xs md:text-sm font-medium hover:bg-white/5 transition"
               >
                 Login
               </button>
             </>
           )}
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden p-2 text-white/60 hover:text-white"
+            aria-label="Menu"
+          >
+            {mobileOpen ? (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile nav dropdown */}
+      {mobileOpen && (
+        <nav className="md:hidden border-t border-white/5 bg-black/95 backdrop-blur-xl">
+          <div className="px-4 py-2 space-y-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`block px-3 py-2.5 rounded-lg text-sm transition ${
+                  pathname === item.href
+                    ? "text-green-400 bg-green-500/10"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              href="/chat"
+              onClick={() => setMobileOpen(false)}
+              className="block px-3 py-2.5 rounded-lg text-sm bg-green-500/10 text-green-400 font-medium"
+            >
+              Chat
+            </Link>
+            {!authenticated && (
+              <Link
+                href="/join"
+                onClick={() => setMobileOpen(false)}
+                className="block px-3 py-2.5 rounded-lg text-sm text-green-400 hover:bg-green-500/10"
+              >
+                Join Us
+              </Link>
+            )}
+          </div>
+        </nav>
+      )}
     </header>
   );
 }

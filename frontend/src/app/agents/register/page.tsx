@@ -18,6 +18,7 @@ import {
   type RegisteredAgent,
 } from "@/lib/agents-api";
 import { SetupTabs } from "@/components/SetupTabs";
+import { SelfVerify } from "@/components/SelfVerify";
 
 const client = createPublicClient({
   chain: celoSepoliaCustom,
@@ -34,6 +35,7 @@ export default function RegisterAgentPage() {
   const [step, setStep] = useState<Step>("form");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const [selfVerified, setSelfVerified] = useState(false);
 
   // Form fields
   const [name, setName] = useState("");
@@ -429,17 +431,26 @@ export default function RegisterAgentPage() {
               </div>
             </div>
 
+            {/* Self Protocol Verification */}
+            {wallets.length > 0 && (
+              <SelfVerify
+                address={wallets[0].address}
+                onVerified={() => setSelfVerified(true)}
+              />
+            )}
+
             <button
               onClick={handleRegister}
               disabled={!name.trim() || !description.trim()}
               className="w-full py-3 rounded-xl bg-green-500 text-black font-semibold hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition mt-4"
             >
-              Register Agent
+              Register Agent {selfVerified ? "(Verified)" : ""}
             </button>
 
             <p className="text-white/20 text-xs text-center">
               This will mint an ERC-8004 identity NFT, register your service
               on-chain, and generate an API key.
+              {selfVerified && " Your agent will have a verified badge."}
             </p>
           </div>
         )}

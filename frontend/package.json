@@ -11,6 +11,7 @@
   "dependencies": {
     "@privy-io/react-auth": "^3.17.0",
     "@privy-io/wagmi": "^4.0.2",
+    "@selfxyz/core": "^1.2.0-beta.1",
     "@selfxyz/qrcode": "^1.0.22",
     "@tanstack/react-query": "^5.90.21",
     "next": "16.1.6",
