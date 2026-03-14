@@ -112,156 +112,193 @@ export default function AgentDetailPage() {
 
   // ── On-chain agent view ────────────────────────────────────────────────
   if (onChainAgent) {
+    const allTags = onChainAgent.services.map((svc) => {
+      const n = svc.name.toLowerCase();
+      const tags: string[] = [];
+      if (n.includes("data") || n.includes("feed")) tags.push("data-feeds");
+      if (n.includes("audit")) tags.push("security-audit");
+      if (n.includes("nft")) tags.push("NFT");
+      if (n.includes("tweet") || n.includes("compose")) tags.push("social-media");
+      if (n.includes("swap") || n.includes("route")) tags.push("DeFi");
+      if (n.includes("translat")) tags.push("translation");
+      if (n.includes("analy")) tags.push("analytics");
+      if (n.includes("scrap")) tags.push("web-scraping");
+      return tags;
+    }).flat().filter((v, i, a) => a.indexOf(v) === i);
+
+    const minPrice = Math.min(...onChainAgent.services.map((s) => parseFloat(s.pricePerCall) || 0));
+    const maxPrice = Math.max(...onChainAgent.services.map((s) => parseFloat(s.pricePerCall) || 0));
+    const priceRange = minPrice === maxPrice ? `${minPrice} USDC` : `${minPrice} - ${maxPrice} USDC`;
+
     return (
       <div className="min-h-screen bg-black text-white">
-        <div className="max-w-2xl mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-bold text-2xl">
-              {onChainAgent.name.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">Agent #{onChainAgent.agentId}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <code className="text-white/30 text-xs font-mono">
-                  {onChainAgent.address.slice(0, 6)}...{onChainAgent.address.slice(-4)}
-                </code>
-                <button
-                  onClick={() => copyToClipboard(onChainAgent.address, "addr")}
-                  className="text-white/20 hover:text-white text-xs"
-                >
-                  {copied === "addr" ? "Copied!" : "Copy"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20 text-center">
-                <p className="text-green-400 font-bold text-xl">${onChainAgent.revenue}</p>
-                <p className="text-white/40 text-xs mt-1">Revenue</p>
-              </div>
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                <p className="text-white font-bold text-xl">{onChainAgent.jobsCompleted}/{onChainAgent.jobsTotal}</p>
-                <p className="text-white/40 text-xs mt-1">Jobs Done</p>
-              </div>
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                <p className="text-white font-bold text-xl">{onChainAgent.completionRate}%</p>
-                <p className="text-white/40 text-xs mt-1">Completion</p>
-              </div>
-            </div>
-
-            {/* Services */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="font-semibold text-white mb-3">
-                Services ({onChainAgent.services.length})
-              </h3>
-              <div className="space-y-3">
-                {onChainAgent.services.map((svc) => (
-                  <div
-                    key={svc.serviceId}
-                    className="p-3 rounded-lg bg-black/30 border border-white/5"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-white font-medium text-sm">{svc.name}</span>
-                        <span className="text-white/20 text-xs font-mono">#{svc.serviceId}</span>
-                      </div>
-                      <span className="text-green-400 font-medium text-sm">
-                        {svc.pricePerCall} USDC
-                      </span>
-                    </div>
-                    <p className="text-white/40 text-xs line-clamp-2">{svc.description}</p>
-                    {svc.endpoint && (
-                      <p className="text-white/20 text-xs font-mono mt-1 truncate">
-                        {svc.endpoint}
-                      </p>
-                    )}
+        {/* Hero banner */}
+        <div className="border-b border-white/10 bg-gradient-to-b from-green-500/5 to-transparent">
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="flex flex-col md:flex-row md:items-start gap-6">
+              {/* Avatar + info */}
+              <div className="flex items-start gap-4 flex-1">
+                <div className="w-20 h-20 rounded-2xl bg-green-500/20 border border-green-500/30 flex items-center justify-center text-green-400 font-bold text-3xl shrink-0">
+                  {onChainAgent.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl font-bold">Agent #{onChainAgent.agentId}</h1>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <code className="text-white/30 text-xs font-mono">
+                      {onChainAgent.address.slice(0, 6)}...{onChainAgent.address.slice(-4)}
+                    </code>
+                    <button
+                      onClick={() => copyToClipboard(onChainAgent.address, "addr")}
+                      className="text-white/20 hover:text-white text-xs"
+                    >
+                      {copied === "addr" ? "Copied!" : "Copy"}
+                    </button>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-500/10 text-green-400 text-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                      Active
+                    </span>
                   </div>
-                ))}
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {allTags.map((tag) => (
+                      <span key={tag} className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50 text-xs">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Identity & Metadata */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="font-semibold text-white mb-3">Identity</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-white/40">Agent NFT ID</span>
-                  <span className="text-white font-mono">#{onChainAgent.agentId} (ERC-8004)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/40">Wallet</span>
-                  <span className="text-white/60 font-mono text-xs">{onChainAgent.address}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/40">Network</span>
-                  <span className="text-green-400">Celo Sepolia</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/40">Registry</span>
+              {/* CTA — always visible, no scroll needed */}
+              <div className="flex flex-col gap-2 md:w-56 shrink-0">
+                <Link
+                  href={`/chat?agent=${onChainAgent.agentId}&name=${encodeURIComponent(onChainAgent.services[0]?.name || `Agent #${onChainAgent.agentId}`)}`}
+                  className="py-3 rounded-xl bg-green-500 text-black text-center font-semibold hover:bg-green-400 transition text-sm"
+                >
+                  Hire this Agent
+                </Link>
+                <div className="flex gap-2">
+                  <a
+                    href={`https://sepolia.celoscan.io/address/${onChainAgent.address}`}
+                    target="_blank"
+                    className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-white/60 text-center text-xs hover:bg-white/10 transition"
+                  >
+                    CeloScan
+                  </a>
                   <a
                     href={`https://agentscan.info/agents?search=${onChainAgent.address}`}
                     target="_blank"
-                    className="text-blue-400 text-xs hover:underline"
+                    className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-white/60 text-center text-xs hover:bg-white/10 transition"
                   >
-                    View on Agentscan
+                    Agentscan
                   </a>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-white/40">Metadata URI</span>
-                  <a
-                    href={`/api/agent-registration/${onChainAgent.agentId}`}
-                    target="_blank"
-                    className="text-blue-400 text-xs hover:underline"
-                  >
-                    ERC-8004 Registration JSON
-                  </a>
+                <p className="text-white/20 text-xs text-center">
+                  {priceRange} per call
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left column — stats + identity */}
+            <div className="space-y-4">
+              {/* Stats */}
+              <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
+                <h3 className="text-xs text-white/30 uppercase tracking-wider mb-3">Performance</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/50 text-sm">Revenue</span>
+                    <span className="text-green-400 font-bold text-lg">${onChainAgent.revenue}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/50 text-sm">Jobs Done</span>
+                    <span className="text-white font-bold">{onChainAgent.jobsCompleted}/{onChainAgent.jobsTotal}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/50 text-sm">Completion</span>
+                    <span className="text-white font-bold">{onChainAgent.completionRate}%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Identity */}
+              <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                <h3 className="text-xs text-white/30 uppercase tracking-wider mb-3">Identity</h3>
+                <div className="space-y-2.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/40">NFT ID</span>
+                    <span className="text-white font-mono text-xs">#{onChainAgent.agentId} (ERC-8004)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/40">Network</span>
+                    <span className="text-green-400 text-xs">Celo Sepolia</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/40">Metadata</span>
+                    <a
+                      href={`/api/agent-registration/${onChainAgent.agentId}`}
+                      target="_blank"
+                      className="text-blue-400 text-xs hover:underline"
+                    >
+                      View JSON
+                    </a>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/40">Trust</span>
+                    <span className="text-white/60 text-xs">Reputation-based</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Tags */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="font-semibold text-white mb-3">Capabilities</h3>
-              <div className="flex flex-wrap gap-2">
-                {onChainAgent.services.map((svc) => {
-                  const n = svc.name.toLowerCase();
-                  const tags: string[] = ["AI-agents", "celo", "nastar"];
-                  if (n.includes("data") || n.includes("feed")) tags.push("data-feeds");
-                  if (n.includes("audit")) tags.push("security-audit");
-                  if (n.includes("nft")) tags.push("NFT");
-                  if (n.includes("tweet") || n.includes("compose")) tags.push("social-media");
-                  if (n.includes("swap") || n.includes("route")) tags.push("DeFi");
-                  if (n.includes("translat")) tags.push("translation");
-                  if (n.includes("analy")) tags.push("analytics");
-                  if (n.includes("scrap")) tags.push("web-scraping");
-                  return tags;
-                }).flat().filter((v, i, a) => a.indexOf(v) === i).map((tag) => (
-                  <span key={tag} className="px-2.5 py-1 rounded-full bg-green-500/10 text-green-400 text-xs">
-                    {tag}
-                  </span>
-                ))}
+            {/* Right column — services */}
+            <div className="lg:col-span-2">
+              <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-white">
+                    Services ({onChainAgent.services.length})
+                  </h3>
+                  <span className="text-white/20 text-xs">Escrow-protected</span>
+                </div>
+                <div className="space-y-3">
+                  {onChainAgent.services.map((svc) => (
+                    <div
+                      key={svc.serviceId}
+                      className="p-4 rounded-lg bg-black/30 border border-white/5 hover:border-green-500/20 transition group"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-medium text-sm group-hover:text-green-400 transition">{svc.name}</span>
+                            <span className="text-white/15 text-xs font-mono">#{svc.serviceId}</span>
+                          </div>
+                        </div>
+                        <span className="text-green-400 font-semibold text-sm whitespace-nowrap ml-3">
+                          {svc.pricePerCall} USDC
+                        </span>
+                      </div>
+                      <p className="text-white/40 text-sm leading-relaxed mb-2">{svc.description}</p>
+                      <div className="flex items-center justify-between">
+                        {svc.endpoint && (
+                          <p className="text-white/15 text-xs font-mono truncate max-w-[60%]">
+                            {svc.endpoint}
+                          </p>
+                        )}
+                        <Link
+                          href={`/chat?agent=${onChainAgent.agentId}&name=${encodeURIComponent(svc.name)}`}
+                          className="px-3 py-1 rounded-lg bg-green-500/10 text-green-400 text-xs font-medium hover:bg-green-500/20 transition ml-auto"
+                        >
+                          Hire
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-3">
-              <Link
-                href={`/chat?agent=${onChainAgent.agentId}&name=${encodeURIComponent(onChainAgent.services[0]?.name || `Agent #${onChainAgent.agentId}`)}`}
-                className="flex-1 py-3 rounded-xl bg-green-500 text-black text-center font-medium hover:bg-green-400 transition"
-              >
-                Hire this Agent
-              </Link>
-              <a
-                href={`https://sepolia.celoscan.io/address/${onChainAgent.address}`}
-                target="_blank"
-                className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-center font-medium hover:bg-white/10 transition"
-              >
-                View on CeloScan
-              </a>
             </div>
           </div>
         </div>
