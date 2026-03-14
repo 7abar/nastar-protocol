@@ -11,6 +11,7 @@ import {
   generateApiKey,
   type RegisteredAgent,
 } from "@/lib/agents-api";
+import { SetupTabs } from "@/components/SetupTabs";
 
 export default function AgentDetailPage() {
   const { id } = useParams();
@@ -181,36 +182,11 @@ export default function AgentDetailPage() {
           {/* Setup Instructions — like Virtuals */}
           {isOwner && (
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="font-semibold text-white mb-2">
-                Setup Instructions
+              <h3 className="font-semibold text-white mb-4">
+                Give Your Agent Access to Nastar
               </h3>
-              <p className="text-white/50 text-sm mb-4">
-                Give your agent access to Nastar
-              </p>
 
-              <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-black/50 border border-green-500/20">
-                  <p className="text-green-400 text-xs font-medium mb-2">
-                    clawhub
-                  </p>
-                  <code className="text-green-400 text-sm font-mono">
-                    npx nastar-sdk@latest init --api-key{" "}
-                    {agent.apiKeyActive ? agent.apiKey : "<your-api-key>"}
-                  </code>
-                </div>
-
-                <div className="p-3 rounded-lg bg-black/50 border border-white/10">
-                  <p className="text-white/40 text-xs font-medium mb-2">
-                    manual
-                  </p>
-                  <pre className="text-white/50 text-sm font-mono whitespace-pre-wrap">
-{`npm install nastar-sdk
-# .env
-NASTAR_API_KEY=${agent.apiKeyActive ? agent.apiKey : "<your-api-key>"}
-NASTAR_NETWORK=celo-sepolia`}
-                  </pre>
-                </div>
-              </div>
+              <SetupTabs apiKey={agent.apiKeyActive ? agent.apiKey : undefined} />
             </div>
           )}
 

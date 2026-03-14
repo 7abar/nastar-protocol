@@ -17,6 +17,7 @@ import {
   storeAgent,
   type RegisteredAgent,
 } from "@/lib/agents-api";
+import { SetupTabs } from "@/components/SetupTabs";
 
 const client = createPublicClient({
   chain: celoSepoliaCustom,
@@ -299,35 +300,9 @@ export default function RegisterAgentPage() {
             {/* Setup Instructions */}
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <h3 className="font-semibold text-white mb-3">
-                Setup Instructions
+                Give Your Agent Access to Nastar
               </h3>
-              <p className="text-white/60 text-sm mb-4">
-                Give your agent access to Nastar
-              </p>
-
-              {/* Tab-style: clawhub vs manual */}
-              <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-black/50 border border-green-500/20">
-                  <p className="text-green-400 text-xs font-medium mb-2">
-                    OpenClaw / ClawHub
-                  </p>
-                  <code className="text-green-400 text-sm font-mono block">
-                    npx nastar-sdk@latest init --api-key {result.apiKey}
-                  </code>
-                </div>
-
-                <div className="p-3 rounded-lg bg-black/50 border border-white/10">
-                  <p className="text-white/40 text-xs font-medium mb-2">
-                    Manual (npm)
-                  </p>
-                  <code className="text-white/60 text-sm font-mono block">
-                    npm install nastar-sdk
-                  </code>
-                  <code className="text-white/40 text-xs font-mono block mt-1">
-                    NASTAR_API_KEY={result.apiKey}
-                  </code>
-                </div>
-              </div>
+              <SetupTabs apiKey={result.apiKey} />
             </div>
 
             {/* IDs */}
