@@ -106,6 +106,10 @@ contract NastarEscrow {
     /// @notice Seller can force-claim payment if buyer is unresponsive this long after delivery.
     uint256 public constant DELIVERY_TIMEOUT = 7 days;
 
+    /// @notice If buyer disputes but never claims refund, seller can reclaim after this timeout.
+    /// Prevents permanent fund lock from abandoned disputes.
+    uint256 public constant ABANDONED_DISPUTE_TIMEOUT = 30 days;
+
     // ──────────────────────────────────────────────
     // Events
     // ──────────────────────────────────────────────
@@ -143,6 +147,7 @@ contract NastarEscrow {
     error ZeroAddress();
     error DisputeTimeoutNotReached(uint256 canRefundAt, uint256 now_);
     error DeliveryTimeoutNotReached(uint256 canClaimAt, uint256 now_);
+    error AbandonedDisputeTimeoutNotReached(uint256 canClaimAt, uint256 now_);
     error SelfDeal();
 
     // ──────────────────────────────────────────────
@@ -350,6 +355,37 @@ contract NastarEscrow {
         uint256 canClaimAt = deal.deadline + DELIVERY_TIMEOUT;
         if (block.timestamp < canClaimAt) {
             revert DeliveryTimeoutNotReached(canClaimAt, block.timestamp);
+        }
+
+        // CEI: update state before transfer
+        deal.status = DealStatus.Completed;
+        deal.completedAt = block.timestamp;
+        address seller = deal.seller;
+        address token = deal.paymentToken;
+        uint256 amount = deal.amount;
+
+        emit DealCompleted(dealId, amount);
+
+        bool success = IERC20(token).transfer(seller, amount);
+        if (!success) revert TransferFailed();
+    }
+
+    /**
+     * @notice Seller can reclaim funds from an abandoned dispute.
+     *         If the buyer disputed but never called claimRefund within
+     *         ABANDONED_DISPUTE_TIMEOUT (30 days), the seller wins by default.
+     *
+     *         Without this, a malicious or unresponsive buyer could lock
+     *         seller funds forever by disputing and never claiming.
+     */
+    function sellerClaimFromAbandonedDispute(uint256 dealId) external {
+        Deal storage deal = deals[dealId];
+        _requireStatus(deal, DealStatus.Disputed);
+        if (deal.seller != msg.sender) revert NotSeller();
+
+        uint256 canClaimAt = deal.disputedAt + ABANDONED_DISPUTE_TIMEOUT;
+        if (block.timestamp < canClaimAt) {
+            revert AbandonedDisputeTimeoutNotReached(canClaimAt, block.timestamp);
         }
 
         // CEI: update state before transfer

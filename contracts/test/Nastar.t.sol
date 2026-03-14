@@ -382,6 +382,106 @@ contract NastarTest is Test {
         vm.stopPrank();
     }
 
+    function test_sellerClaimFromAbandonedDispute() public {
+        uint256 serviceId = _createTestService();
+        uint256 dealId = _createTestDeal(serviceId);
+
+        // Bob delivers
+        vm.prank(bob);
+        escrow.acceptDeal(dealId);
+        vm.prank(bob);
+        escrow.deliverDeal(dealId, "ipfs://QmGoodWork");
+
+        // Alice disputes then disappears
+        vm.prank(alice);
+        escrow.disputeDeal(dealId);
+
+        // Bob can't claim yet — too early
+        vm.prank(bob);
+        vm.expectRevert();
+        escrow.sellerClaimFromAbandonedDispute(dealId);
+
+        // After 3 days, ALICE could claim refund (but she's gone)
+        vm.warp(block.timestamp + 3 days + 1);
+
+        // Bob still can't claim — need 30 days
+        vm.prank(bob);
+        vm.expectRevert();
+        escrow.sellerClaimFromAbandonedDispute(dealId);
+
+        // After 30 days from dispute, Bob can finally claim
+        vm.warp(block.timestamp + 27 days);
+
+        vm.prank(bob);
+        escrow.sellerClaimFromAbandonedDispute(dealId);
+        assertEq(uint8(escrow.getDeal(dealId).status), uint8(NastarEscrow.DealStatus.Completed));
+        assertEq(usdc.balanceOf(bob), 10e6);
+        assertEq(usdc.balanceOf(address(escrow)), 0);
+    }
+
+    function test_buyerCanStillRefundBeforeAbandonedTimeout() public {
+        uint256 serviceId = _createTestService();
+        uint256 dealId = _createTestDeal(serviceId);
+
+        vm.prank(bob);
+        escrow.acceptDeal(dealId);
+        vm.prank(bob);
+        escrow.deliverDeal(dealId, "ipfs://QmResult");
+
+        // Alice disputes
+        vm.prank(alice);
+        escrow.disputeDeal(dealId);
+
+        // After 3 days, Alice claims refund (normal flow)
+        vm.warp(block.timestamp + 3 days + 1);
+        vm.prank(alice);
+        escrow.claimRefund(dealId);
+
+        // Bob tries to claim from abandoned dispute — fails, already Refunded
+        vm.warp(block.timestamp + 30 days);
+        vm.prank(bob);
+        vm.expectRevert();
+        escrow.sellerClaimFromAbandonedDispute(dealId);
+
+        // Alice got her money back
+        assertEq(usdc.balanceOf(alice), 1000e6);
+    }
+
+    function test_doubleConfirm_reverts() public {
+        uint256 serviceId = _createTestService();
+        uint256 dealId = _createTestDeal(serviceId);
+
+        vm.prank(bob);
+        escrow.acceptDeal(dealId);
+        vm.prank(bob);
+        escrow.deliverDeal(dealId, "ipfs://QmResult");
+
+        // First confirm works
+        vm.prank(alice);
+        escrow.confirmDelivery(dealId);
+
+        // Second confirm reverts (status already Completed)
+        vm.prank(alice);
+        vm.expectRevert();
+        escrow.confirmDelivery(dealId);
+    }
+
+    function test_doubleRefund_reverts() public {
+        uint256 serviceId = _createTestService();
+        uint256 dealId = _createTestDeal(serviceId);
+
+        vm.warp(block.timestamp + 8 days);
+
+        // First refund works
+        vm.prank(alice);
+        escrow.claimRefund(dealId);
+
+        // Second refund reverts (status already Expired)
+        vm.prank(alice);
+        vm.expectRevert();
+        escrow.claimRefund(dealId);
+    }
+
     function test_getBuyerAndSellerDeals() public {
         uint256 serviceId = _createTestService();
         _createTestDeal(serviceId);
