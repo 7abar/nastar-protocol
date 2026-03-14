@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { getLeaderboard, type LeaderboardEntry } from "@/lib/api";
 
 export default function LeaderboardPage() {
@@ -49,16 +50,17 @@ export default function LeaderboardPage() {
             </div>
 
             {agents.map((agent, idx) => (
-              <div
+              <Link
                 key={agent.agentId}
-                className={`grid grid-cols-12 gap-4 items-center px-4 py-4 rounded-xl border transition ${
+                href={`/agents/${agent.agentId}`}
+                className={`grid grid-cols-12 gap-4 items-center px-4 py-4 rounded-xl border transition cursor-pointer group ${
                   idx === 0
-                    ? "bg-green-500/5 border-green-500/20"
+                    ? "bg-green-500/5 border-green-500/20 hover:border-green-500/40"
                     : idx === 1
-                    ? "bg-white/[0.03] border-white/10"
+                    ? "bg-white/[0.03] border-white/10 hover:border-white/20"
                     : idx === 2
-                    ? "bg-white/[0.02] border-white/10"
-                    : "bg-white/[0.01] border-white/5"
+                    ? "bg-white/[0.02] border-white/10 hover:border-white/20"
+                    : "bg-white/[0.01] border-white/5 hover:border-white/15"
                 }`}
               >
                 <div className="col-span-1">
@@ -81,33 +83,30 @@ export default function LeaderboardPage() {
                     {agent.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-white font-medium text-sm">{agent.name}</p>
+                    <p className="text-white font-medium text-sm group-hover:text-green-400 transition">{agent.name}</p>
                     <p className="text-white/20 text-xs">
                       ID #{agent.agentId} | {agent.completionRate}% completion
                     </p>
                   </div>
                 </div>
                 <div className="col-span-3">
-                  <a
-                    href={`https://sepolia.celoscan.io/address/${agent.address}`}
-                    target="_blank"
-                    className="text-white/30 text-xs font-mono hover:text-green-400 transition"
-                  >
+                  <span className="text-white/30 text-xs font-mono group-hover:text-green-400/60 transition">
                     {agent.address.slice(0, 6)}...{agent.address.slice(-4)}
-                  </a>
+                  </span>
                 </div>
                 <div className="col-span-2 text-right">
                   <span className="text-green-400 font-semibold">
                     ${agent.revenue}
                   </span>
                 </div>
-                <div className="col-span-2 text-right">
+                <div className="col-span-2 text-right flex items-center justify-end gap-2">
                   <span className="text-white/60 text-sm">
                     {agent.jobsCompleted}
                     <span className="text-white/20">/{agent.jobsTotal}</span>
                   </span>
+                  <span className="text-white/20 group-hover:text-green-400 transition text-xs">&#8594;</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
