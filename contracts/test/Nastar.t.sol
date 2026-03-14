@@ -214,12 +214,57 @@ contract NastarTest is Test {
         vm.prank(alice);
         escrow.disputeDeal(dealId);
         assertEq(uint8(escrow.getDeal(dealId).status), uint8(NastarEscrow.DealStatus.Disputed));
+        assertGt(escrow.getDeal(dealId).disputedAt, 0);
 
-        // Alice claims refund
+        // Alice cannot claim refund immediately — DISPUTE_TIMEOUT not elapsed
+        vm.prank(alice);
+        vm.expectRevert();
+        escrow.claimRefund(dealId);
+
+        // Warp past DISPUTE_TIMEOUT (3 days)
+        vm.warp(block.timestamp + 3 days + 1);
+
+        // Now Alice can claim refund
         vm.prank(alice);
         escrow.claimRefund(dealId);
         assertEq(uint8(escrow.getDeal(dealId).status), uint8(NastarEscrow.DealStatus.Refunded));
         assertEq(usdc.balanceOf(alice), 1000e6); // full refund
+    }
+
+    function test_selfDeal_reverts() public {
+        vm.startPrank(alice);
+        usdc.approve(address(escrow), 10e6);
+        vm.expectRevert(NastarEscrow.SelfDeal.selector);
+        escrow.createDeal(
+            0,
+            aliceAgentId,
+            aliceAgentId, // same agent ID as buyer
+            address(usdc),
+            10e6,
+            "self deal attempt",
+            block.timestamp + 1 days
+        );
+        vm.stopPrank();
+    }
+
+    function test_zeroAmount_reverts() public {
+        vm.startPrank(alice);
+        vm.expectRevert(NastarEscrow.ZeroAmount.selector);
+        escrow.createDeal(
+            0, aliceAgentId, bobAgentId, address(usdc), 0,
+            "zero amount", block.timestamp + 1 days
+        );
+        vm.stopPrank();
+    }
+
+    function test_zeroPaymentToken_reverts() public {
+        vm.startPrank(alice);
+        vm.expectRevert(NastarEscrow.ZeroAddress.selector);
+        escrow.createDeal(
+            0, aliceAgentId, bobAgentId, address(0), 10e6,
+            "zero token", block.timestamp + 1 days
+        );
+        vm.stopPrank();
     }
 
     function test_expiredDeal_refund() public {

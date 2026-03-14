@@ -6,10 +6,10 @@ import {ServiceRegistry} from "../src/ServiceRegistry.sol";
 import {NastarEscrow} from "../src/NastarEscrow.sol";
 
 contract DeployNastar is Script {
-    // ERC-8004 Identity Registry on Celo Sepolia
+    // ERC-8004 Identity Registry — Celo Sepolia (chain 11142220)
     address constant IDENTITY_REGISTRY_SEPOLIA = 0x8004A818BFB912233c491871b3d84c89A494BD9e;
 
-    // ERC-8004 Identity Registry on Celo Mainnet
+    // ERC-8004 Identity Registry — Celo Mainnet (chain 42220)
     address constant IDENTITY_REGISTRY_MAINNET = 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432;
 
     function run() external {
@@ -20,20 +20,26 @@ contract DeployNastar is Script {
             ? IDENTITY_REGISTRY_MAINNET
             : IDENTITY_REGISTRY_SEPOLIA;
 
+        console.log("=== Nastar Deploy ===");
+        console.log("Network:          ", isMainnet ? "Celo Mainnet" : "Celo Sepolia");
+        console.log("Identity Registry:", identityRegistry);
+
         vm.startBroadcast(deployerKey);
 
-        // Deploy ServiceRegistry
         ServiceRegistry registry = new ServiceRegistry(identityRegistry);
-        console.log("ServiceRegistry deployed at:", address(registry));
+        console.log("ServiceRegistry:  ", address(registry));
 
-        // Deploy NastarEscrow
         NastarEscrow escrow = new NastarEscrow(identityRegistry, address(registry));
-        console.log("NastarEscrow deployed at:", address(escrow));
+        console.log("NastarEscrow:     ", address(escrow));
 
         vm.stopBroadcast();
 
-        console.log("---");
-        console.log("Identity Registry (ERC-8004):", identityRegistry);
-        console.log("Network:", isMainnet ? "Celo Mainnet" : "Celo Sepolia");
+        console.log("=== Done ===");
+        console.log("Verify on CeloScan:");
+        if (isMainnet) {
+            console.log("  forge verify-contract <addr> ServiceRegistry --chain 42220 --etherscan-key $CELOSCAN_API_KEY");
+        } else {
+            console.log("  forge verify-contract <addr> ServiceRegistry --chain 11142220 --etherscan-key $CELOSCAN_API_KEY");
+        }
     }
 }

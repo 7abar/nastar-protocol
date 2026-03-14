@@ -39,6 +39,12 @@ import {IERC721} from "forge-std/interfaces/IERC721.sol";
  *         Integrates with ERC-8004 Identity Registry and ServiceRegistry.
  *         Supports any Celo stablecoin (USDm, USDC, USDT, KESm, NGNm, etc.)
  * @author JABAR x NASTAR
+ *
+ * Security model:
+ *   - Funds are held by this contract until deal resolves
+ *   - Seller address locked at creation (ownerOf(sellerAgentId) at deal time)
+ *   - Disputes require DISPUTE_TIMEOUT to elapse before buyer can claim refund
+ *   - State updated before external calls (CEI pattern)
  */
 contract NastarEscrow {
     // ──────────────────────────────────────────────
@@ -46,30 +52,31 @@ contract NastarEscrow {
     // ──────────────────────────────────────────────
 
     enum DealStatus {
-        Created,        // Buyer created deal, funds escrowed
-        Accepted,       // Seller accepted the deal
-        Delivered,      // Seller marked as delivered
-        Completed,      // Buyer confirmed, funds released
-        Disputed,       // Buyer disputes delivery
-        Refunded,       // Funds returned to buyer
-        Expired         // Deal expired without completion
+        Created,    // Buyer created deal, funds escrowed
+        Accepted,   // Seller accepted the deal
+        Delivered,  // Seller marked as delivered
+        Completed,  // Buyer confirmed, funds released to seller
+        Disputed,   // Buyer disputes delivery
+        Refunded,   // Funds returned to buyer
+        Expired     // Deal expired without acceptance or delivery
     }
 
     struct Deal {
         uint256 dealId;
         uint256 serviceId;
-        uint256 buyerAgentId;   // ERC-8004 NFT ID
-        uint256 sellerAgentId;  // ERC-8004 NFT ID
+        uint256 buyerAgentId;    // ERC-8004 NFT ID
+        uint256 sellerAgentId;   // ERC-8004 NFT ID
         address buyer;
-        address seller;
-        address paymentToken;   // Stablecoin used
+        address seller;          // ownerOf(sellerAgentId) at deal creation
+        address paymentToken;    // Stablecoin used
         uint256 amount;
         string taskDescription;
-        string deliveryProof;   // IPFS hash or URL of deliverable
+        string deliveryProof;    // IPFS hash or URL of deliverable
         DealStatus status;
         uint256 createdAt;
-        uint256 deadline;       // Unix timestamp
+        uint256 deadline;        // Unix timestamp
         uint256 completedAt;
+        uint256 disputedAt;      // Timestamp when buyer opened dispute
     }
 
     // ──────────────────────────────────────────────
@@ -86,8 +93,14 @@ contract NastarEscrow {
     mapping(uint256 => uint256[]) public agentDealsAsBuyer;
     mapping(uint256 => uint256[]) public agentDealsAsSeller;
 
-    // Dispute resolution: simple timeout-based for MVP
+    // ──────────────────────────────────────────────
+    // Constants
+    // ──────────────────────────────────────────────
+
+    /// @notice Seller has 3 days to respond after a dispute before buyer can claim refund.
     uint256 public constant DISPUTE_TIMEOUT = 3 days;
+
+    /// @notice Maximum allowed deal deadline from creation.
     uint256 public constant MAX_DEADLINE = 30 days;
 
     // ──────────────────────────────────────────────
@@ -107,7 +120,7 @@ contract NastarEscrow {
     event DealAccepted(uint256 indexed dealId, uint256 indexed sellerAgentId);
     event DealDelivered(uint256 indexed dealId, string deliveryProof);
     event DealCompleted(uint256 indexed dealId, uint256 amount);
-    event DealDisputed(uint256 indexed dealId, uint256 indexed buyerAgentId);
+    event DealDisputed(uint256 indexed dealId, uint256 indexed buyerAgentId, uint256 disputedAt);
     event DealRefunded(uint256 indexed dealId, uint256 amount);
     event DealExpired(uint256 indexed dealId);
 
@@ -116,21 +129,23 @@ contract NastarEscrow {
     // ──────────────────────────────────────────────
 
     error NotAgentOwner();
-    error DealNotFound();
-    error InvalidStatus(DealStatus expected, DealStatus actual);
     error NotBuyer();
     error NotSeller();
+    error InvalidStatus(DealStatus expected, DealStatus actual);
     error DeadlineTooLong();
     error DealExpiredError();
     error TransferFailed();
     error ZeroAmount();
-    error DisputeTimeoutNotReached();
+    error ZeroAddress();
+    error DisputeTimeoutNotReached(uint256 canRefundAt, uint256 now_);
+    error SelfDeal();
 
     // ──────────────────────────────────────────────
     // Constructor
     // ──────────────────────────────────────────────
 
     constructor(address _identityRegistry, address _serviceRegistry) {
+        if (_identityRegistry == address(0) || _serviceRegistry == address(0)) revert ZeroAddress();
         identityRegistry = IERC721(_identityRegistry);
         serviceRegistry = _serviceRegistry;
     }
@@ -141,7 +156,14 @@ contract NastarEscrow {
 
     /**
      * @notice Create a deal and escrow payment.
-     *         Buyer must own the buyerAgentId NFT and approve token transfer.
+     *         Buyer must own the buyerAgentId NFT and have approved this contract.
+     * @param serviceId       Service listing ID in ServiceRegistry.
+     * @param buyerAgentId    ERC-8004 NFT ID of the buyer agent.
+     * @param sellerAgentId   ERC-8004 NFT ID of the seller agent.
+     * @param paymentToken    ERC-20 token used for payment.
+     * @param amount          Amount in token's smallest unit (must be > 0).
+     * @param taskDescription Plain-text description of the task.
+     * @param deadline        Unix timestamp for completion (max 30 days from now).
      */
     function createDeal(
         uint256 serviceId,
@@ -152,17 +174,19 @@ contract NastarEscrow {
         string calldata taskDescription,
         uint256 deadline
     ) external returns (uint256 dealId) {
+        // Validations
         if (identityRegistry.ownerOf(buyerAgentId) != msg.sender) revert NotAgentOwner();
+        if (buyerAgentId == sellerAgentId) revert SelfDeal();
         if (amount == 0) revert ZeroAmount();
+        if (paymentToken == address(0)) revert ZeroAddress();
         if (deadline > block.timestamp + MAX_DEADLINE) revert DeadlineTooLong();
         if (deadline <= block.timestamp) revert DealExpiredError();
 
-        // Transfer payment to escrow
-        bool success = IERC20(paymentToken).transferFrom(msg.sender, address(this), amount);
-        if (!success) revert TransferFailed();
-
-        dealId = nextDealId++;
+        // Capture seller address at deal creation time
         address seller = identityRegistry.ownerOf(sellerAgentId);
+
+        // CEI: assign state before external call
+        dealId = nextDealId++;
 
         deals[dealId] = Deal({
             dealId: dealId,
@@ -178,17 +202,23 @@ contract NastarEscrow {
             status: DealStatus.Created,
             createdAt: block.timestamp,
             deadline: deadline,
-            completedAt: 0
+            completedAt: 0,
+            disputedAt: 0
         });
 
         agentDealsAsBuyer[buyerAgentId].push(dealId);
         agentDealsAsSeller[sellerAgentId].push(dealId);
 
         emit DealCreated(dealId, buyerAgentId, sellerAgentId, serviceId, paymentToken, amount, deadline);
+
+        // Transfer payment to escrow (after state update)
+        bool success = IERC20(paymentToken).transferFrom(msg.sender, address(this), amount);
+        if (!success) revert TransferFailed();
     }
 
     /**
-     * @notice Seller accepts a deal.
+     * @notice Seller accepts a deal. Must be called by the address that owned
+     *         the seller NFT at deal creation time.
      */
     function acceptDeal(uint256 dealId) external {
         Deal storage deal = deals[dealId];
@@ -201,7 +231,8 @@ contract NastarEscrow {
     }
 
     /**
-     * @notice Seller marks deal as delivered with proof.
+     * @notice Seller marks deal as delivered with proof of work.
+     * @param proof IPFS hash, URL, or any string identifying the deliverable.
      */
     function deliverDeal(uint256 dealId, string calldata proof) external {
         Deal storage deal = deals[dealId];
@@ -221,17 +252,23 @@ contract NastarEscrow {
         _requireStatus(deal, DealStatus.Delivered);
         if (deal.buyer != msg.sender) revert NotBuyer();
 
+        // CEI: update state before transfer
         deal.status = DealStatus.Completed;
         deal.completedAt = block.timestamp;
+        address seller = deal.seller;
+        address token = deal.paymentToken;
+        uint256 amount = deal.amount;
 
-        bool success = IERC20(deal.paymentToken).transfer(deal.seller, deal.amount);
+        emit DealCompleted(dealId, amount);
+
+        bool success = IERC20(token).transfer(seller, amount);
         if (!success) revert TransferFailed();
-
-        emit DealCompleted(dealId, deal.amount);
     }
 
     /**
-     * @notice Buyer disputes a delivered deal.
+     * @notice Buyer disputes a delivered deal, starting the DISPUTE_TIMEOUT clock.
+     *         Seller has DISPUTE_TIMEOUT seconds to respond (off-chain) before
+     *         the buyer can claim a refund.
      */
     function disputeDeal(uint256 dealId) external {
         Deal storage deal = deals[dealId];
@@ -239,45 +276,54 @@ contract NastarEscrow {
         if (deal.buyer != msg.sender) revert NotBuyer();
 
         deal.status = DealStatus.Disputed;
-        emit DealDisputed(dealId, deal.buyerAgentId);
+        deal.disputedAt = block.timestamp;
+        emit DealDisputed(dealId, deal.buyerAgentId, block.timestamp);
     }
 
     /**
-     * @notice Refund buyer if deal expired (seller never accepted/delivered)
-     *         or if dispute timeout reached without resolution.
+     * @notice Claim a refund. Three valid scenarios:
+     *   1. Deal was never accepted before the deadline (seller no-show).
+     *   2. Deal was accepted but not delivered before the deadline.
+     *   3. Deal was disputed AND DISPUTE_TIMEOUT has elapsed (no arbitration MVP).
      */
     function claimRefund(uint256 dealId) external {
         Deal storage deal = deals[dealId];
         if (deal.buyer != msg.sender) revert NotBuyer();
 
-        bool canRefund = false;
+        DealStatus status = deal.status;
+        bool canRefund;
 
-        // Expired: seller never accepted before deadline
-        if (deal.status == DealStatus.Created && block.timestamp > deal.deadline) {
+        if (status == DealStatus.Created && block.timestamp > deal.deadline) {
+            // Seller never accepted — deal expired
             deal.status = DealStatus.Expired;
             canRefund = true;
             emit DealExpired(dealId);
-        }
-        // Disputed and timeout reached: auto-refund buyer
-        else if (deal.status == DealStatus.Disputed) {
-            // For MVP: disputes auto-resolve in buyer's favor after timeout
-            // Future: add arbitration layer
+        } else if (status == DealStatus.Accepted && block.timestamp > deal.deadline) {
+            // Seller accepted but never delivered — deal expired
+            deal.status = DealStatus.Expired;
+            canRefund = true;
+            emit DealExpired(dealId);
+        } else if (status == DealStatus.Disputed) {
+            // Buyer disputed — must wait DISPUTE_TIMEOUT before refund
+            uint256 canRefundAt = deal.disputedAt + DISPUTE_TIMEOUT;
+            if (block.timestamp < canRefundAt) {
+                revert DisputeTimeoutNotReached(canRefundAt, block.timestamp);
+            }
             canRefund = true;
             deal.status = DealStatus.Refunded;
         }
-        // Accepted but deadline passed without delivery
-        else if (deal.status == DealStatus.Accepted && block.timestamp > deal.deadline) {
-            deal.status = DealStatus.Expired;
-            canRefund = true;
-            emit DealExpired(dealId);
-        }
 
-        if (!canRefund) revert InvalidStatus(DealStatus.Disputed, deal.status);
+        if (!canRefund) revert InvalidStatus(DealStatus.Disputed, status);
 
-        bool success = IERC20(deal.paymentToken).transfer(deal.buyer, deal.amount);
+        // CEI: state updated above, now transfer
+        address buyer = deal.buyer;
+        address token = deal.paymentToken;
+        uint256 amount = deal.amount;
+
+        emit DealRefunded(dealId, amount);
+
+        bool success = IERC20(token).transfer(buyer, amount);
         if (!success) revert TransferFailed();
-
-        emit DealRefunded(dealId, deal.amount);
     }
 
     // ──────────────────────────────────────────────
