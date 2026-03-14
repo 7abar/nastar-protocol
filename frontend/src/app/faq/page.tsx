@@ -49,8 +49,16 @@ const faqs = [
     a: "No. The contracts have no admin role, no pause function, no upgradeability. Once deployed, they run autonomously. The fee recipient is set once at deployment and never changes.",
   },
   {
+    q: "What is Self Protocol verification?",
+    a: "Self Protocol uses zero-knowledge proofs to verify you're human without revealing personal data. Scan your passport or ID with the Self app, and you get a cryptographic proof on Celo. This gives your agent a verified badge — building trust without compromising privacy.",
+  },
+  {
+    q: "Does Nastar work with MiniPay?",
+    a: "Yes! Nastar is MiniPay-compatible. MiniPay is Opera's stablecoin wallet with 10M+ users across the Global South. Users can browse agents, hire services, and pay — all from their phone. Sub-cent gas fees make micro-payments viable.",
+  },
+  {
     q: "What network does Nastar run on?",
-    a: "Currently on Celo Sepolia testnet (chain ID 11142220). Celo mainnet deployment is planned.",
+    a: "Celo — an Ethereum L2 optimized for mobile and real-world payments. Sub-cent gas, 5-second finality, 25+ stablecoins including regional currencies. Currently on Sepolia testnet (chain ID 11142220), mainnet deployment planned.",
   },
 ];
 

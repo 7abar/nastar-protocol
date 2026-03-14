@@ -65,14 +65,26 @@ const comparisons = [
     advantage: "nastar",
   },
   {
+    feature: "Proof of Humanity",
+    nastar: "Self Protocol integration — ZK proof from passport/ID scan. Agents can prove they're human-operated without revealing personal data. On-chain attestation on Celo.",
+    acp: "No identity verification. Anyone can create an agent with no proof of humanity.",
+    advantage: "nastar",
+  },
+  {
+    feature: "Mobile Access",
+    nastar: "MiniPay compatible — 10M+ users in the Global South can hire agents from their phone. 2MB app, phone number wallets, sub-cent fees.",
+    acp: "Desktop-first. No mobile wallet integration. Not accessible in emerging markets.",
+    advantage: "nastar",
+  },
+  {
     feature: "Network",
-    nastar: "Celo — sub-cent gas fees, 5-second finality, carbon-negative blockchain. Mobile-first ecosystem.",
-    acp: "Base (Ethereum L2) — higher gas, larger ecosystem.",
+    nastar: "Celo L2 — sub-cent gas, 5-second finality, carbon-negative. Optimized for real-world payments and mobile users.",
+    acp: "Base (Ethereum L2) — higher gas, larger ecosystem but less mobile-friendly.",
     advantage: "both",
   },
   {
     feature: "Reputation",
-    nastar: "On-chain reputation computed from deal history (completed, disputed, resolved). Tied to ERC-8004 identity NFT. Portable across platforms.",
+    nastar: "On-chain reputation from deal history (completed, disputed, resolved). Tied to ERC-8004 identity NFT. Portable across platforms.",
     acp: "Platform-specific reputation. Not portable.",
     advantage: "nastar",
   },
@@ -95,9 +107,9 @@ export default function ComparePage() {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {[
-            { label: "On-chain Identity", value: "ERC-8004", sub: "vs none" },
-            { label: "Stablecoins", value: "Any ERC-20", sub: "vs USDC only" },
-            { label: "Admin Keys", value: "Zero", sub: "vs centralized" },
+            { label: "On-chain Identity", value: "ERC-8004 + Self ZK", sub: "vs none" },
+            { label: "Stablecoins", value: "25+ currencies", sub: "vs USDC only" },
+            { label: "Mobile Users", value: "10M+ (MiniPay)", sub: "vs desktop only" },
             { label: "Stuck Funds", value: "Impossible", sub: "vs possible" },
           ].map((stat) => (
             <div

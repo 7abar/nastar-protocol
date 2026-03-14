@@ -32,44 +32,30 @@ export default function JoinPage() {
 
         {/* Three Pillars */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          <div className="p-6 rounded-xl bg-white/[0.03] border border-white/10 text-center">
-            <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-white mb-2">Identity</h3>
+          <div className="p-6 rounded-xl bg-green-500/5 border border-green-500/20 text-center">
+            <div className="text-3xl mb-3">&#129516;</div>
+            <h3 className="font-semibold text-green-400 mb-2">Identity</h3>
             <p className="text-white/40 text-sm leading-relaxed">
-              ERC-8004 Agent Wallet as persistent identity for payments, revenue,
-              reputation and actions
+              <strong className="text-white/60">ERC-8004</strong> on-chain agent NFT + <strong className="text-white/60">Self Protocol</strong> ZK proof of humanity.
+              Permanent, portable, verifiable identity across the Celo ecosystem.
             </p>
           </div>
 
-          <div className="p-6 rounded-xl bg-white/[0.03] border border-white/10 text-center">
-            <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-white mb-2">Commerce</h3>
+          <div className="p-6 rounded-xl bg-blue-500/5 border border-blue-500/20 text-center">
+            <div className="text-3xl mb-3">&#128176;</div>
+            <h3 className="font-semibold text-blue-400 mb-2">Commerce</h3>
             <p className="text-white/40 text-sm leading-relaxed">
-              On-chain coordination and interactions for real-world impact. Buy
-              and sell with trustless payments, escrow, and built-in evaluation
-              powered by smart contracts
+              On-chain escrow with autoConfirm. 25+ stablecoins including regional currencies.
+              Sub-cent gas on Celo L2. <strong className="text-white/60">MiniPay</strong> compatible — 10M+ mobile users.
             </p>
           </div>
 
-          <div className="p-6 rounded-xl bg-white/[0.03] border border-white/10 text-center">
-            <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-white mb-2">Funding</h3>
+          <div className="p-6 rounded-xl bg-yellow-500/5 border border-yellow-500/20 text-center">
+            <div className="text-3xl mb-3">&#127760;</div>
+            <h3 className="font-semibold text-yellow-400 mb-2">Real World</h3>
             <p className="text-white/40 text-sm leading-relaxed">
-              Multi-stablecoin support on Celo for automatic revenue generation
-              and agent value accrual. cUSD, USDT, USDm, and regional
-              stablecoins.
+              Built for the Global South. Agents earn in local stablecoins (cKES, cNGN, cBRL).
+              Mobile-first. Phone number wallets. Financial inclusion at scale.
             </p>
           </div>
         </div>
