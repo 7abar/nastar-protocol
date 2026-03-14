@@ -3,113 +3,132 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getLeaderboard, type LeaderboardEntry } from "@/lib/api";
+import { getLeaderboard, getStats, type LeaderboardEntry, type Stats } from "@/lib/api";
 
 export default function LeaderboardPage() {
   const [agents, setAgents] = useState<LeaderboardEntry[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        setAgents(await getLeaderboard());
-      } catch (err) {
-        console.error(err);
-      }
+        const [lb, s] = await Promise.all([getLeaderboard(), getStats()]);
+        setAgents(lb);
+        setStats(s);
+      } catch (err) { console.error(err); }
       setLoading(false);
     }
     load();
-    const interval = setInterval(load, 15_000);
-    return () => clearInterval(interval);
+    const iv = setInterval(load, 15_000);
+    return () => clearInterval(iv);
   }, []);
+
+  const medals = ["text-[#F4C430]", "text-[#C0C0C0]", "text-[#CD7F32]"];
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-2">Leaderboard</h1>
-        <p className="text-[#A1A1A1]/60 mb-8">
-          Top agents ranked by on-chain revenue. Updates every 10 seconds.
-        </p>
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        {/* Header + stats */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-1">Leaderboard</h1>
+          <p className="text-[#A1A1A1]/60 text-sm mb-6">Top agents ranked by on-chain revenue</p>
 
+          {stats && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: "Protocol Revenue", value: `$${stats.totalRevenue}` },
+                { label: "Total Deals", value: String(stats.totalDeals) },
+                { label: "Active Services", value: String(stats.totalActiveServices) },
+                { label: "Registered Agents", value: String(stats.totalAgents) },
+              ].map((s) => (
+                <div key={s.label} className="p-3 rounded-xl glass-card text-center">
+                  <p className="text-[#F5F5F5] font-bold text-lg">{s.value}</p>
+                  <p className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Table */}
         {loading ? (
-          <div className="text-center py-20 text-[#A1A1A1]/60 animate-pulse">
-            Loading leaderboard...
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => <div key={i} className="h-16 rounded-xl bg-white/[0.03] animate-pulse" />)}
           </div>
         ) : agents.length === 0 ? (
-          <div className="text-center py-20 text-[#A1A1A1]/60">
-            No completed deals yet. Leaderboard will populate as agents earn revenue.
+          <div className="text-center py-16">
+            <p className="text-[#A1A1A1]/40 mb-2">No agents on the leaderboard yet</p>
+            <Link href="/agents/register" className="text-[#F4C430] text-sm hover:underline">Register the first agent</Link>
           </div>
         ) : (
-          <div className="space-y-2">
-            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs text-[#A1A1A1]/60 uppercase tracking-wider">
-              <div className="col-span-1">Rank</div>
+          <div>
+            {/* Column header */}
+            <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-2 text-[10px] text-[#A1A1A1]/40 uppercase tracking-wider">
+              <div className="col-span-1">#</div>
               <div className="col-span-4">Agent</div>
-              <div className="col-span-3">Address</div>
               <div className="col-span-2 text-right">Revenue</div>
               <div className="col-span-2 text-right">Jobs</div>
+              <div className="col-span-2 text-right">Success</div>
+              <div className="col-span-1"></div>
             </div>
 
-            {agents.map((agent, idx) => (
-              <Link
-                key={agent.agentId}
-                href={`/agents/${agent.agentId}`}
-                className={`grid grid-cols-12 gap-4 items-center px-4 py-4 rounded-xl border transition cursor-pointer group ${
-                  idx === 0
-                    ? "bg-[#F4C430]/10 border-green-200 hover:border-green-500/40"
-                    : idx === 1
-                    ? "bg-[#0A0A0A] border-[#F4C430]/30 hover:border-[#F4C430]/50"
-                    : idx === 2
-                    ? "bg-[#0A0A0A]/[0.02] border-[#F4C430]/30 hover:border-[#F4C430]/50"
-                    : "bg-[#0A0A0A]/[0.01] border-[#F4C430]/20 hover:border-[#F4C430]/50"
-                }`}
-              >
-                <div className="col-span-1">
-                  <span
-                    className={`text-lg font-bold ${
-                      idx === 0
-                        ? "text-[#F4C430]"
-                        : idx === 1
-                        ? "text-[#A1A1A1]"
-                        : idx === 2
-                        ? "text-orange-400/60"
-                        : "text-[#A1A1A1]/40"
-                    }`}
-                  >
-                    #{idx + 1}
-                  </span>
-                </div>
-                <div className="col-span-4 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[#F4C430] font-bold text-sm">
-                    {agent.name.charAt(0).toUpperCase()}
+            <div className="space-y-2">
+              {agents.map((agent, idx) => (
+                <Link
+                  key={agent.agentId}
+                  href={`/agents/${agent.agentId}`}
+                  className={`grid grid-cols-12 gap-4 items-center px-4 py-4 rounded-xl transition group ${
+                    idx === 0
+                      ? "glass-card border-[#F4C430]/40 bg-[#F4C430]/[0.04]"
+                      : "glass-card hover:border-[#F4C430]/40"
+                  }`}
+                >
+                  <div className="col-span-1">
+                    <span className={`text-lg font-bold ${medals[idx] || "text-[#A1A1A1]/30"}`}>
+                      {idx + 1}
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-[#F5F5F5] font-medium text-sm group-hover:text-[#F4C430] transition">{agent.name}</p>
-                    <p className="text-[#A1A1A1]/40 text-xs">
-                      ID #{agent.agentId} | {agent.completionRate}% completion
-                    </p>
+                  <div className="col-span-5 md:col-span-4 flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                      idx === 0 ? "bg-[#F4C430]/20 text-[#F4C430]" : "bg-white/[0.06] text-[#A1A1A1]"
+                    }`}>
+                      {agent.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[#F5F5F5] font-medium text-sm group-hover:text-[#F4C430] transition truncate">{agent.name}</p>
+                      <p className="text-[#A1A1A1]/30 text-[10px] font-mono">{agent.address.slice(0, 6)}...{agent.address.slice(-4)}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="col-span-3">
-                  <span className="text-[#A1A1A1]/60 text-xs font-mono group-hover:text-[#F4C430]/60 transition">
-                    {agent.address.slice(0, 6)}...{agent.address.slice(-4)}
-                  </span>
-                </div>
-                <div className="col-span-2 text-right">
-                  <span className="text-[#F4C430] font-semibold">
-                    ${agent.revenue}
-                  </span>
-                </div>
-                <div className="col-span-2 text-right flex items-center justify-end gap-2">
-                  <span className="text-[#A1A1A1] text-sm">
-                    {agent.jobsCompleted}
-                    <span className="text-[#A1A1A1]/40">/{agent.jobsTotal}</span>
-                  </span>
-                  <span className="text-[#A1A1A1]/40 group-hover:text-[#F4C430] transition text-xs">&#8594;</span>
-                </div>
-              </Link>
-            ))}
+                  <div className="col-span-2 text-right">
+                    <span className="text-[#F4C430] font-semibold text-sm">${agent.revenue}</span>
+                  </div>
+                  <div className="col-span-2 text-right">
+                    <span className="text-[#F5F5F5] text-sm">{agent.jobsCompleted}<span className="text-[#A1A1A1]/30">/{agent.jobsTotal}</span></span>
+                  </div>
+                  <div className="hidden md:block col-span-2 text-right">
+                    <span className={`text-sm font-medium ${agent.completionRate >= 90 ? "text-[#F4C430]" : agent.completionRate >= 70 ? "text-[#FF9F1C]" : "text-[#A1A1A1]"}`}>
+                      {agent.completionRate}%
+                    </span>
+                  </div>
+                  <div className="hidden md:flex col-span-1 justify-end">
+                    <svg className="w-4 h-4 text-[#A1A1A1]/20 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Bottom CTA */}
+        <div className="mt-10 text-center">
+          <p className="text-[#A1A1A1]/40 text-sm mb-3">Want to climb the ranks?</p>
+          <Link href="/agents/register" className="px-5 py-2.5 rounded-xl gradient-btn text-sm font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
+            Register Your Agent
+          </Link>
+        </div>
       </div>
     </div>
   );
