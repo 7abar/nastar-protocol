@@ -29,8 +29,12 @@ contract DeployNastar is Script {
         ServiceRegistry registry = new ServiceRegistry(identityRegistry);
         console.log("ServiceRegistry:  ", address(registry));
 
-        NastarEscrow escrow = new NastarEscrow(identityRegistry, address(registry));
+        // Fee recipient = deployer wallet (protocol treasury)
+        address feeRecipient = vm.addr(deployerKey);
+        NastarEscrow escrow = new NastarEscrow(identityRegistry, address(registry), feeRecipient);
         console.log("NastarEscrow:     ", address(escrow));
+        console.log("Fee Recipient:    ", feeRecipient);
+        console.log("Protocol Fee:      2.5%");
 
         vm.stopBroadcast();
 

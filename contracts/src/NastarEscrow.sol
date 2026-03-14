@@ -43,7 +43,9 @@ import {IERC721} from "forge-std/interfaces/IERC721.sol";
  * Security model:
  *   - Funds are held by this contract until deal resolves
  *   - Seller address locked at creation (ownerOf(sellerAgentId) at deal time)
- *   - Disputes require DISPUTE_TIMEOUT to elapse before buyer can claim refund
+ *   - Disputes: seller can contest within DISPUTE_TIMEOUT (50/50 split)
+ *   - Uncontested disputes: buyer refund after DISPUTE_TIMEOUT
+ *   - 2.5% protocol fee on seller payments (no fee on buyer refunds)
  *   - State updated before external calls (CEI pattern)
  */
 contract NastarEscrow {
@@ -58,7 +60,8 @@ contract NastarEscrow {
         Completed,  // Buyer confirmed, funds released to seller
         Disputed,   // Buyer disputes delivery
         Refunded,   // Funds returned to buyer
-        Expired     // Deal expired without acceptance or delivery
+        Expired,    // Deal expired without acceptance or delivery
+        Resolved    // Dispute contested — funds split 50/50
     }
 
     struct Deal {
@@ -85,6 +88,7 @@ contract NastarEscrow {
 
     IERC721 public immutable identityRegistry;
     address public immutable serviceRegistry;
+    address public immutable feeRecipient;
 
     uint256 public nextDealId;
     mapping(uint256 => Deal) public deals;
@@ -97,7 +101,11 @@ contract NastarEscrow {
     // Constants
     // ──────────────────────────────────────────────
 
-    /// @notice Seller has 3 days to respond after a dispute before buyer can claim refund.
+    /// @notice Protocol fee in basis points (250 = 2.5%).
+    /// Taken from seller payment only. Buyer refunds are fee-free.
+    uint256 public constant PROTOCOL_FEE_BPS = 250;
+
+    /// @notice Seller has 3 days to contest or respond after a dispute.
     uint256 public constant DISPUTE_TIMEOUT = 3 days;
 
     /// @notice Maximum allowed deal deadline from creation.
@@ -107,7 +115,6 @@ contract NastarEscrow {
     uint256 public constant DELIVERY_TIMEOUT = 7 days;
 
     /// @notice If buyer disputes but never claims refund, seller can reclaim after this timeout.
-    /// Prevents permanent fund lock from abandoned disputes.
     uint256 public constant ABANDONED_DISPUTE_TIMEOUT = 30 days;
 
     // ──────────────────────────────────────────────
@@ -126,8 +133,9 @@ contract NastarEscrow {
 
     event DealAccepted(uint256 indexed dealId, uint256 indexed sellerAgentId);
     event DealDelivered(uint256 indexed dealId, string deliveryProof);
-    event DealCompleted(uint256 indexed dealId, uint256 amount);
+    event DealCompleted(uint256 indexed dealId, uint256 sellerAmount, uint256 feeAmount);
     event DealDisputed(uint256 indexed dealId, uint256 indexed buyerAgentId, uint256 disputedAt);
+    event DealContested(uint256 indexed dealId, uint256 buyerAmount, uint256 sellerAmount, uint256 feeAmount);
     event DealRefunded(uint256 indexed dealId, uint256 amount);
     event DealExpired(uint256 indexed dealId);
 
@@ -146,6 +154,7 @@ contract NastarEscrow {
     error ZeroAmount();
     error ZeroAddress();
     error DisputeTimeoutNotReached(uint256 canRefundAt, uint256 now_);
+    error DisputeTimeoutReached();
     error DeliveryTimeoutNotReached(uint256 canClaimAt, uint256 now_);
     error AbandonedDisputeTimeoutNotReached(uint256 canClaimAt, uint256 now_);
     error SelfDeal();
@@ -154,10 +163,13 @@ contract NastarEscrow {
     // Constructor
     // ──────────────────────────────────────────────
 
-    constructor(address _identityRegistry, address _serviceRegistry) {
-        if (_identityRegistry == address(0) || _serviceRegistry == address(0)) revert ZeroAddress();
+    constructor(address _identityRegistry, address _serviceRegistry, address _feeRecipient) {
+        if (_identityRegistry == address(0) || _serviceRegistry == address(0) || _feeRecipient == address(0)) {
+            revert ZeroAddress();
+        }
         identityRegistry = IERC721(_identityRegistry);
         serviceRegistry = _serviceRegistry;
+        feeRecipient = _feeRecipient;
     }
 
     // ──────────────────────────────────────────────
@@ -167,13 +179,6 @@ contract NastarEscrow {
     /**
      * @notice Create a deal and escrow payment.
      *         Buyer must own the buyerAgentId NFT and have approved this contract.
-     * @param serviceId       Service listing ID in ServiceRegistry.
-     * @param buyerAgentId    ERC-8004 NFT ID of the buyer agent.
-     * @param sellerAgentId   ERC-8004 NFT ID of the seller agent.
-     * @param paymentToken    ERC-20 token used for payment.
-     * @param amount          Amount in token's smallest unit (must be > 0).
-     * @param taskDescription Plain-text description of the task.
-     * @param deadline        Unix timestamp for completion (max 30 days from now).
      */
     function createDeal(
         uint256 serviceId,
@@ -184,7 +189,6 @@ contract NastarEscrow {
         string calldata taskDescription,
         uint256 deadline
     ) external returns (uint256 dealId) {
-        // Validations
         if (identityRegistry.ownerOf(buyerAgentId) != msg.sender) revert NotAgentOwner();
         if (buyerAgentId == sellerAgentId) revert SelfDeal();
         if (amount == 0) revert ZeroAmount();
@@ -192,7 +196,6 @@ contract NastarEscrow {
         if (deadline > block.timestamp + MAX_DEADLINE) revert DeadlineTooLong();
         if (deadline <= block.timestamp) revert DealExpiredError();
 
-        // Capture seller address at deal creation time
         address seller = identityRegistry.ownerOf(sellerAgentId);
 
         // CEI: assign state before external call
@@ -221,14 +224,12 @@ contract NastarEscrow {
 
         emit DealCreated(dealId, buyerAgentId, sellerAgentId, serviceId, paymentToken, amount, deadline);
 
-        // Transfer payment to escrow (after state update)
         bool success = IERC20(paymentToken).transferFrom(msg.sender, address(this), amount);
         if (!success) revert TransferFailed();
     }
 
     /**
-     * @notice Seller accepts a deal. Must be called by the address that owned
-     *         the seller NFT at deal creation time.
+     * @notice Seller accepts a deal.
      */
     function acceptDeal(uint256 dealId) external {
         Deal storage deal = deals[dealId];
@@ -242,8 +243,6 @@ contract NastarEscrow {
 
     /**
      * @notice Seller marks deal as delivered with proof of work.
-     *         Must be called before the deadline — late delivery is not allowed.
-     * @param proof IPFS hash, URL, or any string identifying the deliverable.
      */
     function deliverDeal(uint256 dealId, string calldata proof) external {
         Deal storage deal = deals[dealId];
@@ -257,7 +256,7 @@ contract NastarEscrow {
     }
 
     /**
-     * @notice Buyer confirms delivery, releasing escrowed funds to seller.
+     * @notice Buyer confirms delivery, releasing escrowed funds to seller (minus fee).
      */
     function confirmDelivery(uint256 dealId) external {
         Deal storage deal = deals[dealId];
@@ -267,20 +266,14 @@ contract NastarEscrow {
         // CEI: update state before transfer
         deal.status = DealStatus.Completed;
         deal.completedAt = block.timestamp;
-        address seller = deal.seller;
-        address token = deal.paymentToken;
-        uint256 amount = deal.amount;
 
-        emit DealCompleted(dealId, amount);
-
-        bool success = IERC20(token).transfer(seller, amount);
-        if (!success) revert TransferFailed();
+        _paySellerWithFee(deal);
     }
 
     /**
-     * @notice Buyer disputes a delivered deal, starting the DISPUTE_TIMEOUT clock.
-     *         Seller has DISPUTE_TIMEOUT seconds to respond (off-chain) before
-     *         the buyer can claim a refund.
+     * @notice Buyer disputes a delivered deal.
+     *         Seller has DISPUTE_TIMEOUT to contest (50/50 split) or the buyer
+     *         can claim a full refund after the timeout.
      */
     function disputeDeal(uint256 dealId) external {
         Deal storage deal = deals[dealId];
@@ -293,10 +286,60 @@ contract NastarEscrow {
     }
 
     /**
+     * @notice Seller contests a dispute within the DISPUTE_TIMEOUT window.
+     *         Funds are split 50/50 (minus protocol fee) — neither side can
+     *         fully scam the other.
+     *
+     *         Timeline: disputeDeal() → seller has 3 days to call contestDispute()
+     *         After 3 days without contest → buyer claims full refund.
+     */
+    function contestDispute(uint256 dealId) external {
+        Deal storage deal = deals[dealId];
+        _requireStatus(deal, DealStatus.Disputed);
+        if (deal.seller != msg.sender) revert NotSeller();
+
+        // Seller must contest within DISPUTE_TIMEOUT
+        if (block.timestamp > deal.disputedAt + DISPUTE_TIMEOUT) revert DisputeTimeoutReached();
+
+        // CEI: update state before transfers
+        deal.status = DealStatus.Resolved;
+        deal.completedAt = block.timestamp;
+
+        address token = deal.paymentToken;
+        uint256 amount = deal.amount;
+
+        // Calculate fee from total, then split remainder
+        uint256 fee = (amount * PROTOCOL_FEE_BPS) / 10000;
+        uint256 remaining = amount - fee;
+        uint256 buyerAmount = remaining / 2;
+        uint256 sellerAmount = remaining - buyerAmount; // handles odd wei
+
+        emit DealContested(dealId, buyerAmount, sellerAmount, fee);
+
+        // Transfer fee
+        if (fee > 0) {
+            bool s1 = IERC20(token).transfer(feeRecipient, fee);
+            if (!s1) revert TransferFailed();
+        }
+        // Transfer buyer's half
+        if (buyerAmount > 0) {
+            bool s2 = IERC20(token).transfer(deal.buyer, buyerAmount);
+            if (!s2) revert TransferFailed();
+        }
+        // Transfer seller's half
+        if (sellerAmount > 0) {
+            bool s3 = IERC20(token).transfer(deal.seller, sellerAmount);
+            if (!s3) revert TransferFailed();
+        }
+    }
+
+    /**
      * @notice Claim a refund. Three valid scenarios:
      *   1. Deal was never accepted before the deadline (seller no-show).
      *   2. Deal was accepted but not delivered before the deadline.
-     *   3. Deal was disputed AND DISPUTE_TIMEOUT has elapsed (no arbitration MVP).
+     *   3. Deal was disputed, seller did NOT contest, AND DISPUTE_TIMEOUT elapsed.
+     *
+     * Refunds are fee-free — buyer always gets full amount back.
      */
     function claimRefund(uint256 dealId) external {
         Deal storage deal = deals[dealId];
@@ -306,17 +349,14 @@ contract NastarEscrow {
         bool canRefund;
 
         if (status == DealStatus.Created && block.timestamp > deal.deadline) {
-            // Seller never accepted — deal expired
             deal.status = DealStatus.Expired;
             canRefund = true;
             emit DealExpired(dealId);
         } else if (status == DealStatus.Accepted && block.timestamp > deal.deadline) {
-            // Seller accepted but never delivered — deal expired
             deal.status = DealStatus.Expired;
             canRefund = true;
             emit DealExpired(dealId);
         } else if (status == DealStatus.Disputed) {
-            // Buyer disputed — must wait DISPUTE_TIMEOUT before refund
             uint256 canRefundAt = deal.disputedAt + DISPUTE_TIMEOUT;
             if (block.timestamp < canRefundAt) {
                 revert DisputeTimeoutNotReached(canRefundAt, block.timestamp);
@@ -327,7 +367,7 @@ contract NastarEscrow {
 
         if (!canRefund) revert NotRefundable();
 
-        // CEI: state updated above, now transfer
+        // No fee on refunds — buyer gets full amount
         address buyer = deal.buyer;
         address token = deal.paymentToken;
         uint256 amount = deal.amount;
@@ -339,13 +379,8 @@ contract NastarEscrow {
     }
 
     /**
-     * @notice Seller can claim payment if buyer has not acted for DELIVERY_TIMEOUT
-     *         after delivery. Protects seller from buyer going unresponsive.
-     *
-     *         Timeline: deliverDeal() → wait 7 days → sellerClaimAfterTimeout()
-     *
-     * @dev Buyer still has DELIVERY_TIMEOUT to confirm or dispute.
-     *      After that window, seller wins by default.
+     * @notice Seller force-claims payment if buyer is unresponsive after delivery.
+     *         Buyer has DELIVERY_TIMEOUT after deadline to confirm or dispute.
      */
     function sellerClaimAfterTimeout(uint256 dealId) external {
         Deal storage deal = deals[dealId];
@@ -360,23 +395,13 @@ contract NastarEscrow {
         // CEI: update state before transfer
         deal.status = DealStatus.Completed;
         deal.completedAt = block.timestamp;
-        address seller = deal.seller;
-        address token = deal.paymentToken;
-        uint256 amount = deal.amount;
 
-        emit DealCompleted(dealId, amount);
-
-        bool success = IERC20(token).transfer(seller, amount);
-        if (!success) revert TransferFailed();
+        _paySellerWithFee(deal);
     }
 
     /**
-     * @notice Seller can reclaim funds from an abandoned dispute.
-     *         If the buyer disputed but never called claimRefund within
-     *         ABANDONED_DISPUTE_TIMEOUT (30 days), the seller wins by default.
-     *
-     *         Without this, a malicious or unresponsive buyer could lock
-     *         seller funds forever by disputing and never claiming.
+     * @notice Seller reclaims funds from an abandoned dispute.
+     *         If buyer disputed but never claimed refund within 30 days.
      */
     function sellerClaimFromAbandonedDispute(uint256 dealId) external {
         Deal storage deal = deals[dealId];
@@ -391,14 +416,8 @@ contract NastarEscrow {
         // CEI: update state before transfer
         deal.status = DealStatus.Completed;
         deal.completedAt = block.timestamp;
-        address seller = deal.seller;
-        address token = deal.paymentToken;
-        uint256 amount = deal.amount;
 
-        emit DealCompleted(dealId, amount);
-
-        bool success = IERC20(token).transfer(seller, amount);
-        if (!success) revert TransferFailed();
+        _paySellerWithFee(deal);
     }
 
     // ──────────────────────────────────────────────
@@ -423,5 +442,27 @@ contract NastarEscrow {
 
     function _requireStatus(Deal storage deal, DealStatus expected) internal view {
         if (deal.status != expected) revert InvalidStatus(expected, deal.status);
+    }
+
+    /**
+     * @dev Pay seller with protocol fee deducted. Used by confirmDelivery,
+     *      sellerClaimAfterTimeout, and sellerClaimFromAbandonedDispute.
+     *      MUST be called AFTER status is set to terminal (CEI).
+     */
+    function _paySellerWithFee(Deal storage deal) internal {
+        address token = deal.paymentToken;
+        uint256 amount = deal.amount;
+        uint256 fee = (amount * PROTOCOL_FEE_BPS) / 10000;
+        uint256 sellerAmount = amount - fee;
+
+        emit DealCompleted(deal.dealId, sellerAmount, fee);
+
+        if (fee > 0) {
+            bool s1 = IERC20(token).transfer(feeRecipient, fee);
+            if (!s1) revert TransferFailed();
+        }
+
+        bool s2 = IERC20(token).transfer(deal.seller, sellerAmount);
+        if (!s2) revert TransferFailed();
     }
 }
