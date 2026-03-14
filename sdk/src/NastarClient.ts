@@ -301,6 +301,7 @@ export class NastarClient {
       args: [
         params.serviceId, params.buyerAgentId, params.sellerAgentId,
         params.paymentToken, params.amount, params.taskDescription, deadline,
+        params.autoConfirm ?? true,
       ],
       account: this.acct!,
     });

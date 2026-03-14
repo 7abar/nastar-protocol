@@ -59,6 +59,7 @@ export interface CreateDealParams {
   amount: bigint;
   taskDescription: string;
   deadlineSeconds: number; // seconds from now
+  autoConfirm?: boolean;  // default true — auto-release payment on delivery
 }
 
 export interface NastarConfig {

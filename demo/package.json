@@ -1,0 +1,20 @@
+{
+  "name": "nastar-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "scenario:0": "tsx src/scenario.ts",
+    "scenario:1": "SCENARIO=1 tsx src/scenario.ts",
+    "scenario:2": "SCENARIO=2 tsx src/scenario.ts",
+    "butler": "tsx src/butler.ts",
+    "seller": "tsx src/seller-agent.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
