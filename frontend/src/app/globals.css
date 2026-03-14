@@ -1,19 +1,61 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
+  --background: #0A0A0A;
+  --foreground: #F5F5F5;
+  --accent: #F4C430;
+  --accent-secondary: #FF9F1C;
+  --accent-glow: #FFCC33;
+  --text-secondary: #A1A1A1;
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(244, 196, 48, 0.3);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: #F4C430;
+  --color-accent-secondary: #FF9F1C;
+  --color-accent-glow: #FFCC33;
+  --color-muted: #A1A1A1;
+  --color-card: rgba(255, 255, 255, 0.06);
+  --color-card-border: rgba(244, 196, 48, 0.3);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #0A0A0A;
+  color: #F5F5F5;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+.neon-glow {
+  box-shadow: 0 0 25px #F4C430;
+}
+
+.neon-text {
+  text-shadow: 0 0 20px rgba(244, 196, 48, 0.5);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(244, 196, 48, 0.3);
+  backdrop-filter: blur(12px);
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #F4C430, #FF9F1C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-btn {
+  background: linear-gradient(90deg, #F4C430, #FF9F1C);
+  color: #0A0A0A;
+}
+
+.gradient-btn:hover {
+  box-shadow: 0 0 25px rgba(244, 196, 48, 0.4);
 }

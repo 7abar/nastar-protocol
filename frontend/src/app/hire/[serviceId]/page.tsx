@@ -180,7 +180,7 @@ export default function HirePage() {
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-10">
-        <div className="h-64 rounded-xl bg-white/5 animate-pulse" />
+        <div className="h-64 rounded-xl bg-[#0A0A0A]/5 animate-pulse" />
       </div>
     );
   }
@@ -196,7 +196,7 @@ export default function HirePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
       {/* Service info */}
-      <div className="p-6 rounded-xl border border-white/10 bg-white/[0.02] mb-6">
+      <div className="p-6 rounded-xl border border-white/10 bg-[#0A0A0A]/[0.02] mb-6">
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="text-sm text-white/40 mb-1">Agent #{service.agentId.toString()}</div>
@@ -214,17 +214,17 @@ export default function HirePage() {
 
       {/* Hire form */}
       {!authenticated ? (
-        <div className="p-6 rounded-xl border border-green-500/20 bg-green-500/5 text-center">
+        <div className="p-6 rounded-xl border border-green-500/20 bg-[#F4C430]/100/5 text-center">
           <p className="text-white/70 mb-3">Sign in to hire this agent</p>
           <button
             onClick={login}
-            className="px-6 py-2.5 rounded-lg bg-green-500 text-black font-medium hover:bg-green-400 transition"
+            className="px-6 py-2.5 rounded-lg bg-[#F4C430]/100 text-black font-medium hover:bg-green-400 transition"
           >
             Sign In with Email
           </button>
         </div>
       ) : txHash ? (
-        <div className="p-6 rounded-xl border border-green-500/30 bg-green-500/5">
+        <div className="p-6 rounded-xl border border-green-500/30 bg-[#F4C430]/100/5">
           <h2 className="text-lg font-bold text-green-400 mb-2">Agent Hired!</h2>
           <p className="text-white/60 text-sm mb-4">
             Your payment is locked in escrow. The agent will start working on your task.
@@ -240,20 +240,20 @@ export default function HirePage() {
           <div className="mt-4">
             <button
               onClick={() => router.push("/deals")}
-              className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition"
+              className="px-4 py-2 rounded-lg bg-[#0A0A0A]/10 text-white text-sm hover:bg-[#0A0A0A]/20 transition"
             >
               View My Deals
             </button>
           </div>
         </div>
       ) : (
-        <div className="p-6 rounded-xl border border-white/10 bg-white/[0.02]">
+        <div className="p-6 rounded-xl border border-white/10 bg-[#0A0A0A]/[0.02]">
           <h2 className="text-lg font-bold mb-4">Describe your task</h2>
           <textarea
             value={task}
             onChange={(e) => setTask(e.target.value)}
             placeholder="What do you want this agent to do?"
-            className="w-full h-32 p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-green-500/50 resize-none mb-4"
+            className="w-full h-32 p-3 rounded-lg bg-[#0A0A0A]/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-green-500/50 resize-none mb-4"
           />
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm mb-4">
@@ -269,7 +269,7 @@ export default function HirePage() {
           <button
             onClick={handleHire}
             disabled={hiring || !task.trim()}
-            className="w-full py-3 rounded-lg bg-green-500 text-black font-semibold hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full py-3 rounded-lg bg-[#F4C430]/100 text-black font-semibold hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {hiring
               ? "Processing..."

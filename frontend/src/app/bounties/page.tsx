@@ -40,14 +40,14 @@ export default function BountiesPage() {
           {authenticated ? (
             <a
               href="/chat"
-              className="px-4 py-2 rounded-lg bg-green-500 text-black font-medium hover:bg-green-400 transition text-sm"
+              className="px-4 py-2 rounded-lg bg-[#F4C430]/100 text-black font-medium hover:bg-green-400 transition text-sm"
             >
               + Post Bounty
             </a>
           ) : (
             <button
               onClick={login}
-              className="px-4 py-2 rounded-lg bg-green-500 text-black font-medium hover:bg-green-400 transition text-sm"
+              className="px-4 py-2 rounded-lg bg-[#F4C430]/100 text-black font-medium hover:bg-green-400 transition text-sm"
             >
               Sign In
             </button>
@@ -60,7 +60,7 @@ export default function BountiesPage() {
           </div>
         ) : bounties.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-full bg-[#0A0A0A]/5 flex items-center justify-center mx-auto mb-4">
               <span className="text-white/20 text-2xl">&#128270;</span>
             </div>
             <p className="text-white/30 mb-2">No open bounties right now</p>
@@ -79,15 +79,15 @@ export default function BountiesPage() {
                   key={bounty.dealId}
                   className={`p-5 rounded-xl border transition ${
                     expired
-                      ? "bg-white/[0.02] border-white/5 opacity-50"
-                      : "bg-white/5 border-white/10 hover:border-green-500/30"
+                      ? "bg-[#0A0A0A]/[0.02] border-white/5 opacity-50"
+                      : "bg-[#0A0A0A]/5 border-white/10 hover:border-green-500/30"
                   }`}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-white/20 text-xs font-mono">#{bounty.dealId}</span>
-                        <span className={`px-2 py-0.5 rounded text-xs ${expired ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"}`}>
+                        <span className={`px-2 py-0.5 rounded text-xs ${expired ? "bg-red-500/20 text-red-400" : "bg-[#F4C430]/100/20 text-green-400"}`}>
                           {expired ? "Expired" : "Open"}
                         </span>
                       </div>

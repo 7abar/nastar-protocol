@@ -28,42 +28,42 @@ function ProfileDropdown() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="w-8 h-8 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center hover:bg-gray-700 transition"
+        className="w-8 h-8 rounded-full bg-[#F4C430] text-[#0A0A0A] text-xs font-bold flex items-center justify-center hover:shadow-[0_0_15px_#F4C430] transition"
       >
         {address ? address.slice(2, 4).toUpperCase() : "?"}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg z-50 overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
+        <div className="absolute right-0 mt-2 w-64 rounded-xl glass-card shadow-lg z-50 overflow-hidden">
+          <div className="p-4 border-b border-[#F4C430]/20">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-[#F4C430] text-[#0A0A0A] text-xs font-bold flex items-center justify-center">
                 {address ? address.slice(2, 4).toUpperCase() : "?"}
               </div>
               <div className="min-w-0">
                 <button
                   onClick={() => { navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                  className="text-gray-900 font-mono text-xs hover:text-green-600 transition"
+                  className="text-[#F5F5F5] font-mono text-xs hover:text-[#F4C430] transition"
                 >
                   {copied ? "Copied!" : shortAddr}
                 </button>
-                {email && <p className="text-gray-400 text-xs truncate">{email}</p>}
+                {email && <p className="text-[#A1A1A1] text-xs truncate">{email}</p>}
               </div>
             </div>
           </div>
           <div className="py-1">
-            <Link href="/deals" onClick={() => setOpen(false)} className="block px-4 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm">
+            <Link href="/deals" onClick={() => setOpen(false)} className="block px-4 py-2.5 text-[#A1A1A1] hover:text-[#F4C430] hover:bg-white/5 text-sm">
               My Deals
             </Link>
-            <Link href="/agents" onClick={() => setOpen(false)} className="block px-4 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm">
+            <Link href="/agents" onClick={() => setOpen(false)} className="block px-4 py-2.5 text-[#A1A1A1] hover:text-[#F4C430] hover:bg-white/5 text-sm">
               My Agents
             </Link>
-            <a href={address ? `https://sepolia.celoscan.io/address/${address}` : "#"} target="_blank" onClick={() => setOpen(false)} className="block px-4 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-sm">
+            <a href={address ? `https://sepolia.celoscan.io/address/${address}` : "#"} target="_blank" onClick={() => setOpen(false)} className="block px-4 py-2.5 text-[#A1A1A1] hover:text-[#F4C430] hover:bg-white/5 text-sm">
               CeloScan
             </a>
           </div>
-          <div className="border-t border-gray-100">
-            <button onClick={() => { setOpen(false); logout(); }} className="block w-full text-left px-4 py-2.5 text-red-500 hover:bg-red-50 text-sm">
+          <div className="border-t border-[#F4C430]/20">
+            <button onClick={() => { setOpen(false); logout(); }} className="block w-full text-left px-4 py-2.5 text-red-400 hover:bg-red-500/10 text-sm">
               Logout
             </button>
           </div>
@@ -87,12 +87,12 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-[#F4C430]/20">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-4 h-14">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-bold text-gray-900 text-lg">Nastar</span>
-          <span className="text-gray-300 text-xs hidden sm:inline">Agent Marketplace</span>
+          <span className="font-bold text-[#F5F5F5] text-lg">Nastar</span>
+          <span className="text-[#A1A1A1] text-xs hidden sm:inline">Agent Marketplace</span>
         </Link>
 
         {/* Desktop nav */}
@@ -103,8 +103,8 @@ export function Header() {
               href={item.href}
               className={`px-3 py-1.5 rounded-lg text-sm transition ${
                 pathname === item.href
-                  ? "text-gray-900 font-medium"
-                  : "text-gray-500 hover:text-gray-900"
+                  ? "text-[#F4C430] font-medium"
+                  : "text-[#A1A1A1] hover:text-[#F5F5F5]"
               }`}
             >
               {item.label}
@@ -112,7 +112,7 @@ export function Header() {
           ))}
           <Link
             href="/chat"
-            className="ml-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-900 hover:bg-gray-100 transition"
+            className="ml-2 px-3 py-1.5 rounded-lg text-sm font-medium text-[#F4C430] hover:bg-[#F4C430]/10 transition"
           >
             Chat
           </Link>
@@ -125,7 +125,7 @@ export function Header() {
           ) : (
             <button
               onClick={login}
-              className="px-4 py-1.5 rounded-full bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition"
+              className="px-4 py-1.5 rounded-full gradient-btn text-sm font-bold hover:shadow-[0_0_20px_rgba(244,196,48,0.4)] transition"
             >
               Connect
             </button>
@@ -134,7 +134,7 @@ export function Header() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 text-gray-500 hover:text-gray-900"
+            className="md:hidden p-2 text-[#A1A1A1] hover:text-[#F4C430]"
           >
             {mobileOpen ? (
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -151,7 +151,7 @@ export function Header() {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <nav className="md:hidden border-t border-gray-100 bg-white">
+        <nav className="md:hidden border-t border-[#F4C430]/20 bg-[#0A0A0A]">
           <div className="px-4 py-2 space-y-1">
             {navItems.map((item) => (
               <Link
@@ -159,13 +159,13 @@ export function Header() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={`block px-3 py-2.5 rounded-lg text-sm ${
-                  pathname === item.href ? "text-gray-900 font-medium bg-gray-50" : "text-gray-500"
+                  pathname === item.href ? "text-[#F4C430] font-medium bg-[#F4C430]/10" : "text-[#A1A1A1]"
                 }`}
               >
                 {item.label}
               </Link>
             ))}
-            <Link href="/chat" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-900">
+            <Link href="/chat" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm font-medium text-[#F4C430]">
               Chat
             </Link>
           </div>

@@ -117,17 +117,17 @@ export default function FAQPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
       <div className="max-w-3xl mx-auto px-4 py-10 md:py-14">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">FAQ</h1>
-        <p className="text-gray-400 text-sm mb-10">
+        <p className="text-[#A1A1A1]/60 text-sm mb-10">
           Everything you need to know about Nastar
         </p>
 
         <div className="space-y-8">
           {sections.map((section) => (
             <div key={section.title}>
-              <h2 className="text-sm font-medium text-green-600 uppercase tracking-wider mb-3">
+              <h2 className="text-sm font-medium text-[#F4C430] uppercase tracking-wider mb-3">
                 {section.title}
               </h2>
               <div className="space-y-1.5">
@@ -137,15 +137,15 @@ export default function FAQPage() {
                   return (
                     <div
                       key={key}
-                      className="rounded-xl border border-gray-200 overflow-hidden"
+                      className="rounded-xl border border-[#F4C430]/30 overflow-hidden"
                     >
                       <button
                         onClick={() => toggle(key)}
-                        className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition"
+                        className="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition"
                       >
-                        <span className="font-medium text-gray-900 text-sm pr-4">{faq.q}</span>
+                        <span className="font-medium text-[#F5F5F5] text-sm pr-4">{faq.q}</span>
                         <span
-                          className={`text-gray-300 transition-transform text-xs ${
+                          className={`text-[#A1A1A1]/40 transition-transform text-xs ${
                             isOpen ? "rotate-180" : ""
                           }`}
                         >
@@ -153,7 +153,7 @@ export default function FAQPage() {
                         </span>
                       </button>
                       {isOpen && (
-                        <div className="px-4 pb-4 text-gray-500 text-sm leading-relaxed">
+                        <div className="px-4 pb-4 text-[#A1A1A1] text-sm leading-relaxed">
                           {faq.a}
                         </div>
                       )}
@@ -166,19 +166,19 @@ export default function FAQPage() {
         </div>
 
         {/* CTA */}
-        <div className="mt-12 p-6 rounded-xl bg-white border border-gray-200 text-center">
-          <p className="text-gray-400 text-sm mb-4">Still have questions?</p>
+        <div className="mt-12 p-6 rounded-xl bg-[#0A0A0A] border border-[#F4C430]/30 text-center">
+          <p className="text-[#A1A1A1]/60 text-sm mb-4">Still have questions?</p>
           <div className="flex gap-3 justify-center">
             <Link
               href="/chat"
-              className="px-5 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition"
+              className="px-5 py-2.5 rounded-lg gradient-btn text-sm font-medium hover:shadow-[0_0_15px_#F4C430] transition"
             >
               Ask the Butler
             </Link>
             <a
               href="https://github.com/7abar/nastar"
               target="_blank"
-              className="px-5 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-sm font-medium hover:bg-gray-100 transition"
+              className="px-5 py-2.5 rounded-lg bg-white/5 border border-[#F4C430]/30 text-[#F5F5F5] text-sm font-medium hover:bg-white/10 transition"
             >
               View Source
             </a>

@@ -45,8 +45,8 @@ export function Providers({ children }: { children: ReactNode }) {
       appId={PRIVY_APP_ID}
       config={{
         appearance: {
-          theme: "light",
-          accentColor: "#111827",
+          theme: "dark",
+          accentColor: "#F4C430",
         },
         loginMethods: miniPayDetected
           ? ["wallet"] // MiniPay: only show wallet connect (uses injected provider)

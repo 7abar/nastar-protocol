@@ -126,19 +126,19 @@ export default function AgentsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <div className="border-b border-gray-200 bg-white/80 backdrop-blur-xl sticky top-16 z-10">
+    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
+      <div className="border-b border-[#F4C430]/30 bg-[#0A0A0A]/80 backdrop-blur-xl sticky top-16 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold">Agent Explorer</h1>
-              <p className="text-gray-400 text-sm mt-1">
+              <p className="text-[#A1A1A1]/60 text-sm mt-1">
                 {agents.length} registered agent{agents.length !== 1 ? "s" : ""}
               </p>
             </div>
             <Link
               href="/agents/register"
-              className="px-4 py-2 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-700 transition text-sm"
+              className="px-4 py-2 rounded-lg gradient-btn font-medium hover:shadow-[0_0_15px_#F4C430] transition text-sm"
             >
               + Register Agent
             </Link>
@@ -148,17 +148,17 @@ export default function AgentsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search agents, services, addresses..."
-              className="flex-1 px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-white placeholder-white/30 focus:outline-none focus:border-green-500/50 text-sm"
+              className="flex-1 px-4 py-2.5 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white placeholder-white/30 focus:outline-none focus:border-green-500/50 text-sm"
             />
-            <div className="flex rounded-lg overflow-hidden border border-gray-200">
+            <div className="flex rounded-lg overflow-hidden border border-[#F4C430]/30">
               {(["all", "active", "mine"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
                   className={`px-3 py-2 text-sm capitalize transition ${
                     filter === f
-                      ? "bg-gray-100 text-green-600"
-                      : "bg-gray-50 text-gray-500 hover:text-white"
+                      ? "bg-white/10 text-[#F4C430]"
+                      : "bg-white/5 text-[#A1A1A1] hover:text-white"
                   }`}
                 >
                   {f}
@@ -171,11 +171,11 @@ export default function AgentsPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-6">
         {loading ? (
-          <div className="text-center py-20 text-gray-400 animate-pulse">Loading agents...</div>
+          <div className="text-center py-20 text-[#A1A1A1]/60 animate-pulse">Loading agents...</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-400 mb-4">No agents found</p>
-            <Link href="/agents/register" className="text-green-600 hover:underline">Register the first one</Link>
+            <p className="text-[#A1A1A1]/60 mb-4">No agents found</p>
+            <Link href="/agents/register" className="text-[#F4C430] hover:underline">Register the first one</Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -183,42 +183,42 @@ export default function AgentsPage() {
               <Link
                 key={agent.agentId + agent.walletAddress}
                 href={agent.localId ? `/agents/${agent.localId}` : `/agents/${agent.agentId}`}
-                className="block p-4 rounded-xl bg-gray-50 border border-gray-200 hover:border-green-200 transition group"
+                className="block p-4 rounded-xl bg-white/5 border border-[#F4C430]/30 hover:border-green-200 transition group"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[#F4C430] font-bold text-lg">
                       {agent.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white group-hover:text-green-600 transition">
+                      <h3 className="font-semibold text-white group-hover:text-[#F4C430] transition">
                         Agent #{agent.agentId}
                       </h3>
-                      <p className="text-gray-400 text-xs font-mono">
+                      <p className="text-[#A1A1A1]/60 text-xs font-mono">
                         {agent.walletAddress.slice(0, 6)}...{agent.walletAddress.slice(-4)}
                       </p>
                     </div>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${agent.active ? "bg-gray-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${agent.active ? "bg-white/10 text-[#F4C430]" : "bg-white/10 text-[#A1A1A1]/60"}`}>
                     {agent.active ? "Active" : "Inactive"}
                   </span>
                 </div>
 
-                <p className="text-gray-500 text-sm line-clamp-2 mb-3">{agent.description}</p>
+                <p className="text-[#A1A1A1] text-sm line-clamp-2 mb-3">{agent.description}</p>
 
                 <div className="flex items-center justify-between text-xs mb-3">
-                  <span className="text-gray-400">
+                  <span className="text-[#A1A1A1]/60">
                     {agent.serviceCount} service{agent.serviceCount !== 1 ? "s" : ""}
                   </span>
-                  <span className="text-green-600 font-medium">from {agent.price} USDC</span>
+                  <span className="text-[#F4C430] font-medium">from {agent.price} USDC</span>
                 </div>
 
                 {/* Stats bar */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100 text-xs">
-                  <span className="text-green-600 font-medium">${agent.revenue} earned</span>
-                  <span className="text-gray-400">{agent.jobsCompleted} jobs done</span>
+                <div className="flex items-center justify-between pt-3 border-t border-[#F4C430]/20 text-xs">
+                  <span className="text-[#F4C430] font-medium">${agent.revenue} earned</span>
+                  <span className="text-[#A1A1A1]/60">{agent.jobsCompleted} jobs done</span>
                   {agent.hasApiKey && (
-                    <span className="text-green-600 flex items-center gap-1">
+                    <span className="text-[#F4C430] flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
                       API
                     </span>

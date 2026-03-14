@@ -44,7 +44,7 @@ interface Message {
 
 export default function ChatPageWrapper() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}>
       <ChatPage />
     </Suspense>
   );
@@ -315,14 +315,14 @@ function ChatPage() {
       <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] px-4">
         <div className="max-w-md text-center">
           {/* Agent avatar */}
-          <div className="w-24 h-24 rounded-full bg-gray-100 border-2 border-green-200 flex items-center justify-center mx-auto mb-6">
-            <span className="text-green-600 font-bold text-4xl">N</span>
+          <div className="w-24 h-24 rounded-full bg-white/10 border-2 border-green-200 flex items-center justify-center mx-auto mb-6">
+            <span className="text-[#F4C430] font-bold text-4xl">N</span>
           </div>
 
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
+          <h2 className="text-xl font-bold text-[#F5F5F5] mb-2">
             Let's Get You Started
           </h2>
-          <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+          <p className="text-[#A1A1A1]/60 text-sm mb-8 leading-relaxed">
             Nastar works with AI agents to serve you best.
             Connect your wallet to begin your conversation.
             Your wallet is used for identity and payments on Celo.
@@ -330,12 +330,12 @@ function ChatPage() {
 
           <button
             onClick={login}
-            className="w-full py-3 rounded-xl bg-gray-900 text-white font-semibold hover:bg-gray-700 transition text-sm"
+            className="w-full py-3 rounded-xl gradient-btn font-semibold hover:shadow-[0_0_15px_#F4C430] transition text-sm"
           >
             Connect Wallet
           </button>
 
-          <p className="text-gray-300 text-xs mt-4">
+          <p className="text-[#A1A1A1]/40 text-xs mt-4">
             Supports email, Google, or any Celo wallet. MiniPay users connect automatically.
           </p>
         </div>
@@ -353,10 +353,10 @@ function ChatPage() {
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   msg.role === "user"
-                    ? "bg-gray-900 text-white"
+                    ? "gradient-btn"
                     : msg.role === "system"
-                    ? "bg-gray-50 text-gray-500 text-sm italic"
-                    : "bg-gray-100 text-gray-900"
+                    ? "bg-white/5 text-[#A1A1A1] text-sm italic"
+                    : "bg-white/10 text-[#F5F5F5]"
                 }`}
               >
                 <p className="whitespace-pre-wrap">{msg.text}</p>
@@ -367,23 +367,23 @@ function ChatPage() {
                     {msg.services.map((svc, i) => (
                       <div
                         key={i}
-                        className="p-3 rounded-xl bg-white/30 border border-gray-200"
+                        className="p-3 rounded-xl bg-[#0A0A0A]/30 border border-[#F4C430]/30"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-gray-900 text-sm">
+                          <span className="font-semibold text-[#F5F5F5] text-sm">
                             {svc.name}
                           </span>
-                          <span className="text-green-600 text-sm font-medium">
+                          <span className="text-[#F4C430] text-sm font-medium">
                             {formatUnits(svc.pricePerCall, 6)} USDC
                           </span>
                         </div>
-                        <p className="text-gray-500 text-xs mb-2 line-clamp-2">
+                        <p className="text-[#A1A1A1] text-xs mb-2 line-clamp-2">
                           {svc.description}
                         </p>
                         <button
                           onClick={() => handleHire(svc, i)}
                           disabled={loading}
-                          className="w-full py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition"
+                          className="w-full py-1.5 rounded-lg gradient-btn text-sm font-medium hover:shadow-[0_0_15px_#F4C430] disabled:opacity-50 transition"
                         >
                           Hire Agent
                         </button>
@@ -397,7 +397,7 @@ function ChatPage() {
                   <a
                     href={`https://sepolia.celoscan.io/tx/${msg.txHash}`}
                     target="_blank"
-                    className="inline-block mt-2 text-xs text-green-600 hover:underline"
+                    className="inline-block mt-2 text-xs text-[#F4C430] hover:underline"
                   >
                     View on CeloScan →
                   </a>
@@ -408,7 +408,7 @@ function ChatPage() {
 
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-2xl px-4 py-3 text-gray-500">
+              <div className="bg-white/10 rounded-2xl px-4 py-3 text-[#A1A1A1]">
                 <span className="animate-pulse">Thinking...</span>
               </div>
             </div>
@@ -418,7 +418,7 @@ function ChatPage() {
             <div className="flex justify-center">
               <button
                 onClick={login}
-                className="px-6 py-2.5 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-700 transition"
+                className="px-6 py-2.5 rounded-xl gradient-btn font-medium hover:shadow-[0_0_15px_#F4C430] transition"
               >
                 Sign In with Email
               </button>
@@ -430,25 +430,25 @@ function ChatPage() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-200 bg-gray-500 backdrop-blur-xl px-4 py-4">
+      <div className="border-t border-[#F4C430]/30 bg-white/50 backdrop-blur-xl px-4 py-4">
         <div className="max-w-2xl mx-auto flex gap-2">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="What do you need an agent to do?"
-            className="flex-1 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-white placeholder-white/30 focus:outline-none focus:border-green-500/50"
+            className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-[#F4C430]/30 text-white placeholder-white/30 focus:outline-none focus:border-green-500/50"
             disabled={loading}
           />
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="px-5 py-3 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-700 disabled:opacity-50 transition"
+            className="px-5 py-3 rounded-xl gradient-btn font-medium hover:shadow-[0_0_15px_#F4C430] disabled:opacity-50 transition"
           >
             Send
           </button>
         </div>
-        <p className="max-w-2xl mx-auto text-xs text-gray-300 mt-2 text-center">
+        <p className="max-w-2xl mx-auto text-xs text-[#A1A1A1]/40 mt-2 text-center">
           Try: "I need data scraping" or "find me an AI agent"
         </p>
       </div>

@@ -26,7 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-white text-gray-900 min-h-screen`}>
+      <body className={`${inter.className} bg-[#0A0A0A] text-[#F5F5F5] min-h-screen`}>
         <Providers>
           <MiniPayBanner />
           <Header />

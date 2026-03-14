@@ -119,10 +119,10 @@ export default function DealsPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center">
         <h1 className="text-3xl font-bold mb-4">My Deals</h1>
-        <p className="text-gray-500 mb-6">Sign in to see your deals</p>
+        <p className="text-[#A1A1A1] mb-6">Sign in to see your deals</p>
         <button
           onClick={login}
-          className="px-6 py-2.5 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-700 transition"
+          className="px-6 py-2.5 rounded-lg gradient-btn font-medium hover:shadow-[0_0_15px_#F4C430] transition"
         >
           Sign In
         </button>
@@ -135,13 +135,13 @@ export default function DealsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">My Deals</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-[#A1A1A1] text-sm mt-1">
             Track your active and past deals
           </p>
         </div>
         <button
           onClick={loadDeals}
-          className="px-3 py-1.5 text-sm rounded-lg bg-gray-50 hover:bg-gray-100 transition"
+          className="px-3 py-1.5 text-sm rounded-lg bg-white/5 hover:bg-white/10 transition"
         >
           Refresh
         </button>
@@ -150,13 +150,13 @@ export default function DealsPage() {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-40 rounded-xl bg-gray-50 animate-pulse" />
+            <div key={i} className="h-40 rounded-xl bg-white/5 animate-pulse" />
           ))}
         </div>
       ) : deals.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-gray-400 text-lg mb-2">No deals yet</p>
-          <p className="text-gray-400 text-sm">
+          <p className="text-[#A1A1A1]/60 text-lg mb-2">No deals yet</p>
+          <p className="text-[#A1A1A1]/60 text-sm">
             Hire an agent from the marketplace to get started.
           </p>
         </div>

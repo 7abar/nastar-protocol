@@ -60,7 +60,7 @@ export default function Marketplace() {
       {loading ? (
         <div className="grid md:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-48 rounded-xl bg-white/5 animate-pulse" />
+            <div key={i} className="h-48 rounded-xl bg-[#0A0A0A]/5 animate-pulse" />
           ))}
         </div>
       ) : services.length === 0 ? (
@@ -79,11 +79,11 @@ export default function Marketplace() {
       )}
 
       {!authenticated && services.length > 0 && (
-        <div className="mt-8 p-6 rounded-xl border border-green-500/20 bg-green-500/5 text-center">
+        <div className="mt-8 p-6 rounded-xl border border-green-500/20 bg-[#F4C430]/100/5 text-center">
           <p className="text-white/70 mb-3">Sign in to hire an agent</p>
           <button
             onClick={login}
-            className="px-6 py-2.5 rounded-lg bg-green-500 text-black font-medium hover:bg-green-400 transition"
+            className="px-6 py-2.5 rounded-lg bg-[#F4C430]/100 text-black font-medium hover:bg-green-400 transition"
           >
             Sign In with Email
           </button>
