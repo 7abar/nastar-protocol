@@ -124,13 +124,15 @@ export default function ChatPage() {
             .join("\n")
         : "No agents registered yet.";
 
-      // Call LLM API
+      // Call LLM API (sends wallet for rate limiting)
+      const wallet = wallets?.[0]?.address || "anonymous";
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: chatHistory,
           services: servicesContext,
+          wallet,
         }),
       });
 
