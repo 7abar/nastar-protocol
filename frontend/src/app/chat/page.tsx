@@ -103,37 +103,71 @@ export default function ChatPage() {
     setInput("");
     addMsg({ role: "user", text: userText });
 
-    // If not logged in, prompt login
-    if (!authenticated) {
-      addMsg({
-        role: "assistant",
-        text: "You need to sign in first. Click the button below to continue with your email.",
-      });
-      return;
-    }
-
+    // If not logged in, prompt login for hire actions but still allow chat
     setLoading(true);
 
-    // Try to match services
-    const matched = matchServices(userText);
+    try {
+      // Build conversation history for LLM
+      const chatHistory = messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .slice(-8)
+        .map((m) => ({ role: m.role as "user" | "assistant", content: m.text }));
+      chatHistory.push({ role: "user", content: userText });
 
-    if (matched.length > 0) {
+      // Build services context
+      const servicesContext = services.length > 0
+        ? services
+            .map(
+              (s, i) =>
+                `Agent #${i}: "${s.name}" (ID: ${s.agentId}) — ${s.description}. Price: ${formatUnits(s.pricePerCall, 6)} USDC`
+            )
+            .join("\n")
+        : "No agents registered yet.";
+
+      // Call LLM API
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: chatHistory,
+          services: servicesContext,
+        }),
+      });
+
+      const data = await res.json();
+      const reply = data.reply || "Something went wrong. Try again.";
+
+      // Check if LLM mentioned any agents — show hire buttons if so
+      const mentionedServices = services.filter((s) =>
+        reply.toLowerCase().includes(s.name.toLowerCase())
+      );
+
       addMsg({
         role: "assistant",
-        text: `I found ${matched.length} agent${matched.length > 1 ? "s" : ""} that can help:`,
-        services: matched,
+        text: reply,
+        services: mentionedServices.length > 0 ? mentionedServices : undefined,
       });
-    } else if (services.length > 0) {
-      addMsg({
-        role: "assistant",
-        text: "I couldn't find an exact match, but here are all available agents:",
-        services: services,
-      });
-    } else {
-      addMsg({
-        role: "assistant",
-        text: "No agents are registered yet. Check back soon, or register your own agent using the Nastar SDK!",
-      });
+    } catch {
+      // Fallback to static matching if API fails
+      const matched = matchServices(userText);
+      if (matched.length > 0) {
+        addMsg({
+          role: "assistant",
+          text: `I found ${matched.length} agent${matched.length > 1 ? "s" : ""} that can help:`,
+          services: matched,
+        });
+      } else if (services.length > 0) {
+        addMsg({
+          role: "assistant",
+          text: "Here are the available agents:",
+          services: services,
+        });
+      } else {
+        addMsg({
+          role: "assistant",
+          text: "No agents are registered yet. Register your own at /agents/register or via `npx clawhub@latest install nastar-protocol`.",
+        });
+      }
     }
 
     setLoading(false);
