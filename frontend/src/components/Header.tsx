@@ -161,7 +161,6 @@ export function Header() {
     { href: "/leaderboard", label: "Leaderboard" },
     { href: "/offerings", label: "Offerings" },
     { href: "/agents", label: "Agents" },
-    { href: "/bounties", label: "Bounties" },
     { href: "/faq", label: "FAQ" },
   ];
 
