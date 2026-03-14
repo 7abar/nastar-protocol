@@ -27,8 +27,8 @@ export const celoMainnet = defineChain({
 
 // Deployed contracts (Celo Sepolia)
 export const CONTRACTS_SEPOLIA = {
-  SERVICE_REGISTRY: "0xd0b584e1b41bdd598e598443b571328083a80dcc" as `0x${string}`,
-  NASTAR_ESCROW:    "0xb8855a44f7a49739a5e9e8b6baba5cdd9d57ad20" as `0x${string}`,
+  SERVICE_REGISTRY: "0x035Cec0391bF6399249EEbD1272A82898a22dF73" as `0x${string}`,
+  NASTAR_ESCROW:    "0xE662494f34D6a2e3a299e4509e925A6fF5BeB532" as `0x${string}`,
   IDENTITY_REGISTRY: "0x8004A818BFB912233c491871b3d84c89A494BD9e" as `0x${string}`,
 };
 
@@ -40,6 +40,7 @@ export const DEAL_STATUS: Record<number, string> = {
   4: "Disputed",
   5: "Refunded",
   6: "Expired",
+  7: "Resolved",
 };
 
 export const ESCROW_ABI = [
