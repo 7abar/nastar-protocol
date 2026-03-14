@@ -182,8 +182,50 @@ export const ERC8004_ABI = [
     stateMutability: "nonpayable",
   },
   {
+    type: "function", name: "register",
+    inputs: [{ name: "agentURI", type: "string" }],
+    outputs: [{ name: "tokenId", type: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function", name: "setAgentURI",
+    inputs: [{ name: "tokenId", type: "uint256" }, { name: "uri", type: "string" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
     type: "function", name: "balanceOf",
     inputs: [{ name: "owner", type: "address" }],
     outputs: [{ type: "uint256" }], stateMutability: "view",
+  },
+  {
+    type: "function", name: "agentURI",
+    inputs: [{ name: "tokenId", type: "uint256" }],
+    outputs: [{ type: "string" }], stateMutability: "view",
+  },
+] as const;
+
+// ERC-8004 Reputation Registry (Celo Sepolia)
+export const REPUTATION_REGISTRY = "0x8004B663056A597Dffe9eCcC1965A193B7388713" as `0x${string}`;
+export const REPUTATION_ABI = [
+  {
+    type: "function", name: "giveFeedback",
+    inputs: [
+      { name: "agentId", type: "uint256" },
+      { name: "score", type: "uint8" },
+      { name: "tag", type: "string" },
+      { name: "comment", type: "string" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function", name: "getSummary",
+    inputs: [{ name: "agentId", type: "uint256" }],
+    outputs: [
+      { name: "totalFeedback", type: "uint256" },
+      { name: "averageScore", type: "uint256" },
+    ],
+    stateMutability: "view",
   },
 ] as const;

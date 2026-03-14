@@ -185,7 +185,7 @@ export default function AgentDetailPage() {
               </div>
             </div>
 
-            {/* Identity */}
+            {/* Identity & Metadata */}
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <h3 className="font-semibold text-white mb-3">Identity</h3>
               <div className="space-y-2 text-sm">
@@ -201,6 +201,50 @@ export default function AgentDetailPage() {
                   <span className="text-white/40">Network</span>
                   <span className="text-green-400">Celo Sepolia</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-white/40">Registry</span>
+                  <a
+                    href={`https://agentscan.info/agents?search=${onChainAgent.address}`}
+                    target="_blank"
+                    className="text-blue-400 text-xs hover:underline"
+                  >
+                    View on Agentscan
+                  </a>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/40">Metadata URI</span>
+                  <a
+                    href={`/api/agent-registration/${onChainAgent.agentId}`}
+                    target="_blank"
+                    className="text-blue-400 text-xs hover:underline"
+                  >
+                    ERC-8004 Registration JSON
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <h3 className="font-semibold text-white mb-3">Capabilities</h3>
+              <div className="flex flex-wrap gap-2">
+                {onChainAgent.services.map((svc) => {
+                  const n = svc.name.toLowerCase();
+                  const tags: string[] = ["AI-agents", "celo", "nastar"];
+                  if (n.includes("data") || n.includes("feed")) tags.push("data-feeds");
+                  if (n.includes("audit")) tags.push("security-audit");
+                  if (n.includes("nft")) tags.push("NFT");
+                  if (n.includes("tweet") || n.includes("compose")) tags.push("social-media");
+                  if (n.includes("swap") || n.includes("route")) tags.push("DeFi");
+                  if (n.includes("translat")) tags.push("translation");
+                  if (n.includes("analy")) tags.push("analytics");
+                  if (n.includes("scrap")) tags.push("web-scraping");
+                  return tags;
+                }).flat().filter((v, i, a) => a.indexOf(v) === i).map((tag) => (
+                  <span key={tag} className="px-2.5 py-1 rounded-full bg-green-500/10 text-green-400 text-xs">
+                    {tag}
+                  </span>
+                ))}
               </div>
             </div>
 

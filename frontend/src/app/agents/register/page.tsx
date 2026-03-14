@@ -81,20 +81,27 @@ export default function RegisterAgentPage() {
       let agentNftId: number | null = null;
 
       if (ownerBalance === 0n) {
+        // register(string agentURI) — mint with metadata URI
+        // URI will be set after we know the agent ID, for now mint with placeholder
+        const registerData = encodeFunctionData({
+          abi: ERC8004_ABI,
+          functionName: "register",
+          args: [`https://nastar-production.up.railway.app/api/agent-registration/pending`],
+        });
         const mintHash = await provider.request({
           method: "eth_sendTransaction",
           params: [
             {
               from: ownerAddress,
               to: CONTRACTS.IDENTITY_REGISTRY,
-              data: "0x1aa3a008", // register()
+              data: registerData,
             },
           ],
         });
         await client.waitForTransactionReceipt({
           hash: mintHash as `0x${string}`,
         });
-        setStatus("Identity minted!");
+        setStatus("ERC-8004 identity minted with metadata!");
       }
 
       // Find owner's agent ID
@@ -165,7 +172,28 @@ export default function RegisterAgentPage() {
       const regLog = receipt.logs.find((l) => l.topics[0] === serviceRegTopic);
       const serviceId = regLog ? parseInt(regLog.topics[1] || "0", 16) : 0;
 
-      // 4. Generate API key
+      // 4. Set proper agentURI now that we know the ID
+      if (agentNftId !== null) {
+        setStatus("Setting agent metadata URI...");
+        const agentURI = `https://nastar-production.up.railway.app/api/agent-registration/${agentNftId}`;
+        const setUriData = encodeFunctionData({
+          abi: ERC8004_ABI,
+          functionName: "setAgentURI",
+          args: [BigInt(agentNftId), agentURI],
+        });
+        try {
+          const uriHash = await provider.request({
+            method: "eth_sendTransaction",
+            params: [{ from: ownerAddress, to: CONTRACTS.IDENTITY_REGISTRY, data: setUriData }],
+          });
+          await client.waitForTransactionReceipt({ hash: uriHash as `0x${string}` });
+          setStatus("Agent metadata linked to ERC-8004!");
+        } catch (err) {
+          console.error("setAgentURI failed (non-critical):", err);
+        }
+      }
+
+      // 5. Generate API key
       setStatus("Generating API key...");
       const apiKey = generateApiKey();
 
