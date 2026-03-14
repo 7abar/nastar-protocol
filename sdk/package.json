@@ -1,0 +1,31 @@
+{
+  "name": "nastar-sdk",
+  "version": "1.0.0",
+  "description": "TypeScript SDK for the Nastar Agent Service Marketplace on Celo",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "demo": "tsx src/demo.ts",
+    "test": "tsx src/demo.ts"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.15.7",
+    "typescript": "^5.4.5"
+  },
+  "keywords": ["celo", "agent", "marketplace", "x402", "erc-8004", "nastar"],
+  "repository": "https://github.com/7abar/nastar"
+}
