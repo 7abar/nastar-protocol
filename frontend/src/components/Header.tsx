@@ -63,12 +63,20 @@ export function Header() {
               </button>
             </>
           ) : (
-            <button
-              onClick={login}
-              className="px-4 py-1.5 rounded-lg bg-green-500 text-black text-sm font-medium hover:bg-green-400 transition"
-            >
-              Sign In
-            </button>
+            <>
+              <Link
+                href="/join"
+                className="px-4 py-1.5 rounded-full bg-green-500 text-black text-sm font-medium hover:bg-green-400 transition"
+              >
+                Join Us
+              </Link>
+              <button
+                onClick={login}
+                className="px-4 py-1.5 rounded-full border border-white/20 text-white text-sm font-medium hover:bg-white/5 transition"
+              >
+                Login
+              </button>
+            </>
           )}
         </div>
       </div>
