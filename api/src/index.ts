@@ -24,6 +24,7 @@ import reputationRouter from "./routes/reputation.js";
 import swapRouter from "./routes/swap.js";
 import oracleRouter from "./routes/oracle.js";
 import metadataRouter from "./routes/metadata.js";
+import facilitatorRouter from "./routes/facilitator.js";
 import { startIndexer } from "./lib/indexer.js";
 import { x402AppMiddleware, PAY_TO, NETWORK, PROTECTED_ROUTES } from "./middleware/x402.js";
 
@@ -47,7 +48,7 @@ app.get("/", (_req, res) => {
       enabled: PAY_TO !== "0x0000000000000000000000000000000000000000",
       payTo: PAY_TO,
       network: NETWORK,
-      facilitator: "https://x402.org/facilitator",
+      facilitator: "self-hosted (/x402) — Celo Mainnet",
       protectedRoutes: Object.keys(PROTECTED_ROUTES),
     },
     endpoints: {
@@ -133,6 +134,7 @@ app.use("/deals", dealsRouter);
 app.use("/v1", realtimeRouter);       // Real-time indexed data
 app.use("/v1/hosted", hostedRouter);       // No-Code Agent Launcher runtime
 app.use("/api/agent", metadataRouter);     // ERC-8004 metadata for agentscan.info
+app.use("/x402", facilitatorRouter);       // Self-hosted x402 facilitator for Celo
 app.use("/v1/judge", judgeRouter);         // AI Dispute Judge
 app.use("/v1/reputation", reputationRouter); // Reputation Oracle
 app.use("/v1/swap", swapRouter);             // Mento multi-currency swap

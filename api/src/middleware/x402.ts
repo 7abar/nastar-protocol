@@ -1,13 +1,11 @@
 /**
  * x402 Payment Required middleware for Nastar API.
  *
- * Uses the official x402-express package (Coinbase/Base).
- * Premium endpoints require an on-chain micropayment on Base.
+ * Uses the official x402-express package with Celo support patched in.
+ * Premium endpoints require an on-chain USDC micropayment on Celo.
  *
- * Why Base for payments when Nastar runs on Celo?
- * - x402 is Base-native (Coinbase's protocol) — no Celo support yet
- * - Premium API access is a separate concern from marketplace logic
- * - Demonstrates cross-chain composability: Celo data, Base payments
+ * Celo is standard EVM — same USDC permit flow as Base/Ethereum.
+ * Patch script: scripts/patch-x402-celo.js (runs on postinstall)
  *
  * Spec: https://x402.org
  * Package: https://www.npmjs.com/package/x402-express
@@ -17,7 +15,7 @@ import { paymentMiddleware, type Network } from "x402-express";
 import { Request, Response, NextFunction } from "express";
 
 const PAY_TO = (process.env.SERVER_WALLET || "0xA5844eeF46b34894898b7050CEF5F4D225e92fbE") as `0x${string}`;
-const NETWORK: Network = (process.env.X402_NETWORK || "base") as Network;
+const NETWORK: Network = (process.env.X402_NETWORK || "celo") as Network;
 const DEV_MODE = PAY_TO === "0x0000000000000000000000000000000000000000";
 
 // ─── Route price config ───────────────────────────────────────────────────────
@@ -42,7 +40,7 @@ let _x402Middleware: ReturnType<typeof paymentMiddleware> | null = null;
 function getX402Middleware() {
   if (!_x402Middleware) {
     _x402Middleware = paymentMiddleware(PAY_TO, PROTECTED_ROUTES, {
-      url: "https://x402.org/facilitator",
+      url: (process.env.X402_FACILITATOR_URL || "https://api-production-a473.up.railway.app/x402") as `https://${string}`,
     });
   }
   return _x402Middleware;

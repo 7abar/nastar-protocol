@@ -4,6 +4,7 @@
   "description": "Nastar Agent Marketplace API — REST + x402 payment layer on Celo",
   "main": "dist/index.js",
   "scripts": {
+    "postinstall": "node scripts/patch-x402-celo.js",
     "dev": "tsx watch src/index.ts",
     "build": "echo 'using tsx'",
     "start": "npx tsx src/index.ts"
@@ -21,6 +22,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^20.14.0",
+    "patch-package": "^8.0.1",
     "tsx": "^4.15.7",
     "typescript": "^5.4.5"
   }
