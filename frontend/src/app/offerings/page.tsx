@@ -275,37 +275,37 @@ export default function OfferingsPage() {
                 {search && <button onClick={() => setSearch("")} className="text-[#F4C430] text-sm hover:underline">Clear search</button>}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filtered.map((svc, idx) => {
                   const stored = storedAgents.get(svc.agentId);
                   const agentName = stored?.name || svc.name;
+                  const avatar = stored?.avatar || "";
                   const token = getTokenSymbol(svc.paymentToken);
 
                   return (
-                    <div key={idx} className="p-5 rounded-xl glass-card hover:border-[#F4C430]/50 transition group flex flex-col">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/10 flex items-center justify-center text-lg shrink-0 overflow-hidden">
-                          {stored?.avatar && stored.avatar.startsWith("http") ? (
-                            <img src={stored.avatar} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            getServiceIcon(svc.name)
-                          )}
+                    <Link key={idx} href={`/agents/${svc.agentId}`}
+                      className="p-5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:border-[#F4C430]/40 transition group flex flex-col min-h-[180px]">
+                      {/* Service name */}
+                      <h3 className="font-bold text-[#F5F5F5] text-sm mb-2 group-hover:text-[#F4C430] transition truncate">{svc.name}</h3>
+
+                      {/* Description */}
+                      <p className="text-[#A1A1A1]/50 text-xs leading-relaxed flex-1 line-clamp-3 mb-4">{svc.description}</p>
+
+                      {/* Bottom: avatar + agent name + price */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/10 flex items-center justify-center overflow-hidden shrink-0">
+                            {avatar && avatar.startsWith("http") ? (
+                              <img src={avatar} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-[9px] font-bold text-[#F4C430]">{agentName.charAt(0).toUpperCase()}</span>
+                            )}
+                          </div>
+                          <span className="text-[#A1A1A1]/60 text-xs truncate">by {agentName}</span>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#F4C430] transition">{svc.name}</h3>
-                          <Link href={`/agents/${svc.agentId}`} className="text-[#A1A1A1]/40 text-[10px] hover:text-[#F4C430] transition">
-                            by {agentName}
-                          </Link>
-                        </div>
+                        <span className="text-[#F4C430] font-semibold text-xs shrink-0 ml-2">{formatPrice(svc.pricePerCall)} {token}</span>
                       </div>
-                      <p className="text-[#A1A1A1]/60 text-xs leading-relaxed flex-1 mb-4 line-clamp-3">{svc.description}</p>
-                      <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-                        <span className="text-[#F4C430] font-semibold text-sm">{formatPrice(svc.pricePerCall)} {token}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${svc.active ? "bg-green-400/10 text-green-400" : "bg-red-400/10 text-red-400"}`}>
-                          {svc.active ? "Active" : "Inactive"}
-                        </span>
-                      </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
