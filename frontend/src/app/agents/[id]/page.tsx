@@ -138,21 +138,24 @@ export default function AgentDetailPage() {
         // Fetch stored agent metadata from Supabase
         let foundStored = false;
         try {
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from("registered_agents")
             .select("name, description, avatar, agent_wallet")
-            .eq("agent_nft_id", agentId)
-            .single();
-          if (data) { setStoredAgent(data); foundStored = true; }
+            .eq("agent_nft_id", agentId);
+          if (!error && data && data.length > 0) {
+            setStoredAgent(data[0]);
+            foundStored = true;
+          }
         } catch {}
         if (!foundStored) {
           try {
-            const { data } = await supabase
+            const { data, error } = await supabase
               .from("hosted_agents")
               .select("name, description, agent_wallet")
-              .eq("agent_nft_id", agentId)
-              .single();
-            if (data) setStoredAgent({ ...data, avatar: null, agent_wallet: data.agent_wallet || null });
+              .eq("agent_nft_id", agentId);
+            if (!error && data && data.length > 0) {
+              setStoredAgent({ ...data[0], avatar: null, agent_wallet: data[0].agent_wallet || null });
+            }
           } catch {}
         }
       } catch (err) {
