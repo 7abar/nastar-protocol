@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { formatUnits } from "viem";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
 
@@ -25,6 +26,7 @@ export default function AgentChatPage() {
   const agentId = params?.agentId as string;
 
   const [agent, setAgent] = useState<any>(null);
+  const [agentAvatar, setAgentAvatar] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,6 +45,17 @@ export default function AgentChatPage() {
           const services = data.services || data || [];
           const match = services.find((s: any) => String(s.agentId) === String(agentId));
           if (match) setAgent(match);
+        }
+      } catch {}
+
+      // Fetch avatar from Supabase
+      try {
+        const { data } = await supabase
+          .from("registered_agents")
+          .select("avatar")
+          .eq("agent_nft_id", Number(agentId));
+        if (data && data.length > 0 && data[0].avatar) {
+          setAgentAvatar(data[0].avatar);
         }
       } catch {}
     }
@@ -151,7 +164,11 @@ export default function AgentChatPage() {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-20 h-20 rounded-full overflow-hidden mb-4">
-              <Image src="/nastar-mascot.png" alt="Nastar" width={80} height={80} className="w-full h-full object-cover" />
+              {agentAvatar ? (
+                <img src={agentAvatar} alt={agentName} className="w-full h-full object-cover" />
+              ) : (
+                <Image src="/nastar-mascot.png" alt="Nastar" width={80} height={80} className="w-full h-full object-cover" />
+              )}
             </div>
             <p className="text-[#A1A1A1]/50 text-sm mb-1">Start a conversation with {agentName}</p>
             <p className="text-[#A1A1A1]/25 text-xs">Powered by {selectedModel.label}</p>
