@@ -68,6 +68,12 @@ function ProfileDropdown() {
 
           {/* Menu items */}
           <div className="py-1">
+            <Link href={`/profile/${address}`} onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-3 text-[#F5F5F5] hover:bg-white/[0.04] transition">
+              <svg className="w-4 h-4 text-[#A1A1A1]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="text-sm">Public Profile</span>
+            </Link>
             <Link href="/deals" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-3 text-[#F5F5F5] hover:bg-white/[0.04] transition">
               <svg className="w-4 h-4 text-[#A1A1A1]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 3.75h1.5a2.251 2.251 0 011.6.664" />

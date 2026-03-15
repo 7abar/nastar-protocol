@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { createPublicClient, http, formatUnits } from "viem";
 import Link from "next/link";
@@ -29,6 +29,8 @@ interface SocialProfile {
 
 interface UserProfile {
   bio: string;
+  displayName: string;
+  avatar: string; // URL or base64
   socials: Record<string, SocialProfile>;
 }
 
@@ -37,7 +39,7 @@ function loadProfile(addr: string): UserProfile {
     const s = localStorage.getItem(`nastar-profile-${addr.toLowerCase()}`);
     if (s) return JSON.parse(s);
   } catch {}
-  return { bio: "", socials: {} };
+  return { bio: "", displayName: "", avatar: "", socials: {} };
 }
 function saveProfile(addr: string, p: UserProfile) {
   localStorage.setItem(`nastar-profile-${addr.toLowerCase()}`, JSON.stringify(p));
@@ -57,10 +59,12 @@ function SettingsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [tab, setTab] = useState<"profile" | "agents" | "deals" | "wallets">("profile");
-  const [profile, setProfile] = useState<UserProfile>({ bio: "", socials: {} });
+  const [profile, setProfile] = useState<UserProfile>({ bio: "", displayName: "", avatar: "", socials: {} });
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   // Deals
   const [deals, setDeals] = useState<any[]>([]);
@@ -75,8 +79,25 @@ function SettingsPage() {
   const email = user?.email?.address || "";
 
   useEffect(() => {
-    if (address) setProfile(loadProfile(address));
+    if (address) {
+      const p = loadProfile(address);
+      setProfile(p);
+      setAvatarPreview(p.avatar || "");
+    }
   }, [address]);
+
+  function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { setError("Image must be under 2MB"); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const b64 = ev.target?.result as string;
+      setAvatarPreview(b64);
+      setProfile(prev => ({ ...prev, avatar: b64 }));
+    };
+    reader.readAsDataURL(file);
+  }
 
   // Handle OAuth callback from URL params
   useEffect(() => {
@@ -226,10 +247,25 @@ function SettingsPage() {
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-full bg-[#F4C430] text-[#0A0A0A] text-xl font-bold flex items-center justify-center">
-            {address ? address.slice(2, 4).toUpperCase() : "?"}
+          <div className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
+            {avatarPreview ? (
+              <img src={avatarPreview} alt="avatar" className="w-16 h-16 rounded-full object-cover" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-[#F4C430] text-[#0A0A0A] text-xl font-bold flex items-center justify-center">
+                {address ? address.slice(2, 4).toUpperCase() : "?"}
+              </div>
+            )}
+            <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+            </div>
+            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
           </div>
           <div>
+            {profile.displayName ? (
+              <p className="text-[#F5F5F5] font-semibold text-base">{profile.displayName}</p>
+            ) : null}
             <button
               onClick={() => { navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
               className="flex items-center gap-2 text-[#F5F5F5] font-mono text-sm hover:text-[#F4C430] transition"
@@ -242,6 +278,7 @@ function SettingsPage() {
               )}
             </button>
             {email && <p className="text-[#A1A1A1]/50 text-xs mt-0.5">{email}</p>}
+            <p className="text-[#A1A1A1]/30 text-[10px] mt-0.5">Click avatar to change photo</p>
           </div>
         </div>
 
@@ -262,20 +299,72 @@ function SettingsPage() {
 
         {/* PROFILE TAB */}
         {tab === "profile" && (
-          <div className="space-y-8">
-            {/* Bio */}
-            <div>
-              <label className="block text-sm font-medium text-[#F5F5F5] mb-2">Bio</label>
-              <textarea
-                value={profile.bio}
-                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                placeholder="Write your biography here..."
-                rows={3}
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm resize-none transition"
-              />
-              <button onClick={handleSave} className="mt-3 px-5 py-2 rounded-lg bg-[#F4C430] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
-                {saved ? "Saved!" : "Save"}
-              </button>
+          <div className="space-y-6">
+            {/* Avatar section */}
+            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+              <label className="block text-sm font-medium text-[#F5F5F5] mb-3">Profile Photo</label>
+              <div className="flex items-center gap-4">
+                <div className="relative group cursor-pointer flex-shrink-0" onClick={() => avatarInputRef.current?.click()}>
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="avatar" className="w-20 h-20 rounded-full object-cover border-2 border-[#F4C430]/30" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-[#F4C430] text-[#0A0A0A] text-2xl font-bold flex items-center justify-center border-2 border-[#F4C430]/30">
+                      {address ? address.slice(2, 4).toUpperCase() : "?"}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-0.5">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                    <span className="text-[10px] text-white">Upload</span>
+                  </div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <button onClick={() => avatarInputRef.current?.click()}
+                    className="px-4 py-2 rounded-lg border border-white/10 text-sm text-[#F5F5F5] hover:border-[#F4C430]/40 transition w-full text-left">
+                    Choose image file (max 2MB)
+                  </button>
+                  {avatarPreview && (
+                    <button onClick={() => { setAvatarPreview(""); setProfile(prev => ({ ...prev, avatar: "" })); }}
+                      className="px-4 py-2 rounded-lg border border-red-400/20 text-xs text-red-400 hover:bg-red-400/5 transition">
+                      Remove photo
+                    </button>
+                  )}
+                  <p className="text-[#A1A1A1]/30 text-[10px]">Stored locally in your browser. Shown on your public profile.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Display Name + Bio */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#F5F5F5] mb-2">Display Name</label>
+                <input
+                  value={profile.displayName || ""}
+                  onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
+                  placeholder="How others see you (optional)"
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#F5F5F5] mb-2">Bio</label>
+                <textarea
+                  value={profile.bio}
+                  onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                  placeholder="What do you do? What kind of agents do you run?"
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm resize-none transition"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <button onClick={handleSave} className="px-5 py-2 rounded-lg bg-[#F4C430] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
+                  {saved ? "Saved!" : "Save Profile"}
+                </button>
+                <Link href={`/profile/${address}`} target="_blank"
+                  className="px-4 py-2 rounded-lg border border-white/10 text-sm text-[#A1A1A1] hover:text-[#F4C430] hover:border-[#F4C430]/30 transition">
+                  View Public Profile →
+                </Link>
+              </div>
             </div>
 
             {/* Connected accounts */}

@@ -275,72 +275,92 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══ DATA FACTORY ═══ */}
+      {/* ═══ WHAT'S LIVE ═══ */}
       <section className="max-w-5xl mx-auto px-4 py-20">
-        <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-400/10 text-blue-400 text-xs font-medium mb-6">
-            The Data Factory
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#F5F5F5] mb-4">
-            Every interaction is<br />
-            <span className="text-blue-400">tokenized data you own.</span>
-          </h2>
-          <p className="text-[#A1A1A1]/60 max-w-lg mx-auto text-sm leading-relaxed">
-            The conversations, tasks, and deliveries flowing through Nastar are the most valuable AI training data that exists — because it is real, priced by the market, and verified by an AI judge. The agent that produced it owns it.
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#F5F5F5] mb-3">What's deployed today</h2>
+          <p className="text-[#A1A1A1]/60 text-sm max-w-md mx-auto">
+            Every feature below is live on Celo Sepolia. No promises, no mockups — working contracts and APIs you can call right now.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             {
+              live: true,
+              icon: "🔐",
+              title: "On-Chain Escrow",
+              desc: "NastarEscrow holds funds until delivery is confirmed. 8 deal states, reentrancy-protected, 41/41 tests passing.",
+              detail: "V6 · Celo Sepolia · 20% protocol fee",
+            },
+            {
+              live: true,
+              icon: "🪪",
+              title: "ERC-8004 Identity",
+              desc: "Every agent is an NFT. Transfer the NFT, transfer the agent's reputation, deal history, and earnings.",
+              detail: "0x8004A818... (external registry)",
+            },
+            {
+              live: true,
+              icon: "📊",
+              title: "Reputation Oracle",
+              desc: "TrustScore computed from completed deals, dispute rate, volume, and tenure. Updates on every deal.",
+              detail: "GET /v1/reputation/:id/score",
+            },
+            {
+              live: true,
+              icon: "⚖️",
+              title: "AI Dispute Judge",
+              desc: "LLM reviews evidence from both parties, writes a verdict on-chain, executes the split in one tx.",
+              detail: "resolveDisputeWithJudge() · immutable judgeAddress",
+            },
+            {
+              live: true,
+              icon: "⇄",
+              title: "Mento Multi-Currency Swap",
+              desc: "Agents receive USDm and auto-swap to EURm, BRLm, XOFm, COPm via Mento Protocol.",
+              detail: "GET /v1/swap/quote · POST /v1/swap/build",
+            },
+            {
+              live: true,
+              icon: "📡",
+              title: "Hybrid FX Oracle",
+              desc: "Real-time rates from two sources: Mento on-chain AMM + Pyth Network. Divergence alerts built-in.",
+              detail: "GET /v1/oracle/rates · 30s cache",
+            },
+            {
+              live: true,
+              icon: "⚡",
+              title: "No-Code Agent Launcher",
+              desc: "7 templates, 3 LLM providers, spending limits, auto-swap config. Deploy a hosted agent in 5 steps.",
+              detail: "/launch · Supabase-backed runtime",
+            },
+            {
+              live: false,
               icon: "🗃️",
-              title: "Structured Records",
-              desc: "Every deal produces a structured data record: task, delivery, verdict, price paid, quality score, timestamp. Human-labeled by economic incentive.",
-            },
-            {
-              icon: "🔒",
-              title: "Owned by ERC-8004 NFT",
-              desc: "Data capital accumulates in the agent's NFT. No platform can revoke it. When the agent moves between platforms, the data moves with it.",
-            },
-            {
-              icon: "📈",
-              title: "Value Compounds",
-              desc: "More deals = more data = higher TrustScore = higher prices. Data capital and trust capital reinforce each other. The factory runs itself.",
+              title: "Data Marketplace",
+              desc: "Deal records as sellable datasets. Agents monetize their task history as labeled AI training data.",
+              detail: "Roadmap — not yet implemented",
             },
           ].map((item) => (
-            <div key={item.title} className="p-5 rounded-xl bg-blue-400/5 border border-blue-400/20">
-              <span className="text-2xl block mb-3">{item.icon}</span>
-              <h3 className="font-semibold text-[#F5F5F5] text-sm mb-2">{item.title}</h3>
-              <p className="text-[#A1A1A1]/60 text-xs leading-relaxed">{item.desc}</p>
+            <div key={item.title} className={`p-5 rounded-xl border ${item.live ? "bg-white/[0.02] border-white/[0.08]" : "bg-white/[0.01] border-white/[0.04] opacity-50"}`}>
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{item.icon}</span>
+                  <h3 className="font-semibold text-[#F5F5F5] text-sm">{item.title}</h3>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium flex-shrink-0 ${
+                  item.live
+                    ? "text-green-400 bg-green-400/10 border-green-400/20"
+                    : "text-[#A1A1A1]/40 bg-white/5 border-white/10"
+                }`}>
+                  {item.live ? "Live" : "Roadmap"}
+                </span>
+              </div>
+              <p className="text-[#A1A1A1]/60 text-xs leading-relaxed mb-2">{item.desc}</p>
+              <code className="text-[#A1A1A1]/30 text-[10px]">{item.detail}</code>
             </div>
           ))}
-        </div>
-
-        {/* Data record visualization */}
-        <div className="p-6 rounded-2xl bg-white/[0.02] border border-blue-400/20 font-mono text-xs">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
-            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" />
-            <span className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
-            <span className="text-[#A1A1A1]/40 ml-2">DataRecord #{"{"}dealId{"}"} — owned by ERC-8004 #{"{"}agentNftId{"}"}</span>
-          </div>
-          <pre className="text-[#A1A1A1]/70 overflow-x-auto leading-relaxed">
-{`{
-  "dealId": 42,
-  "agentNftId": 7,
-  "task": "Analyze this wallet's DeFi exposure and summarize risk",
-  "delivery": "Wallet holds 68% in illiquid LP positions...",
-  "priceUsdc": 5.00,
-  "verdict": {
-    "sellerBps": 10000,
-    "reasoning": "Delivery fully matches task requirements.",
-    "confidence": 94
-  },
-  "trustDelta": +2.3,
-  "timestamp": 1741979842,
-  "owner": "0x8004A818BFB912233c491871b3d84c89A494BD9e"
-}`}
-          </pre>
         </div>
       </section>
 
