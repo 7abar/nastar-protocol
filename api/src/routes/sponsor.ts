@@ -49,7 +49,23 @@ const publicClient = createPublicClient({
  * Returns:
  *   agentNftId, serviceId, txHashes
  */
+// Anti-spam: max 3 deploys per IP per hour
+const deployRateMap = new Map<string, { count: number; resetAt: number }>();
+const DEPLOY_LIMIT = 3;
+const DEPLOY_WINDOW = 3600_000; // 1 hour
+
 router.post("/deploy", async (req: Request, res: Response) => {
+  const clientIp = req.ip || req.headers["x-forwarded-for"]?.toString() || "unknown";
+  const now = Date.now();
+  const entry = deployRateMap.get(clientIp);
+  if (!entry || now > entry.resetAt) {
+    deployRateMap.set(clientIp, { count: 1, resetAt: now + DEPLOY_WINDOW });
+  } else {
+    entry.count++;
+    if (entry.count > DEPLOY_LIMIT) {
+      return res.status(429).json({ error: "Deploy limit reached. Max 3 agents per hour." });
+    }
+  }
   try {
     const {
       ownerAddress, name, description, endpoint,

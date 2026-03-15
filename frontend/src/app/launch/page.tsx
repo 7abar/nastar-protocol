@@ -1070,37 +1070,6 @@ export default function LaunchPage() {
               </div>
             </div>
 
-            {/* Spending limits */}
-            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-              <p className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider mb-3">Spending Limits</p>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-[#A1A1A1]/40 text-[10px] block mb-1">Max per op</label>
-                  <input
-                    type="number" min="1" value={config.maxPerCallUsd}
-                    onChange={(e) => setConfig((c) => ({ ...c, maxPerCallUsd: e.target.value }))}
-                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/40 transition"
-                  />
-                </div>
-                <div>
-                  <label className="text-[#A1A1A1]/40 text-[10px] block mb-1">Daily limit</label>
-                  <input
-                    type="number" min="5" value={config.dailyLimitUsd}
-                    onChange={(e) => setConfig((c) => ({ ...c, dailyLimitUsd: e.target.value }))}
-                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/40 transition"
-                  />
-                </div>
-                <div>
-                  <label className="text-[#A1A1A1]/40 text-[10px] block mb-1">Confirm above</label>
-                  <input
-                    type="number" min="1" value={config.requireConfirmAboveUsd}
-                    onChange={(e) => setConfig((c) => ({ ...c, requireConfirmAboveUsd: e.target.value }))}
-                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/40 transition"
-                  />
-                </div>
-              </div>
-            </div>
-
             <p className="text-[#A1A1A1]/30 text-[10px] text-center">
               Gas fees are sponsored by Nastar Protocol. No CELO needed.
             </p>

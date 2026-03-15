@@ -119,9 +119,40 @@ router.get("/:wallet/logs", async (req: Request, res: Response) => {
   })));
 });
 
+// ─── Anti-spam: per-IP rate limiting for agent chat ───────────────────────────
+
+const chatRateMap = new Map<string, { count: number; resetAt: number }>();
+const CHAT_RATE_LIMIT = 20;     // max messages per window
+const CHAT_RATE_WINDOW = 60_000; // 1 minute
+
+function checkChatRate(ip: string): boolean {
+  const now = Date.now();
+  const entry = chatRateMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    chatRateMap.set(ip, { count: 1, resetAt: now + CHAT_RATE_WINDOW });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= CHAT_RATE_LIMIT;
+}
+
+// Clean up old entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of chatRateMap) {
+    if (now > entry.resetAt) chatRateMap.delete(ip);
+  }
+}, 300_000);
+
 // ─── POST /v1/hosted/:wallet — execute task ───────────────────────────────────
 
 router.post("/:wallet", async (req: Request, res: Response) => {
+  // Anti-spam check
+  const clientIp = req.ip || req.headers["x-forwarded-for"]?.toString() || "unknown";
+  if (!checkChatRate(clientIp)) {
+    return res.status(429).json({ error: "Too many requests. Try again in a minute." });
+  }
+
   const wallet = req.params.wallet.toLowerCase();
   await resetDailyIfNeeded(wallet);
 
