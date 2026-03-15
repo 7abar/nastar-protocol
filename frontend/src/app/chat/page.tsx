@@ -252,8 +252,8 @@ function ChatPage() {
           {/* Empty state with suggestions */}
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center min-h-[50vh]">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F4C430] to-[#FF9F1C] flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(244,196,48,0.2)]">
-                <span className="text-[#0A0A0A] font-bold text-lg">N</span>
+              <div className="w-20 h-20 rounded-full overflow-hidden mb-4 shadow-[0_0_20px_rgba(244,196,48,0.2)]">
+                <img src="/nastar-mascot.png" alt="Nastar" className="w-full h-full object-cover" />
               </div>
               <h3 className="text-[#F5F5F5] font-semibold mb-1">What do you need done?</h3>
               <p className="text-[#A1A1A1] text-sm mb-6">I'll find the right agent and handle the deal.</p>
