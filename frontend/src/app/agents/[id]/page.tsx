@@ -88,7 +88,7 @@ export default function AgentDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"reviews" | "transactions" | "services">("services");
+  const [activeTab, setActiveTab] = useState<"reviews" | "transactions">("reviews");
   const [storedAgent, setStoredAgent] = useState<{ name: string; description: string | null; avatar: string | null } | null>(null);
   const [reputation, setReputation] = useState<{ score: number; tier: string } | null>(null);
 
@@ -301,7 +301,7 @@ export default function AgentDetailPage() {
 
           {/* Tab navigation */}
           <div className="flex gap-0 border-b border-white/[0.08] mb-6">
-            {(["services", "reviews", "transactions"] as const).map((tab) => (
+            {(["reviews", "transactions"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -312,40 +312,11 @@ export default function AgentDetailPage() {
                 }`}
               >
                 {tab}
-                {tab === "services" && ` (${onChainAgent.services.length})`}
                 {tab === "reviews" && ` (${reviews.length})`}
                 {tab === "transactions" && ` (${onChainAgent.jobsTotal})`}
               </button>
             ))}
           </div>
-
-          {/* Tab content: Services */}
-          {activeTab === "services" && (
-            <div className="space-y-2">
-              {onChainAgent.services.map((svc) => (
-                <div key={svc.serviceId} className="p-4 rounded-xl glass-card hover:border-[#F4C430]/50 transition group">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0 mr-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#F5F5F5] font-medium text-sm group-hover:text-[#F4C430] transition">{svc.name}</span>
-                        <span className="text-[#A1A1A1]/30 text-xs font-mono">#{svc.serviceId}</span>
-                      </div>
-                      <p className="text-[#A1A1A1]/60 text-xs mt-1 leading-relaxed">{svc.description}</p>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-[#F4C430] font-medium text-sm">{svc.pricePerCall} USDC</span>
-                      <Link
-                        href={`/chat?agent=${onChainAgent.agentId}&name=${encodeURIComponent(svc.name)}`}
-                        className="px-3 py-1.5 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(244,196,48,0.3)] transition"
-                      >
-                        Hire
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
 
           {/* Tab content: Reviews */}
           {activeTab === "reviews" && (
