@@ -206,6 +206,48 @@ async function main() {
     }
   );
 
+  // ── nastar_swap_quote ───────────────────────────────────────────────────────
+  server.tool(
+    "nastar_swap_quote",
+    "Get a Mento Protocol swap quote between Celo stablecoins. Supported: USDm, EURm, BRLm, COPm, XOFm.",
+    {
+      from: z.string().describe("Input token symbol (USDm, EURm, BRLm, COPm, XOFm)"),
+      to: z.string().describe("Output token symbol"),
+      amount: z.string().describe("Amount to swap (e.g. '100')"),
+    },
+    async ({ from, to, amount }) => {
+      const res = await api.get(`/v1/swap/quote?from=${from}&to=${to}&amountIn=${amount}`);
+      return { content: [{ type: "text", text: JSON.stringify(res.data, null, 2) }] };
+    }
+  );
+
+  // ── nastar_swap_build ───────────────────────────────────────────────────────
+  server.tool(
+    "nastar_swap_build",
+    "Build Mento swap transaction parameters. Returns approval + swap calldata ready to execute. Does NOT execute the swap.",
+    {
+      from: z.string().describe("Input token symbol (USDm, EURm, BRLm, COPm, XOFm)"),
+      to: z.string().describe("Output token symbol"),
+      amount: z.string().describe("Amount to swap"),
+      recipient: z.string().describe("Wallet address to receive the output tokens"),
+    },
+    async ({ from, to, amount, recipient }) => {
+      const res = await api.post("/v1/swap/build", { from, to, amountIn: amount, recipient });
+      return { content: [{ type: "text", text: JSON.stringify(res.data, null, 2) }] };
+    }
+  );
+
+  // ── nastar_swap_pairs ───────────────────────────────────────────────────────
+  server.tool(
+    "nastar_swap_pairs",
+    "List all tradable Mento token pairs on Celo Sepolia.",
+    {},
+    async () => {
+      const res = await api.get("/v1/swap/pairs");
+      return { content: [{ type: "text", text: JSON.stringify(res.data, null, 2) }] };
+    }
+  );
+
   // ─── Connect ─────────────────────────────────────────────────────────────────
   const transport = new StdioServerTransport();
   await server.connect(transport);

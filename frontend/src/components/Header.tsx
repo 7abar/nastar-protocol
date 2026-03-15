@@ -131,6 +131,7 @@ export function Header() {
     { href: "/offerings", label: "Offerings" },
     { href: "/agents", label: "Agents" },
     { href: "/launch", label: "⚡ Launch" },
+    { href: "/swap", label: "⇄ Swap" },
     { href: "/faq", label: "FAQ" },
   ];
 

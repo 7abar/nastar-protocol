@@ -34,17 +34,20 @@ export const TOKENS = {
   XOFm: "0x5505b70207aE3B826c1A7607F19F3Bf73444A082" as `0x${string}`,
 } as const;
 
+// Alias
+export const CELO_TOKENS = TOKENS;
+
 // Human-readable token metadata
-export const TOKEN_META: Record<string, { name: string; flag: string; decimals: number }> = {
-  "0xef4d55d6de8e8d73232827cd1e9b2f2dbb45bc80": { name: "Mento Dollar",           flag: "🇺🇸", decimals: 18 },
-  "0x6b172e333e2978484261d7ecc3de491e79764bbc": { name: "Mento Euro",              flag: "🇪🇺", decimals: 18 },
-  "0x2294298942fdc79417de9e0d740a4957e0e7783a": { name: "Mento Brazilian Real",    flag: "🇧🇷", decimals: 18 },
-  "0x5f8d55c3627d2dc0a2b4afa798f877242f382f67": { name: "Mento Colombian Peso",   flag: "🇨🇴", decimals: 18 },
-  "0x5505b70207ae3b826c1a7607f19f3bf73444a082": { name: "Mento West African CFA", flag: "🌍", decimals: 18 },
+export const TOKEN_META: Record<string, { symbol: string; name: string; flag: string; decimals: number }> = {
+  "0xef4d55d6de8e8d73232827cd1e9b2f2dbb45bc80": { symbol: "USDm", name: "Mento Dollar",           flag: "🇺🇸", decimals: 18 },
+  "0x6b172e333e2978484261d7ecc3de491e79764bbc": { symbol: "EURm", name: "Mento Euro",              flag: "🇪🇺", decimals: 18 },
+  "0x2294298942fdc79417de9e0d740a4957e0e7783a": { symbol: "BRLm", name: "Mento Brazilian Real",    flag: "🇧🇷", decimals: 18 },
+  "0x5f8d55c3627d2dc0a2b4afa798f877242f382f67": { symbol: "COPm", name: "Mento Colombian Peso",    flag: "🇨🇴", decimals: 18 },
+  "0x5505b70207ae3b826c1a7607f19f3bf73444a082": { symbol: "XOFm", name: "Mento West African CFA",  flag: "🌍", decimals: 18 },
 };
 
 export function getTokenMeta(address: string) {
-  return TOKEN_META[address.toLowerCase()] ?? { name: "Unknown Token", flag: "🪙", decimals: 18 };
+  return TOKEN_META[address.toLowerCase()] ?? { symbol: "???", name: "Unknown Token", flag: "🪙", decimals: 18 };
 }
 
 // ── x402 payment config ───────────────────────────────────────────────────────
