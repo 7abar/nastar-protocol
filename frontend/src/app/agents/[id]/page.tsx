@@ -14,7 +14,7 @@ import {
 import { SetupTabs } from "@/components/SetupTabs";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
-const IDENTITY_REGISTRY = "0x8004A818BFB912233c491871b3d84c89A494BD9e";
+const IDENTITY_REGISTRY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
 const ESCROW = "0xEE51f3CA1bcDeb58a94093F759BafBC9157734AF";
 
 interface OnChainAgent {
@@ -183,13 +183,26 @@ export default function AgentDetailPage() {
                 <button onClick={() => copy(onChainAgent.address, "addr")} className="text-[#A1A1A1]/50 text-xs font-mono hover:text-[#A1A1A1]">
                   {onChainAgent.address.slice(0, 6)}...{onChainAgent.address.slice(-4)} {copied === "addr" ? "✓" : ""}
                 </button>
-                <a
-                  href={`https://celoscan.io/address/${IDENTITY_REGISTRY}#readContract`}
-                  target="_blank"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-[#F4C430]/10 text-[#F4C430] hover:bg-[#F4C430]/20 transition"
-                >
-                  ERC-8004
-                </a>
+                <div className="group/erc relative inline-flex items-center">
+                  <span className="group-hover/erc:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                    </svg>
+                    ERC-8004
+                  </span>
+                  <div className="hidden group-hover/erc:flex items-center gap-2">
+                    <a href={`https://celoscan.io/address/${IDENTITY_REGISTRY}`} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium hover:bg-green-500/20 transition">
+                      View Tx
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                    </a>
+                    <a href={`https://agentscan.info/agents/${onChainAgent.address}`} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium hover:bg-green-500/20 transition">
+                      8004scan
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                    </a>
+                  </div>
+                </div>
                 <span className="text-[#A1A1A1]/30 text-xs">{avgRating.toFixed(1)} / 5.0</span>
               </div>
               <p className="text-[#A1A1A1]/60 text-sm mt-2 leading-relaxed line-clamp-3">
@@ -231,8 +244,9 @@ export default function AgentDetailPage() {
             <a
               href={`https://celoscan.io/address/${IDENTITY_REGISTRY}`}
               target="_blank"
-              className="px-2.5 py-1 rounded-md bg-[#F4C430]/10 border border-[#F4C430]/30 text-[#F4C430] text-xs hover:bg-[#F4C430]/20 transition"
+              className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium hover:bg-green-500/20 transition inline-flex items-center gap-1.5"
             >
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
               ERC-8004
             </a>
             <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-[#A1A1A1] text-xs">Celo</span>
@@ -324,8 +338,9 @@ export default function AgentDetailPage() {
                       <a
                         href={`https://celoscan.io/address/${IDENTITY_REGISTRY}`}
                         target="_blank"
-                        className="text-[10px] px-2 py-0.5 rounded bg-[#F4C430]/10 text-[#F4C430]/60 hover:text-[#F4C430] transition"
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition inline-flex items-center gap-1"
                       >
+                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
                         ERC-8004
                       </a>
                     </div>
