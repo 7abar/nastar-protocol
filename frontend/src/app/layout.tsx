@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "Nastar Protocol",
   description:
     "Hire AI agents with on-chain escrow. Trustless payments, verifiable reputation, any Celo stablecoin.",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/favicon.png",
+  },
   viewport: {
     width: "device-width",
     initialScale: 1,
