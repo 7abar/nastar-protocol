@@ -505,7 +505,12 @@ export default function LaunchPage() {
                 </div>
                 <button
                   onClick={() => setStep("limits")}
-                  disabled={!config.name.trim() || !config.systemPrompt.trim() || !config.llmApiKey.trim()}
+                  disabled={!config.name.trim() || !config.systemPrompt.trim() || (() => {
+                    const k = config.llmApiKey.trim();
+                    return config.llmProvider === "openai" ? !/^sk-[A-Za-z0-9_-]{20,}$/.test(k) :
+                           config.llmProvider === "anthropic" ? !/^sk-ant-[A-Za-z0-9_-]{20,}$/.test(k) :
+                           config.llmProvider === "google" ? !/^AIza[A-Za-z0-9_-]{30,}$/.test(k) : k.length <= 10;
+                  })()}
                   className="px-5 py-2 rounded-lg gradient-btn text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_15px_#F4C430] transition"
                 >
                   Deploy Agent ⚡
@@ -553,7 +558,10 @@ export default function LaunchPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-[#A1A1A1] text-sm mb-1 block">Price per Call (USDC)</label>
+                <label className="text-[#A1A1A1] text-sm mb-1 block">
+                  Price per Call (USDC)
+                  <span className="ml-1.5 text-[10px] text-[#A1A1A1]/50 font-normal">— buyers pay this per task</span>
+                </label>
                 <input
                   value={config.price}
                   onChange={(e) => setConfig((c) => ({ ...c, price: e.target.value }))}
@@ -641,25 +649,79 @@ export default function LaunchPage() {
               <label className="text-[#A1A1A1] text-sm mb-1 block">
                 {selectedProvider.name} API Key *
               </label>
-              <input
-                type="password"
-                value={config.llmApiKey}
-                onChange={(e) => setConfig((c) => ({ ...c, llmApiKey: e.target.value }))}
-                placeholder={`${selectedProvider.id === "openai" ? "sk-..." : selectedProvider.id === "anthropic" ? "sk-ant-..." : "AIza..."}`}
-                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white placeholder-white/20 focus:outline-none focus:border-[#F4C430]/70 font-mono text-sm"
-              />
-              <p className="text-[#A1A1A1]/40 text-xs mt-1">
-                Stored encrypted. Used only by your agent runtime.
-              </p>
+              {(() => {
+                const key = config.llmApiKey.trim();
+                const valid =
+                  config.llmProvider === "openai" ? /^sk-[A-Za-z0-9_-]{20,}$/.test(key) :
+                  config.llmProvider === "anthropic" ? /^sk-ant-[A-Za-z0-9_-]{20,}$/.test(key) :
+                  config.llmProvider === "google" ? /^AIza[A-Za-z0-9_-]{30,}$/.test(key) :
+                  key.length > 10;
+                const placeholder =
+                  config.llmProvider === "openai" ? "sk-proj-..." :
+                  config.llmProvider === "anthropic" ? "sk-ant-api03-..." : "AIzaSy...";
+                return (
+                  <>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        value={config.llmApiKey}
+                        onChange={(e) => setConfig((c) => ({ ...c, llmApiKey: e.target.value }))}
+                        placeholder={placeholder}
+                        className={`w-full px-4 py-3 pr-10 rounded-lg bg-white/5 border text-white placeholder-white/20 focus:outline-none font-mono text-sm transition ${
+                          key.length === 0 ? "border-[#F4C430]/30 focus:border-[#F4C430]/70" :
+                          valid ? "border-green-400/50 focus:border-green-400" :
+                          "border-red-400/50 focus:border-red-400"
+                        }`}
+                      />
+                      {key.length > 0 && (
+                        <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-lg ${valid ? "text-green-400" : "text-red-400"}`}>
+                          {valid ? "✓" : "✗"}
+                        </span>
+                      )}
+                    </div>
+                    {key.length > 0 && !valid && (
+                      <p className="text-red-400 text-xs mt-1.5">
+                        {config.llmProvider === "openai" ? 'Must start with "sk-" — get yours at platform.openai.com' :
+                         config.llmProvider === "anthropic" ? 'Must start with "sk-ant-" — get yours at console.anthropic.com' :
+                         'Must start with "AIza" — get yours at aistudio.google.com'}
+                      </p>
+                    )}
+                    {valid && (
+                      <p className="text-green-400/70 text-xs mt-1.5">Key format valid. Stored encrypted in your hosted runtime.</p>
+                    )}
+                    {key.length === 0 && (
+                      <p className="text-[#A1A1A1]/40 text-xs mt-1">
+                        Stored encrypted. Used only by your agent runtime.
+                      </p>
+                    )}
+                    <div className="mt-2 p-3 rounded-lg bg-white/5 border border-white/10 text-xs text-[#A1A1A1]">
+                      Get your key: {" "}
+                      {config.llmProvider === "openai" && <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" className="text-[#F4C430] underline">platform.openai.com/api-keys</a>}
+                      {config.llmProvider === "anthropic" && <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" className="text-[#F4C430] underline">console.anthropic.com</a>}
+                      {config.llmProvider === "google" && <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" className="text-[#F4C430] underline">aistudio.google.com</a>}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
-            <button
-              onClick={() => setStep("limits")}
-              disabled={!config.llmApiKey.trim()}
-              className="w-full py-3 rounded-xl gradient-btn font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_#F4C430] transition"
-            >
-              Next: Spending Limits →
-            </button>
+            {(() => {
+              const key = config.llmApiKey.trim();
+              const valid =
+                config.llmProvider === "openai" ? /^sk-[A-Za-z0-9_-]{20,}$/.test(key) :
+                config.llmProvider === "anthropic" ? /^sk-ant-[A-Za-z0-9_-]{20,}$/.test(key) :
+                config.llmProvider === "google" ? /^AIza[A-Za-z0-9_-]{30,}$/.test(key) :
+                key.length > 10;
+              return (
+                <button
+                  onClick={() => setStep("limits")}
+                  disabled={!valid}
+                  className="w-full py-3 rounded-xl gradient-btn font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_#F4C430] transition"
+                >
+                  Next: Spending Limits →
+                </button>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -731,7 +793,15 @@ export default function LaunchPage() {
                 <div className="flex justify-between"><span className="text-[#A1A1A1]">Template</span><span>{tmpl.icon} {tmpl.name}</span></div>
                 <div className="flex justify-between"><span className="text-[#A1A1A1]">Agent Name</span><span>{config.name}</span></div>
                 <div className="flex justify-between"><span className="text-[#A1A1A1]">LLM</span><span>{config.llmProvider} / {config.llmModel}</span></div>
-                <div className="flex justify-between"><span className="text-[#A1A1A1]">Price/call</span><span>{config.price} USDC</span></div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#A1A1A1] group relative cursor-help">
+                    Price/call
+                    <span className="absolute bottom-full left-0 mb-1.5 w-56 bg-[#1a1a1a] border border-white/10 text-white text-xs rounded-lg p-2.5 opacity-0 group-hover:opacity-100 transition pointer-events-none z-10 shadow-xl">
+                      Amount buyers pay in USDC each time they hire your agent for a task. Goes into escrow — released to you after delivery.
+                    </span>
+                  </span>
+                  <span>{config.price} USDC</span>
+                </div>
                 <div className="flex justify-between"><span className="text-[#A1A1A1]">ERC-8004 Identity</span><span className="text-green-400">Auto-minted</span></div>
                 <div className="flex justify-between"><span className="text-[#A1A1A1]">Hosted Runtime</span><span className="text-green-400">OpenClaw</span></div>
               </div>
