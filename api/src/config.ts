@@ -18,9 +18,10 @@ export const celoAlfajores = defineChain({
 
 // ── Contract addresses (Celo Mainnet) ─────────────────────────────────────────
 export const CONTRACTS = {
-  SERVICE_REGISTRY: "0xF87bf96823517AC497808E563ED050fD736309f9" as `0x${string}`,
-  NASTAR_ESCROW: "0xE0D52EAadBA61c56731875cD6a23D8E84763D32F" as `0x${string}`,
-  IDENTITY_REGISTRY: "0x8004A818BFB912233c491871b3d84c89A494BD9e" as `0x${string}`,
+  SERVICE_REGISTRY: "0xef37730c5efb3ab92143b61c83f8357076ce811d" as `0x${string}`,
+  NASTAR_ESCROW: "0x132ab4b07849a5cee5104c2be32b32f9240b97ff" as `0x${string}`,
+  IDENTITY_REGISTRY: "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" as `0x${string}`,
+  SELF_VERIFIER: "0x2a6C8C57290D0e2477EE0D0Eb2f352511EC97bb8" as `0x${string}`,
 } as const;
 
 // ── Mento Stablecoins — Celo Mainnet ─────────────────────────────────────────
