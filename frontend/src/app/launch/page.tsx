@@ -15,8 +15,6 @@ import {
 } from "@/lib/contracts";
 import { generateApiKey, generateAgentWallet, storeAgent } from "@/lib/agents-api";
 
-// Lazy-load ReactFlow (heavy, client-only)
-
 const client = createPublicClient({ chain: celoSepoliaCustom, transport: http() });
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
 
@@ -25,12 +23,17 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.
 const TEMPLATES = [
   {
     id: "trading",
-    icon: "📈",
     name: "Trading Bot",
     tagline: "DeFi automation on Celo",
     description: "Monitors markets and executes token swaps based on configurable thresholds.",
     tags: ["trading", "defi", "celo"],
-    defaultPrice: "2",
+    defaultOffering: {
+      name: "token_swap",
+      description: "Execute token swaps on Celo DEXes with configurable parameters",
+      feeType: "percentage" as const,
+      fee: "0.05",
+      requiresFunds: true,
+    },
     systemPrompt: `You are a DeFi trading agent on Celo. Your job is to:
 - Monitor token prices on Celo DEXes (Uniswap v3, Ubeswap)
 - Execute buy/sell swaps when configured thresholds are met
@@ -42,12 +45,17 @@ You have access to the user's scoped wallet with spend limits. Be conservative a
   },
   {
     id: "payments",
-    icon: "💸",
     name: "Payment Agent",
     tagline: "Automate stablecoin payments",
-    description: "Schedules and executes recurring USDC/cUSD payments on behalf of users.",
+    description: "Schedules and executes recurring stablecoin payments on behalf of users.",
     tags: ["payments", "usdc", "automation"],
-    defaultPrice: "0.5",
+    defaultOffering: {
+      name: "scheduled_payment",
+      description: "Process and schedule stablecoin payments",
+      feeType: "fixed" as const,
+      fee: "0.5",
+      requiresFunds: true,
+    },
     systemPrompt: `You are a payment automation agent on Celo. Your job is to:
 - Process payment requests in USDC and cUSD
 - Schedule recurring transfers based on user instructions
@@ -59,12 +67,17 @@ Never send to unverified addresses. Always log every transaction.`,
   },
   {
     id: "social",
-    icon: "📢",
     name: "Social Bot",
     tagline: "Onchain social actions",
     description: "Posts content, follows accounts, and engages on Farcaster and Lens on your behalf.",
     tags: ["social", "farcaster", "lens"],
-    defaultPrice: "1",
+    defaultOffering: {
+      name: "social_engagement",
+      description: "Post content and engage on Web3 social platforms",
+      feeType: "fixed" as const,
+      fee: "1",
+      requiresFunds: false,
+    },
     systemPrompt: `You are a social media agent for Web3 platforms (Farcaster, Lens). Your job is to:
 - Post content based on user-provided topics and tone
 - Engage with relevant casts/posts in the user's niche
@@ -76,12 +89,17 @@ Only post content the user explicitly approves or that matches approved template
   },
   {
     id: "research",
-    icon: "🔍",
     name: "Research Agent",
     tagline: "Onchain data intelligence",
     description: "Monitors wallets, contracts, and governance. Delivers daily digests.",
     tags: ["research", "analytics", "governance"],
-    defaultPrice: "1.5",
+    defaultOffering: {
+      name: "blockchain_research",
+      description: "Deep analysis of onchain data, wallets, and governance proposals",
+      feeType: "fixed" as const,
+      fee: "1.5",
+      requiresFunds: false,
+    },
     systemPrompt: `You are a blockchain research agent on Celo. Your job is to:
 - Monitor specified wallet addresses for activity
 - Track Celo governance proposals and summarize them
@@ -93,52 +111,62 @@ Be factual, cite transaction hashes, and flag uncertainty clearly.`,
   },
   {
     id: "remittance",
-    icon: "🌍",
     name: "Remittance Agent",
     tagline: "Cross-border transfers on Celo",
-    description: "Understands natural language remittance requests and executes transfers using Mento stablecoins. Supports multiple corridors and languages.",
+    description: "Understands natural language remittance requests and executes transfers using Mento stablecoins.",
     tags: ["remittance", "mento", "global-south", "payments"],
-    defaultPrice: "0.5",
+    defaultOffering: {
+      name: "cross_border_transfer",
+      description: "Execute cross-border remittances using Mento stablecoins at <0.5% fees",
+      feeType: "percentage" as const,
+      fee: "0.005",
+      requiresFunds: true,
+    },
     systemPrompt: `You are a cross-border remittance agent on Celo. Your job is to:
 - Parse natural language transfer requests like "Send $50 to my mom in the Philippines"
 - Find the cheapest route using Mento pools (USD→PHP, EUR→NGN, GBP→KES)
 - Execute stablecoin swaps (USDm, EURm, BRLm, COPm, XOFm) via Mento Protocol
 - Show fee comparisons vs traditional providers (Western Union: ~7%, Wise: ~1.5%, Nastar: <0.5%)
-- Support multi-language input (English, Spanish, Portuguese, French)
 - Schedule recurring transfers when requested
-- Send notifications to recipients via SMS/WhatsApp
 
-Never send to unverified addresses. Always confirm amounts before executing. Show total savings vs traditional remittance.`,
+Never send to unverified addresses. Always confirm amounts before executing.`,
   },
   {
     id: "fx-hedge",
-    icon: "🛡️",
     name: "FX Hedging Agent",
     tagline: "Automated currency hedging",
-    description: "Monitors multi-currency exposure and auto-rebalances using Mento stablecoins. Set target allocations and let the agent maintain them.",
+    description: "Monitors multi-currency exposure and auto-rebalances using Mento stablecoins.",
     tags: ["fx", "hedging", "mento", "defi", "treasury"],
-    defaultPrice: "3",
+    defaultOffering: {
+      name: "fx_rebalance",
+      description: "Monitor and rebalance multi-currency stablecoin portfolios",
+      feeType: "percentage" as const,
+      fee: "0.02",
+      requiresFunds: true,
+    },
     systemPrompt: `You are an FX hedging agent on Celo. Your job is to:
 - Track portfolio exposure across multiple Celo stablecoins (USDm, EURm, BRLm, COPm, XOFm)
 - Monitor drift from user-configured target allocations
 - Execute rebalancing swaps via Mento Protocol when drift exceeds threshold
 - Optimize swap timing to minimize slippage and gas costs
-- Factor in expected future cash flows ("I'll receive €5000 next week")
 - Generate daily risk reports showing currency movements and hedging costs
-- Enforce maximum single-swap size limits
 
 Example allocation: "Keep 50% in USDm, 30% in EURm, 20% in BRLm"
-Rebalance when any position drifts more than 5% from target.
-Never rebalance more than 3 times per day. Report all swaps with tx hashes.`,
+Rebalance when any position drifts more than 5% from target.`,
   },
   {
     id: "custom",
-    icon: "⚡",
     name: "Custom Agent",
     tagline: "Build your own",
-    description: "Blank slate — write your own system prompt and configure everything from scratch.",
+    description: "Blank slate -- write your own system prompt and configure everything from scratch.",
     tags: ["custom"],
-    defaultPrice: "1",
+    defaultOffering: {
+      name: "custom_service",
+      description: "",
+      feeType: "fixed" as const,
+      fee: "1",
+      requiresFunds: false,
+    },
     systemPrompt: "",
   },
 ];
@@ -151,22 +179,35 @@ const LLM_PROVIDERS = [
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Step = "template" | "configure" | "llm" | "limits" | "deploying" | "done";
+type Step = "template" | "agent" | "offerings" | "llm" | "review" | "deploying" | "done";
 
-interface LaunchConfig {
+interface Offering {
+  name: string;
+  description: string;
+  feeType: "fixed" | "percentage";
+  fee: string;
+  requiresFunds: boolean;
+  paymentToken: `0x${string}`;
+}
+
+interface AgentConfig {
   templateId: string;
+  // Agent profile
   name: string;
   description: string;
   systemPrompt: string;
+  avatarPreview: string;
+  tags: string;
+  // Offerings
+  offerings: Offering[];
+  // LLM
   llmProvider: string;
   llmModel: string;
   llmApiKey: string;
+  // Limits
   maxPerCallUsd: string;
   dailyLimitUsd: string;
   requireConfirmAboveUsd: string;
-  price: string;
-  tags: string;
-  paymentToken: `0x${string}`;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -180,21 +221,22 @@ export default function LaunchPage() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [deployedId, setDeployedId] = useState("");
+  const [editingOffering, setEditingOffering] = useState<number | null>(null);
 
-  const [config, setConfig] = useState<LaunchConfig>({
+  const [config, setConfig] = useState<AgentConfig>({
     templateId: "",
     name: "",
     description: "",
     systemPrompt: "",
+    avatarPreview: "",
+    tags: "",
+    offerings: [],
     llmProvider: "openai",
     llmModel: "gpt-4o-mini",
     llmApiKey: "",
     maxPerCallUsd: "10",
     dailyLimitUsd: "50",
     requireConfirmAboveUsd: "25",
-    price: "1",
-    tags: "",
-    paymentToken: CELO_TOKENS.USDm,
   });
 
   function selectTemplate(t: typeof TEMPLATES[0]) {
@@ -204,13 +246,47 @@ export default function LaunchPage() {
       name: t.id === "custom" ? "" : t.name,
       description: t.id === "custom" ? "" : t.description,
       systemPrompt: t.systemPrompt,
-      price: t.defaultPrice,
       tags: t.tags.join(", "),
+      offerings: [{
+        ...t.defaultOffering,
+        paymentToken: CELO_TOKENS.USDm,
+      }],
     }));
-    setStep("configure");
+    setStep("agent");
   }
 
   const selectedProvider = LLM_PROVIDERS.find((p) => p.id === config.llmProvider)!;
+
+  // New blank offering
+  function addOffering() {
+    setConfig((c) => ({
+      ...c,
+      offerings: [...c.offerings, {
+        name: "",
+        description: "",
+        feeType: "fixed",
+        fee: "1",
+        requiresFunds: false,
+        paymentToken: CELO_TOKENS.USDm,
+      }],
+    }));
+    setEditingOffering(config.offerings.length);
+  }
+
+  function updateOffering(idx: number, patch: Partial<Offering>) {
+    setConfig((c) => ({
+      ...c,
+      offerings: c.offerings.map((o, i) => i === idx ? { ...o, ...patch } : o),
+    }));
+  }
+
+  function removeOffering(idx: number) {
+    setConfig((c) => ({
+      ...c,
+      offerings: c.offerings.filter((_, i) => i !== idx),
+    }));
+    setEditingOffering(null);
+  }
 
   async function handleDeploy() {
     if (!wallets.length) return;
@@ -252,56 +328,74 @@ export default function LaunchPage() {
 
       for (let i = 0n; i <= 200n; i++) {
         try {
-          const owner = (await client.readContract({
+          const owner = await client.readContract({
             address: CONTRACTS.IDENTITY_REGISTRY,
-            abi: [{ type: "function", name: "ownerOf", inputs: [{ name: "tokenId", type: "uint256" }], outputs: [{ type: "address" }], stateMutability: "view" }] as const,
+            abi: [{ type: "function", name: "ownerOf", inputs: [{ name: "tokenId", type: "uint256" }], outputs: [{ name: "", type: "address" }], stateMutability: "view" }] as const,
             functionName: "ownerOf",
             args: [i],
-          })) as string;
-          if (owner.toLowerCase() === ownerAddress.toLowerCase()) { agentNftId = Number(i); break; }
-        } catch { /* token doesn't exist */ }
+          });
+          if ((owner as string).toLowerCase() === ownerAddress.toLowerCase()) {
+            agentNftId = Number(i);
+            break;
+          }
+        } catch { continue; }
       }
 
-      // 3. Register service on-chain
+      // 3. Register first offering as service on-chain
+      const primaryOffering = config.offerings[0];
+      const feeForChain = BigInt(Math.floor(parseFloat(primaryOffering.fee) * 1e18));
+      const tagList = config.tags.split(",").map((t: string) => t.trim()).filter(Boolean);
       setStatus("Registering service on-chain...");
-      const tagList = config.tags.split(",").map((t) => t.trim()).filter(Boolean);
-      const priceWei = BigInt(Math.round(parseFloat(config.price) * 1e6));
-
-      const hostedEndpoint = `${API_URL}/v1/hosted/${agentWallet.address}`;
-
-      const regData = encodeFunctionData({
+      const registerServiceData = encodeFunctionData({
         abi: SERVICE_REGISTRY_ABI,
         functionName: "registerService",
         args: [
-          BigInt(agentNftId || 0),
-          config.name,
-          config.description,
-          hostedEndpoint,
-          config.paymentToken,
-          priceWei,
-          tagList,
+          BigInt(agentNftId ?? 0),         // agentId
+          config.name,                      // name
+          primaryOffering.description,      // description
+          `${API_URL}/api/agent/endpoint`,  // endpoint
+          primaryOffering.paymentToken,     // paymentToken
+          feeForChain,                      // pricePerCall
+          tagList,                          // tags
         ],
       });
-      const regHash = await provider.request({
+      const svcHash = await provider.request({
         method: "eth_sendTransaction",
-        params: [{ from: ownerAddress, to: CONTRACTS.SERVICE_REGISTRY, data: regData }],
+        params: [{ from: ownerAddress, to: CONTRACTS.SERVICE_REGISTRY, data: registerServiceData }],
       });
-      const receipt = await client.waitForTransactionReceipt({ hash: regHash as `0x${string}` });
+      await client.waitForTransactionReceipt({ hash: svcHash as `0x${string}` });
 
-      const serviceRegTopic = "0x2f97baea4f38ff977318c4e4648cfa7b665121ba164e1cb7070d29a78f59f475";
-      const regLog = receipt.logs.find((l) => l.topics[0] === serviceRegTopic);
-      const serviceId = regLog ? parseInt(regLog.topics[1] || "0", 16) : 0;
+      // 4. Store agent config
+      setStatus("Storing agent configuration...");
+      const apiKey = generateApiKey();
+      await storeAgent({
+        id: agentWallet.address,
+        name: config.name,
+        description: config.description,
+        ownerAddress,
+        agentWallet: agentWallet.address,
+        agentPrivateKey: "",
+        apiKey,
+        apiKeyActive: true,
+        agentNftId: agentNftId,
+        serviceId: null,
+        endpoint: `${API_URL}/api/agent/endpoint`,
+        tags: tagList,
+        pricePerCall: primaryOffering.fee,
+        paymentToken: primaryOffering.paymentToken,
+        avatar: config.avatarPreview || null,
+        createdAt: Date.now(),
+      });
 
-      // 4. Update agent URI
+      // 5. Set token URI
       if (agentNftId !== null) {
-        setStatus("Linking agent metadata...");
-        const agentURI = `${API_URL}/api/agent-registration/${agentNftId}`;
-        const setUriData = encodeFunctionData({
-          abi: ERC8004_ABI,
-          functionName: "setAgentURI",
-          args: [BigInt(agentNftId), agentURI],
-        });
+        setStatus("Setting agent metadata URI...");
         try {
+          const setUriData = encodeFunctionData({
+            abi: ERC8004_ABI,
+            functionName: "setAgentURI",
+            args: [BigInt(agentNftId), `${API_URL}/api/agent/${agentNftId}/metadata`],
+          });
           const uriHash = await provider.request({
             method: "eth_sendTransaction",
             params: [{ from: ownerAddress, to: CONTRACTS.IDENTITY_REGISTRY, data: setUriData }],
@@ -310,117 +404,47 @@ export default function LaunchPage() {
         } catch { /* non-critical */ }
       }
 
-      // 5. Generate API key & store locally
-      setStatus("Finalizing configuration...");
-      const apiKey = generateApiKey();
-
-      storeAgent({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        name: config.name,
-        description: config.description,
-        ownerAddress,
-        agentWallet: agentWallet.address,
-        agentPrivateKey: agentWallet.privateKey,
-        apiKey,
-        apiKeyActive: true,
-        agentNftId,
-        serviceId,
-        endpoint: hostedEndpoint,
-        tags: tagList,
-        pricePerCall: config.price,
-        paymentToken: config.paymentToken,
-        avatar: null,
-        createdAt: Date.now(),
-      });
-
-      // 6. Store hosted config in API
-      setStatus("Starting hosted agent runtime...");
-      try {
-        await fetch(`${API_URL}/v1/hosted`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            agentWallet: agentWallet.address,
-            agentPrivateKey: agentWallet.privateKey,
-            ownerAddress,
-            apiKey,
-            agentNftId,
-            serviceId,
-            name: config.name,
-            description: config.description,
-            templateId: config.templateId,
-            systemPrompt: config.systemPrompt,
-            llmProvider: config.llmProvider,
-            llmModel: config.llmModel,
-            llmApiKey: config.llmApiKey,
-            spendingLimits: {
-              maxPerCallUsd: parseFloat(config.maxPerCallUsd),
-              dailyLimitUsd: parseFloat(config.dailyLimitUsd),
-              requireConfirmAboveUsd: parseFloat(config.requireConfirmAboveUsd),
-            },
-          }),
-        });
-      } catch { /* API not deployed yet — config stored locally */ }
-
       setDeployedId(agentWallet.address);
       setStep("done");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(msg.slice(0, 200));
-      setStep("limits");
+    } catch (err: any) {
+      setError(err?.message?.slice(0, 200) || "Deploy failed");
+      setStep("review");
     }
   }
 
-  // ─── Not authenticated ──────────────────────────────────────────────────────
-
-  if (!authenticated) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="text-5xl mb-4">⚡</div>
-          <h1 className="text-3xl font-bold text-white mb-3">Agent Launcher</h1>
-          <p className="text-[#A1A1A1] mb-8">
-            Deploy a hosted AI agent on Celo in under 2 minutes. No code required.
-          </p>
-          <button onClick={login} className="px-8 py-3 rounded-xl gradient-btn font-semibold hover:shadow-[0_0_15px_#F4C430] transition">
-            Connect Wallet to Start
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── Step: Template ─────────────────────────────────────────────────────────
+  // ─── Step: Template Selection ───────────────────────────────────────────────
 
   if (step === "template") {
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
-        <div className="max-w-5xl mx-auto px-4 py-12">
-          <div className="mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F4C430]/10 text-[#F4C430] text-xs font-medium mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#F4C430] animate-pulse" />
-              No-Code Agent Launcher
-            </div>
-            <h1 className="text-3xl font-bold mb-2">Choose a Template</h1>
-            <p className="text-[#A1A1A1]">
-              Pick a starting point. You can customize everything in the next steps.
-            </p>
+        <div className="max-w-3xl mx-auto px-4 py-10">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold mb-1">Launch an Agent</h1>
+            <p className="text-[#A1A1A1]/60 text-sm">Choose a template or start from scratch. You can customize everything.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {!authenticated && (
+            <button onClick={login} className="w-full py-3 mb-6 rounded-xl gradient-btn font-semibold">
+              Connect Wallet to Continue
+            </button>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {TEMPLATES.map((t) => (
               <button
                 key={t.id}
-                onClick={() => selectTemplate(t)}
-                className="text-left p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#F4C430]/50 hover:bg-[#F4C430]/5 transition group"
+                onClick={() => authenticated && selectTemplate(t)}
+                disabled={!authenticated}
+                className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#F4C430]/30 transition text-left group disabled:opacity-50"
               >
-                <div className="text-3xl mb-3">{t.icon}</div>
-                <h3 className="font-semibold text-white text-lg mb-1 group-hover:text-[#F4C430] transition">{t.name}</h3>
-                <p className="text-[#F4C430]/70 text-xs font-medium mb-2">{t.tagline}</p>
-                <p className="text-[#A1A1A1] text-sm leading-relaxed">{t.description}</p>
-                <div className="flex flex-wrap gap-1 mt-4">
-                  {t.tags.map((tag) => (
-                    <span key={tag} className="px-2 py-0.5 rounded text-xs bg-white/10 text-[#A1A1A1]">{tag}</span>
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-[#F5F5F5] group-hover:text-[#F4C430] transition">{t.name}</h3>
+                  <span className="text-[#A1A1A1]/30 text-xs">{t.defaultOffering.feeType === "fixed" ? `$${t.defaultOffering.fee}` : `${(parseFloat(t.defaultOffering.fee) * 100).toFixed(1)}%`}</span>
+                </div>
+                <p className="text-[#A1A1A1]/50 text-xs leading-relaxed mb-3">{t.tagline}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {t.tags.slice(0, 3).map((tag) => (
+                    <span key={tag} className="px-2 py-0.5 rounded-md bg-white/[0.04] text-[#A1A1A1]/40 text-[10px]">{tag}</span>
                   ))}
                 </div>
               </button>
@@ -431,11 +455,10 @@ export default function LaunchPage() {
     );
   }
 
-  // ─── Step: Configure ────────────────────────────────────────────────────────
+  // ─── Step: Agent Profile ────────────────────────────────────────────────────
 
-  if (step === "configure") {
+  if (step === "agent") {
     const tmpl = TEMPLATES.find((t) => t.id === config.templateId)!;
-
     return (
       <div className="bg-[#0A0A0A] text-[#F5F5F5] min-h-screen">
         <div className="max-w-xl mx-auto px-4 py-10">
@@ -448,12 +471,11 @@ export default function LaunchPage() {
               </svg>
             </button>
             <div>
-              <h1 className="text-lg font-bold">Configure {tmpl.name}</h1>
-              <p className="text-[#A1A1A1]/50 text-xs">Step 2 of 4</p>
+              <h1 className="text-lg font-bold">Agent Profile</h1>
+              <p className="text-[#A1A1A1]/50 text-xs">Step 1 of 4 -- Who is your agent?</p>
             </div>
           </div>
 
-          {/* Form */}
           <div className="space-y-6">
 
             {/* Avatar + Name row */}
@@ -462,8 +484,8 @@ export default function LaunchPage() {
                 onClick={() => document.getElementById("agent-avatar-input")?.click()}
                 className="w-20 h-20 rounded-2xl bg-white/[0.03] border-2 border-dashed border-white/[0.1] hover:border-[#F4C430]/40 transition cursor-pointer flex items-center justify-center overflow-hidden group shrink-0"
               >
-                {(config as any).avatarPreview ? (
-                  <img src={(config as any).avatarPreview} alt="avatar" className="w-full h-full object-cover" />
+                {config.avatarPreview ? (
+                  <img src={config.avatarPreview} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
                   <svg className="w-7 h-7 text-[#A1A1A1]/20 group-hover:text-[#F4C430]/60 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
@@ -486,10 +508,10 @@ export default function LaunchPage() {
                 <input
                   value={config.name}
                   onChange={(e) => setConfig((c) => ({ ...c, name: e.target.value }))}
-                  placeholder={`e.g. My ${tmpl.name}`}
+                  placeholder={`e.g. ${tmpl.name}`}
                   className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
                 />
-                <p className="text-[#A1A1A1]/30 text-[10px]">Click image to upload avatar (optional)</p>
+                <p className="text-[#A1A1A1]/30 text-[10px]">Click image to upload avatar</p>
               </div>
             </div>
 
@@ -499,7 +521,7 @@ export default function LaunchPage() {
               <textarea
                 value={config.description}
                 onChange={(e) => setConfig((c) => ({ ...c, description: e.target.value }))}
-                placeholder="What does this agent do?"
+                placeholder="What does this agent do? This is shown in the marketplace."
                 rows={2}
                 className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm resize-none transition"
               />
@@ -520,30 +542,6 @@ export default function LaunchPage() {
               />
             </div>
 
-            {/* Price + Token */}
-            <div>
-              <label className="text-[#A1A1A1]/60 text-xs mb-1.5 block">Price per Task</label>
-              <div className="flex gap-2">
-                <input
-                  value={config.price}
-                  onChange={(e) => setConfig((c) => ({ ...c, price: e.target.value }))}
-                  type="number" step="0.01" min="0.01"
-                  className="flex-1 px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
-                />
-                <select
-                  value={config.paymentToken}
-                  onChange={(e) => setConfig((c) => ({ ...c, paymentToken: e.target.value as `0x${string}` }))}
-                  className="px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
-                >
-                  {TOKEN_LIST.map((t) => (
-                    <option key={t.address} value={t.address} className="bg-[#111]">
-                      {t.flag} {t.symbol}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
             {/* Tags */}
             <div>
               <label className="text-[#A1A1A1]/60 text-xs mb-1.5 block">Tags</label>
@@ -553,18 +551,237 @@ export default function LaunchPage() {
                 placeholder="e.g. trading, defi, celo"
                 className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
               />
-              <p className="text-[#A1A1A1]/30 text-[10px] mt-1">Comma-separated. Helps buyers find your agent.</p>
+              <p className="text-[#A1A1A1]/30 text-[10px] mt-1">Comma-separated. Helps buyers discover your agent.</p>
             </div>
 
-            {/* Next button */}
             <button
-              onClick={() => setStep("llm")}
+              onClick={() => setStep("offerings")}
               disabled={!config.name.trim() || !config.systemPrompt.trim()}
               className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition mt-2"
             >
-              Next: LLM Backend
+              Next: Configure Offerings
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Step: Offerings ────────────────────────────────────────────────────────
+
+  if (step === "offerings") {
+    return (
+      <div className="bg-[#0A0A0A] text-[#F5F5F5] min-h-screen">
+        <div className="max-w-xl mx-auto px-4 py-10">
+
+          <div className="flex items-center gap-3 mb-8">
+            <button onClick={() => setStep("agent")} className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#A1A1A1] hover:text-white hover:bg-white/[0.08] transition">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-lg font-bold">Service Offerings</h1>
+              <p className="text-[#A1A1A1]/50 text-xs">Step 2 of 4 -- What does your agent sell?</p>
+            </div>
+          </div>
+
+          {/* ACP-style explainer */}
+          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] mb-6">
+            <p className="text-[#A1A1A1]/50 text-xs leading-relaxed">
+              Each offering is a service your agent provides. Set a <span className="text-[#F5F5F5]">fixed fee</span> (flat rate per job) or <span className="text-[#F5F5F5]">percentage</span> (commission on funds handled). Agents can have multiple offerings.
+            </p>
+          </div>
+
+          {/* Offering list */}
+          <div className="space-y-3 mb-4">
+            {config.offerings.map((offering, idx) => (
+              <div key={idx} className="rounded-xl border border-white/[0.08] bg-white/[0.02] overflow-hidden">
+                {/* Offering header (collapsed) */}
+                <button
+                  onClick={() => setEditingOffering(editingOffering === idx ? null : idx)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#F4C430]/10 flex items-center justify-center shrink-0">
+                      <svg className="w-4 h-4 text-[#F4C430]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
+                    </div>
+                    <div className="text-left min-w-0">
+                      <p className="text-sm font-medium truncate">{offering.name || "Untitled offering"}</p>
+                      <p className="text-[#A1A1A1]/40 text-[10px]">
+                        {offering.feeType === "fixed"
+                          ? `$${offering.fee} flat fee`
+                          : `${(parseFloat(offering.fee || "0") * 100).toFixed(1)}% commission`
+                        }
+                        {offering.requiresFunds && " + funds transfer"}
+                      </p>
+                    </div>
+                  </div>
+                  <svg className={`w-4 h-4 text-[#A1A1A1]/40 transition ${editingOffering === idx ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </button>
+
+                {/* Expanded edit form */}
+                {editingOffering === idx && (
+                  <div className="px-4 pb-4 pt-1 space-y-4 border-t border-white/[0.06]">
+
+                    {/* Offering name */}
+                    <div>
+                      <label className="text-[#A1A1A1]/60 text-xs mb-1 block">Offering Name *</label>
+                      <input
+                        value={offering.name}
+                        onChange={(e) => updateOffering(idx, { name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })}
+                        placeholder="e.g. token_swap"
+                        className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm font-mono transition"
+                      />
+                      <p className="text-[#A1A1A1]/25 text-[10px] mt-0.5">Lowercase, underscores only</p>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="text-[#A1A1A1]/60 text-xs mb-1 block">Description *</label>
+                      <textarea
+                        value={offering.description}
+                        onChange={(e) => updateOffering(idx, { description: e.target.value })}
+                        placeholder="What does this offering do for the buyer?"
+                        rows={2}
+                        className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm resize-none transition"
+                      />
+                    </div>
+
+                    {/* Fee type toggle */}
+                    <div>
+                      <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Fee Model</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => updateOffering(idx, { feeType: "fixed" })}
+                          className={`p-3 rounded-xl border text-left transition ${
+                            offering.feeType === "fixed"
+                              ? "border-[#F4C430]/40 bg-[#F4C430]/5"
+                              : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
+                          }`}
+                        >
+                          <p className={`text-sm font-medium ${offering.feeType === "fixed" ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>Fixed Fee</p>
+                          <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Flat rate per job</p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateOffering(idx, { feeType: "percentage", requiresFunds: true })}
+                          className={`p-3 rounded-xl border text-left transition ${
+                            offering.feeType === "percentage"
+                              ? "border-[#F4C430]/40 bg-[#F4C430]/5"
+                              : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
+                          }`}
+                        >
+                          <p className={`text-sm font-medium ${offering.feeType === "percentage" ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>Percentage</p>
+                          <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Commission on capital</p>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Fee amount */}
+                    <div>
+                      <label className="text-[#A1A1A1]/60 text-xs mb-1 block">
+                        {offering.feeType === "fixed" ? "Fee Amount (USD)" : "Commission Rate"}
+                      </label>
+                      <div className="flex gap-2 items-center">
+                        {offering.feeType === "percentage" && <span className="text-[#A1A1A1]/50 text-sm shrink-0">%</span>}
+                        <input
+                          value={offering.feeType === "percentage" ? String(parseFloat(offering.fee || "0") * 100) : offering.fee}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (offering.feeType === "percentage") {
+                              updateOffering(idx, { fee: String(parseFloat(val || "0") / 100) });
+                            } else {
+                              updateOffering(idx, { fee: val });
+                            }
+                          }}
+                          type="number" step={offering.feeType === "fixed" ? "0.01" : "0.1"} min="0"
+                          placeholder={offering.feeType === "fixed" ? "5.00" : "5"}
+                          className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
+                        />
+                        {offering.feeType === "fixed" && (
+                          <select
+                            value={offering.paymentToken}
+                            onChange={(e) => updateOffering(idx, { paymentToken: e.target.value as `0x${string}` })}
+                            className="px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
+                          >
+                            {TOKEN_LIST.map((t) => (
+                              <option key={t.address} value={t.address} className="bg-[#111]">
+                                {t.flag} {t.symbol}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                      <p className="text-[#A1A1A1]/25 text-[10px] mt-1">
+                        {offering.feeType === "fixed"
+                          ? "Amount buyers pay per job. Goes into escrow."
+                          : "Percentage taken from the capital the buyer sends (e.g. 5 = 5%)."
+                        }
+                      </p>
+                    </div>
+
+                    {/* Requires funds toggle */}
+                    {offering.feeType === "fixed" && (
+                      <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                        <div>
+                          <p className="text-sm text-[#F5F5F5]">Requires funds transfer</p>
+                          <p className="text-[#A1A1A1]/40 text-[10px]">Buyer sends additional capital for the agent to use (e.g. for swaps, trading)</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => updateOffering(idx, { requiresFunds: !offering.requiresFunds })}
+                          className={`w-10 h-6 rounded-full transition relative shrink-0 ${
+                            offering.requiresFunds ? "bg-[#F4C430]" : "bg-white/[0.1]"
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition ${
+                            offering.requiresFunds ? "right-1" : "left-1"
+                          }`} />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Remove offering */}
+                    {config.offerings.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeOffering(idx)}
+                        className="text-red-400/50 text-xs hover:text-red-400 transition"
+                      >
+                        Remove this offering
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Add offering */}
+          <button
+            type="button"
+            onClick={addOffering}
+            className="w-full py-3 rounded-xl border border-dashed border-white/[0.1] text-[#A1A1A1]/50 text-sm hover:border-[#F4C430]/30 hover:text-[#F4C430] transition flex items-center justify-center gap-2 mb-6"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Add another offering
+          </button>
+
+          <button
+            onClick={() => setStep("llm")}
+            disabled={config.offerings.length === 0 || !config.offerings[0].name || !config.offerings[0].description}
+            className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition"
+          >
+            Next: LLM Backend
+          </button>
         </div>
       </div>
     );
@@ -575,17 +792,22 @@ export default function LaunchPage() {
   if (step === "llm") {
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <button onClick={() => setStep("configure")} className="text-[#A1A1A1] text-sm mb-6 hover:text-white transition flex items-center gap-1">
-            ← Back
-          </button>
-
-          <h1 className="text-2xl font-bold mb-2">LLM Backend</h1>
-          <p className="text-[#A1A1A1] mb-8">Choose the AI model that powers your agent.</p>
+        <div className="max-w-xl mx-auto px-4 py-10">
+          <div className="flex items-center gap-3 mb-8">
+            <button onClick={() => setStep("offerings")} className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#A1A1A1] hover:text-white hover:bg-white/[0.08] transition">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-lg font-bold">LLM Backend</h1>
+              <p className="text-[#A1A1A1]/50 text-xs">Step 3 of 4 -- Choose the AI model powering your agent</p>
+            </div>
+          </div>
 
           <div className="space-y-5">
             <div>
-              <label className="text-[#A1A1A1] text-sm mb-2 block">Provider</label>
+              <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Provider</label>
               <div className="grid grid-cols-3 gap-3">
                 {LLM_PROVIDERS.map((p) => (
                   <button
@@ -593,8 +815,8 @@ export default function LaunchPage() {
                     onClick={() => setConfig((c) => ({ ...c, llmProvider: p.id, llmModel: p.models[0] }))}
                     className={`py-3 rounded-xl border font-medium transition text-sm ${
                       config.llmProvider === p.id
-                        ? "border-[#F4C430] bg-[#F4C430]/10 text-[#F4C430]"
-                        : "border-white/10 bg-white/5 text-[#A1A1A1] hover:border-white/30"
+                        ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
+                        : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
                     }`}
                   >
                     {p.name}
@@ -604,16 +826,16 @@ export default function LaunchPage() {
             </div>
 
             <div>
-              <label className="text-[#A1A1A1] text-sm mb-2 block">Model</label>
+              <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Model</label>
               <div className="grid grid-cols-2 gap-3">
                 {selectedProvider.models.map((m) => (
                   <button
                     key={m}
                     onClick={() => setConfig((c) => ({ ...c, llmModel: m }))}
-                    className={`py-2.5 px-4 rounded-lg border font-mono text-sm transition ${
+                    className={`py-2.5 px-4 rounded-xl border font-mono text-sm transition ${
                       config.llmModel === m
-                        ? "border-[#F4C430] bg-[#F4C430]/10 text-[#F4C430]"
-                        : "border-white/10 bg-white/5 text-[#A1A1A1] hover:border-white/30"
+                        ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
+                        : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
                     }`}
                   >
                     {m}
@@ -623,7 +845,7 @@ export default function LaunchPage() {
             </div>
 
             <div>
-              <label className="text-[#A1A1A1] text-sm mb-1 block">
+              <label className="text-[#A1A1A1]/60 text-xs mb-1 block">
                 {selectedProvider.name} API Key *
               </label>
               {(() => {
@@ -644,39 +866,23 @@ export default function LaunchPage() {
                         value={config.llmApiKey}
                         onChange={(e) => setConfig((c) => ({ ...c, llmApiKey: e.target.value }))}
                         placeholder={placeholder}
-                        className={`w-full px-4 py-3 pr-10 rounded-lg bg-white/5 border text-white placeholder-white/20 focus:outline-none font-mono text-sm transition ${
-                          key.length === 0 ? "border-[#F4C430]/30 focus:border-[#F4C430]/70" :
-                          valid ? "border-green-400/50 focus:border-green-400" :
-                          "border-red-400/50 focus:border-red-400"
+                        className={`w-full px-3 py-2.5 pr-10 rounded-xl bg-white/[0.04] border text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none font-mono text-sm transition ${
+                          key.length === 0 ? "border-white/[0.08] focus:border-[#F4C430]/40" :
+                          valid ? "border-green-400/30 focus:border-green-400/60" :
+                          "border-red-400/30 focus:border-red-400/60"
                         }`}
                       />
                       {key.length > 0 && (
-                        <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-lg ${valid ? "text-green-400" : "text-red-400"}`}>
-                          {valid ? "✓" : "✗"}
+                        <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm ${valid ? "text-green-400" : "text-red-400"}`}>
+                          {valid ? "Valid" : "Invalid"}
                         </span>
                       )}
                     </div>
-                    {key.length > 0 && !valid && (
-                      <p className="text-red-400 text-xs mt-1.5">
-                        {config.llmProvider === "openai" ? 'Must start with "sk-" — get yours at platform.openai.com' :
-                         config.llmProvider === "anthropic" ? 'Must start with "sk-ant-" — get yours at console.anthropic.com' :
-                         'Must start with "AIza" — get yours at aistudio.google.com'}
-                      </p>
-                    )}
-                    {valid && (
-                      <p className="text-green-400/70 text-xs mt-1.5">Key format valid. Stored encrypted in your hosted runtime.</p>
-                    )}
-                    {key.length === 0 && (
-                      <p className="text-[#A1A1A1]/40 text-xs mt-1">
-                        Stored encrypted. Used only by your agent runtime.
-                      </p>
-                    )}
-                    <div className="mt-2 p-3 rounded-lg bg-white/5 border border-white/10 text-xs text-[#A1A1A1]">
-                      Get your key: {" "}
-                      {config.llmProvider === "openai" && <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" className="text-[#F4C430] underline">platform.openai.com/api-keys</a>}
-                      {config.llmProvider === "anthropic" && <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" className="text-[#F4C430] underline">console.anthropic.com</a>}
-                      {config.llmProvider === "google" && <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" className="text-[#F4C430] underline">aistudio.google.com</a>}
-                    </div>
+                    <p className="text-[#A1A1A1]/30 text-[10px] mt-1">
+                      {config.llmProvider === "openai" && "Get yours at platform.openai.com/api-keys"}
+                      {config.llmProvider === "anthropic" && "Get yours at console.anthropic.com/settings/keys"}
+                      {config.llmProvider === "google" && "Get yours at aistudio.google.com/app/apikey"}
+                    </p>
                   </>
                 );
               })()}
@@ -691,11 +897,11 @@ export default function LaunchPage() {
                 key.length > 10;
               return (
                 <button
-                  onClick={() => setStep("limits")}
+                  onClick={() => setStep("review")}
                   disabled={!valid}
-                  className="w-full py-3 rounded-xl gradient-btn font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_#F4C430] transition"
+                  className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition"
                 >
-                  Next: Spending Limits →
+                  Next: Review & Deploy
                 </button>
               );
             })()}
@@ -705,94 +911,123 @@ export default function LaunchPage() {
     );
   }
 
-  // ─── Step: Limits ───────────────────────────────────────────────────────────
+  // ─── Step: Review & Deploy ──────────────────────────────────────────────────
 
-  if (step === "limits") {
+  if (step === "review") {
     const tmpl = TEMPLATES.find((t) => t.id === config.templateId)!;
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <button onClick={() => setStep("llm")} className="text-[#A1A1A1] text-sm mb-6 hover:text-white transition flex items-center gap-1">
-            ← Back
-          </button>
-
-          <h1 className="text-2xl font-bold mb-2">Spending Limits & Guardrails</h1>
-          <p className="text-[#A1A1A1] mb-8">
-            Define hard limits on what your agent can spend. These are enforced on-chain.
-          </p>
+        <div className="max-w-xl mx-auto px-4 py-10">
+          <div className="flex items-center gap-3 mb-8">
+            <button onClick={() => setStep("llm")} className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#A1A1A1] hover:text-white hover:bg-white/[0.08] transition">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-lg font-bold">Review & Deploy</h1>
+              <p className="text-[#A1A1A1]/50 text-xs">Step 4 of 4 -- Confirm and launch</p>
+            </div>
+          </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-6">
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-6">
               {error}
             </div>
           )}
 
-          <div className="space-y-5">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="p-4 rounded-xl bg-white/5 border border-[#F4C430]/20">
-                <label className="text-white font-medium text-sm block mb-1">Max per operation (USD)</label>
-                <p className="text-[#A1A1A1] text-xs mb-3">Hard cap on a single transaction or action.</p>
-                <input
-                  type="number" step="1" min="1"
-                  value={config.maxPerCallUsd}
-                  onChange={(e) => setConfig((c) => ({ ...c, maxPerCallUsd: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white focus:outline-none focus:border-[#F4C430]/70"
-                />
-              </div>
-
-              <div className="p-4 rounded-xl bg-white/5 border border-[#F4C430]/20">
-                <label className="text-white font-medium text-sm block mb-1">Daily spending limit (USD)</label>
-                <p className="text-[#A1A1A1] text-xs mb-3">Agent pauses and asks for approval when daily spend hits this.</p>
-                <input
-                  type="number" step="5" min="5"
-                  value={config.dailyLimitUsd}
-                  onChange={(e) => setConfig((c) => ({ ...c, dailyLimitUsd: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white focus:outline-none focus:border-[#F4C430]/70"
-                />
-              </div>
-
-              <div className="p-4 rounded-xl bg-white/5 border border-[#F4C430]/20">
-                <label className="text-white font-medium text-sm block mb-1">Require confirmation above (USD)</label>
-                <p className="text-[#A1A1A1] text-xs mb-3">Agent must get explicit user approval for actions above this amount.</p>
-                <input
-                  type="number" step="5" min="1"
-                  value={config.requireConfirmAboveUsd}
-                  onChange={(e) => setConfig((c) => ({ ...c, requireConfirmAboveUsd: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white focus:outline-none focus:border-[#F4C430]/70"
-                />
-              </div>
-            </div>
-
-            {/* Summary card */}
-            <div className="p-5 rounded-xl bg-[#F4C430]/5 border border-[#F4C430]/30">
-              <h3 className="font-semibold mb-3 text-[#F4C430]">Launch Summary</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-[#A1A1A1]">Template</span><span>{tmpl.icon} {tmpl.name}</span></div>
-                <div className="flex justify-between"><span className="text-[#A1A1A1]">Agent Name</span><span>{config.name}</span></div>
-                <div className="flex justify-between"><span className="text-[#A1A1A1]">LLM</span><span>{config.llmProvider} / {config.llmModel}</span></div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[#A1A1A1] group relative cursor-help">
-                    Price/call
-                    <span className="absolute bottom-full left-0 mb-1.5 w-56 bg-[#1a1a1a] border border-white/10 text-white text-xs rounded-lg p-2.5 opacity-0 group-hover:opacity-100 transition pointer-events-none z-10 shadow-xl">
-                      Amount buyers pay in USDC each time they hire your agent for a task. Goes into escrow — released to you after delivery.
-                    </span>
-                  </span>
-                  <span>{config.price} {TOKEN_LIST.find(t => t.address === config.paymentToken)?.symbol ?? "USDm"}</span>
+          <div className="space-y-4">
+            {/* Agent summary */}
+            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+              <div className="flex items-center gap-3 mb-3">
+                {config.avatarPreview ? (
+                  <img src={config.avatarPreview} alt="" className="w-12 h-12 rounded-xl object-cover" />
+                ) : (
+                  <div className="w-12 h-12 rounded-xl bg-[#F4C430]/10 flex items-center justify-center text-[#F4C430] text-lg">A</div>
+                )}
+                <div>
+                  <p className="font-semibold">{config.name}</p>
+                  <p className="text-[#A1A1A1]/50 text-xs">{config.description}</p>
                 </div>
-                <div className="flex justify-between"><span className="text-[#A1A1A1]">ERC-8004 Identity</span><span className="text-green-400">Auto-minted</span></div>
-                <div className="flex justify-between"><span className="text-[#A1A1A1]">Hosted Runtime</span><span className="text-green-400">OpenClaw</span></div>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {config.tags.split(",").filter(Boolean).map((t) => (
+                  <span key={t.trim()} className="px-2 py-0.5 rounded-md bg-white/[0.04] text-[#A1A1A1]/40 text-[10px]">{t.trim()}</span>
+                ))}
               </div>
             </div>
 
-            <p className="text-[#A1A1A1]/40 text-xs text-center">
-              3 transactions required: mint identity NFT, register service, set agent URI.
+            {/* Offerings summary */}
+            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+              <p className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider mb-3">Offerings ({config.offerings.length})</p>
+              <div className="space-y-2">
+                {config.offerings.map((o, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="min-w-0">
+                      <p className="text-sm font-mono">{o.name}</p>
+                      <p className="text-[#A1A1A1]/40 text-[10px] truncate">{o.description}</p>
+                    </div>
+                    <span className="text-[#F4C430] text-xs font-medium shrink-0 ml-3">
+                      {o.feeType === "fixed"
+                        ? `$${o.fee}`
+                        : `${(parseFloat(o.fee) * 100).toFixed(1)}%`
+                      }
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* LLM summary */}
+            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+              <p className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider mb-3">Configuration</p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-[#A1A1A1]/50">LLM</span><span className="font-mono text-xs">{config.llmProvider} / {config.llmModel}</span></div>
+                <div className="flex justify-between"><span className="text-[#A1A1A1]/50">ERC-8004 Identity</span><span className="text-green-400 text-xs">Auto-minted</span></div>
+                <div className="flex justify-between"><span className="text-[#A1A1A1]/50">Hosted Runtime</span><span className="text-green-400 text-xs">OpenClaw</span></div>
+              </div>
+            </div>
+
+            {/* Spending limits */}
+            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+              <p className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider mb-3">Spending Limits</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[#A1A1A1]/40 text-[10px] block mb-1">Max per op</label>
+                  <input
+                    type="number" min="1" value={config.maxPerCallUsd}
+                    onChange={(e) => setConfig((c) => ({ ...c, maxPerCallUsd: e.target.value }))}
+                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/40 transition"
+                  />
+                </div>
+                <div>
+                  <label className="text-[#A1A1A1]/40 text-[10px] block mb-1">Daily limit</label>
+                  <input
+                    type="number" min="5" value={config.dailyLimitUsd}
+                    onChange={(e) => setConfig((c) => ({ ...c, dailyLimitUsd: e.target.value }))}
+                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/40 transition"
+                  />
+                </div>
+                <div>
+                  <label className="text-[#A1A1A1]/40 text-[10px] block mb-1">Confirm above</label>
+                  <input
+                    type="number" min="1" value={config.requireConfirmAboveUsd}
+                    onChange={(e) => setConfig((c) => ({ ...c, requireConfirmAboveUsd: e.target.value }))}
+                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/40 transition"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[#A1A1A1]/30 text-[10px] text-center">
+              3 transactions required: mint identity NFT, register service, set metadata URI.
             </p>
 
             <button
               onClick={handleDeploy}
-              className="w-full py-4 rounded-xl gradient-btn font-bold text-lg hover:shadow-[0_0_25px_#F4C430] transition"
+              className="w-full py-4 rounded-xl gradient-btn font-bold text-base hover:shadow-[0_0_25px_rgba(244,196,48,0.3)] transition"
             >
-              Deploy Agent ⚡
+              Deploy Agent
             </button>
           </div>
         </div>
@@ -809,10 +1044,9 @@ export default function LaunchPage() {
           <div className="relative w-16 h-16 mx-auto mb-6">
             <div className="absolute inset-0 rounded-full border-2 border-[#F4C430]/20" />
             <div className="absolute inset-0 rounded-full border-2 border-[#F4C430] border-t-transparent animate-spin" />
-            <span className="absolute inset-0 flex items-center justify-center text-2xl">⚡</span>
           </div>
-          <h2 className="text-xl font-semibold text-white mb-2">Launching Agent</h2>
-          <p className="text-[#A1A1A1] text-sm max-w-xs">{status}</p>
+          <h2 className="text-xl font-semibold text-white mb-2">Deploying Agent</h2>
+          <p className="text-[#A1A1A1]/60 text-sm max-w-xs">{status}</p>
         </div>
       </div>
     );
@@ -821,60 +1055,63 @@ export default function LaunchPage() {
   // ─── Step: Done ─────────────────────────────────────────────────────────────
 
   if (step === "done") {
-    const tmpl = TEMPLATES.find((t) => t.id === config.templateId)!;
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <div className="text-center mb-10">
-            <div className="text-5xl mb-4 animate-bounce">{tmpl.icon}</div>
-            <h1 className="text-3xl font-bold mb-2">Agent Live!</h1>
-            <p className="text-[#A1A1A1]">
-              <span className="text-[#F4C430] font-medium">{config.name}</span> is registered on Celo and hosted on OpenClaw.
+        <div className="max-w-xl mx-auto px-4 py-10">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold mb-1">Agent Live</h1>
+            <p className="text-[#A1A1A1]/60 text-sm">
+              <span className="text-[#F4C430]">{config.name}</span> is registered on Celo and ready to serve.
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-white/5 border border-[#F4C430]/30">
-              <label className="text-[#A1A1A1] text-xs uppercase tracking-wider">Agent Wallet</label>
+            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+              <label className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider">Agent Wallet</label>
               <code className="text-[#F4C430] text-sm font-mono block mt-1 break-all">{deployedId}</code>
             </div>
 
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="text-lg font-bold text-[#F4C430]">{config.llmModel}</div>
-                <div className="text-[#A1A1A1] text-xs mt-0.5">LLM</div>
+              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                <div className="text-sm font-bold text-[#F4C430]">{config.offerings.length}</div>
+                <div className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Offerings</div>
               </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="text-lg font-bold text-[#F4C430]">${config.dailyLimitUsd}</div>
-                <div className="text-[#A1A1A1] text-xs mt-0.5">Daily limit</div>
+              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                <div className="text-sm font-bold text-[#F4C430] font-mono">{config.llmModel}</div>
+                <div className="text-[#A1A1A1]/40 text-[10px] mt-0.5">LLM</div>
               </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="text-lg font-bold text-[#F4C430]">{config.price} USDC</div>
-                <div className="text-[#A1A1A1] text-xs mt-0.5">Per call</div>
+              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                <div className="text-sm font-bold text-[#F4C430]">${config.dailyLimitUsd}</div>
+                <div className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Daily limit</div>
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
-              <h3 className="text-green-400 font-medium mb-2 text-sm">What happens next</h3>
-              <ul className="text-[#A1A1A1] text-sm space-y-1">
-                <li>• Your agent is listed on the Nastar marketplace</li>
-                <li>• Other agents can hire it via on-chain escrow</li>
-                <li>• You earn USDC every time it completes a job</li>
-                <li>• Monitor activity from your dashboard</li>
+              <h3 className="text-green-400 font-medium mb-2 text-xs">What happens next</h3>
+              <ul className="text-[#A1A1A1]/60 text-xs space-y-1">
+                <li>Your agent is listed on the Nastar marketplace</li>
+                <li>Other agents and users can hire it via on-chain escrow</li>
+                <li>You earn fees every time it completes a job</li>
+                <li>Monitor activity from your profile</li>
               </ul>
             </div>
           </div>
 
-          <div className="flex gap-3 mt-8">
+          <div className="flex gap-3 mt-6">
             <button
-              onClick={() => router.push(`/agents`)}
-              className="flex-1 py-3 rounded-xl bg-white/5 text-[#F5F5F5] font-medium hover:bg-white/10 transition"
+              onClick={() => router.push("/offerings")}
+              className="flex-1 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] font-medium text-sm hover:bg-white/[0.08] transition"
             >
-              View Marketplace
+              Browse Marketplace
             </button>
             <button
               onClick={() => router.push(`/launch/${deployedId}`)}
-              className="flex-1 py-3 rounded-xl gradient-btn font-semibold hover:shadow-[0_0_15px_#F4C430] transition"
+              className="flex-1 py-3 rounded-xl gradient-btn font-semibold text-sm hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition"
             >
               Open Dashboard
             </button>
