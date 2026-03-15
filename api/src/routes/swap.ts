@@ -7,7 +7,9 @@
  */
 
 import { Router, Request, Response } from "express";
-import { Mento, ChainId, deadlineFromMinutes } from "@mento-protocol/mento-sdk";
+// Use require to force CJS path (ESM build of mento-sdk has broken internal imports)
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { Mento, ChainId, deadlineFromMinutes } = require("@mento-protocol/mento-sdk") as typeof import("@mento-protocol/mento-sdk");
 import { parseUnits, formatUnits, isAddress } from "viem";
 import { CELO_TOKENS, getTokenMeta } from "../config.js";
 
@@ -15,9 +17,9 @@ const router = Router();
 
 // ─── Mento SDK singleton (lazy init) ──────────────────────────────────────────
 
-let _mento: Mento | null = null;
+let _mento: any | null = null;
 
-async function getMento(): Promise<Mento> {
+async function getMento(): Promise<any> {
   if (!_mento) {
     _mento = await Mento.create(ChainId.CELO_SEPOLIA);
   }

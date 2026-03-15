@@ -37,11 +37,12 @@ export const CONTRACTS = {
 // ── Mento Stablecoins — Celo Sepolia Testnet ─────────────────────────────────
 // Source: https://docs.celo.org/tooling/contracts/token-contracts
 export const CELO_TOKENS = {
-  USDm: "0xEF4d55D6dE8e8d73232827Cd1e9b2F2dBb45bC80" as `0x${string}`,
-  EURm: "0x6B172e333e2978484261D7eCC3DE491E79764BbC" as `0x${string}`,
+  USDm: "0xdE9e4C3ce781b4bA68120d6261cbad65ce0aB00b" as `0x${string}`,  // ✓ Celo Sepolia verified
   BRLm: "0x2294298942fdc79417DE9E0D740A4957E0e7783a" as `0x${string}`,
   COPm: "0x5F8d55c3627d2dc0a2B4afa798f877242F382F67" as `0x${string}`,
   XOFm: "0x5505b70207aE3B826c1A7607F19F3Bf73444A082" as `0x${string}`,
+  KESm: "0xC7e4635651E3e3Af82b61d3E23c159438daE3BbF" as `0x${string}`,
+  USDC: "0x01C5C0122039549AD1493B8220cABEdD739BC44E" as `0x${string}`,
 } as const;
 
 export interface TokenMeta {
@@ -54,10 +55,11 @@ export interface TokenMeta {
 
 export const TOKEN_LIST: TokenMeta[] = [
   { symbol: "USDm", name: "Mento Dollar",           flag: "🇺🇸", address: CELO_TOKENS.USDm, decimals: 18 },
-  { symbol: "EURm", name: "Mento Euro",              flag: "🇪🇺", address: CELO_TOKENS.EURm, decimals: 18 },
   { symbol: "BRLm", name: "Mento Brazilian Real",   flag: "🇧🇷", address: CELO_TOKENS.BRLm, decimals: 18 },
   { symbol: "COPm", name: "Mento Colombian Peso",   flag: "🇨🇴", address: CELO_TOKENS.COPm, decimals: 18 },
   { symbol: "XOFm", name: "Mento West African CFA", flag: "🌍", address: CELO_TOKENS.XOFm, decimals: 18 },
+  { symbol: "KESm", name: "Mento Kenyan Shilling",  flag: "🇰🇪", address: CELO_TOKENS.KESm, decimals: 18 },
+  { symbol: "USDC", name: "USD Coin",               flag: "💵", address: CELO_TOKENS.USDC, decimals: 6  },
 ];
 
 export function getTokenByAddress(address: string): TokenMeta | undefined {

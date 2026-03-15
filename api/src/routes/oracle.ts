@@ -17,7 +17,9 @@
  */
 
 import { Router, Request, Response } from "express";
-import { Mento, ChainId } from "@mento-protocol/mento-sdk";
+// Use require to force CJS path (ESM build of mento-sdk has broken internal imports)
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { Mento, ChainId } = require("@mento-protocol/mento-sdk") as typeof import("@mento-protocol/mento-sdk");
 import { parseUnits, formatUnits } from "viem";
 import { TOKENS, getTokenMeta } from "../config.js";
 
@@ -76,8 +78,8 @@ const CACHE_TTL = 30_000; // 30 seconds
 
 // ─── Mento SDK ────────────────────────────────────────────────────────────────
 
-let _mento: Mento | null = null;
-async function getMento(): Promise<Mento> {
+let _mento: any | null = null;
+async function getMento(): Promise<any> {
   if (!_mento) _mento = await Mento.create(ChainId.CELO_SEPOLIA);
   return _mento;
 }
@@ -88,7 +90,7 @@ async function fetchPythPrices(): Promise<Record<string, number>> {
   const ids = Object.values(PYTH_IDS).map(f => f.id);
   const url = `${PYTH_URL}?${ids.map(id => `ids[]=${id}`).join("&")}`;
 
-  const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+  const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
   if (!res.ok) throw new Error(`Pyth HTTP ${res.status}`);
 
   const data = await res.json() as any;
@@ -256,7 +258,8 @@ router.get("/rates", async (_req: Request, res: Response) => {
 router.get("/rates/:from/:to", async (req: Request, res: Response) => {
   try {
     const { from, to } = req.params;
-    const key = `${from.toUpperCase()}/${to.toUpperCase()}`;
+    // Case-sensitive lookup — token symbols are mixed case (e.g. "USDm", not "USDM")
+    const key = `${from}/${to}`;
     const data = await getCache();
     const rate = data.rates[key];
     if (!rate) {
