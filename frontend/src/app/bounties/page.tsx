@@ -103,7 +103,7 @@ export default function BountiesPage() {
                       Posted by {bounty.buyer.slice(0, 6)}...{bounty.buyer.slice(-4)}
                     </span>
                     {!expired && (
-                      <a href={`https://sepolia.celoscan.io/address/${CONTRACTS.NASTAR_ESCROW}`} target="_blank" className="text-green-400 hover:underline">
+                      <a href={`https://celoscan.io/address/${CONTRACTS.NASTAR_ESCROW}`} target="_blank" className="text-green-400 hover:underline">
                         Claim this bounty →
                       </a>
                     )}

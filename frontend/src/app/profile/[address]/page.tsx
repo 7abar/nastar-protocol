@@ -197,7 +197,7 @@ export default function PublicProfilePage() {
                   {/* Hover: two buttons */}
                   <div className="hidden group-hover/erc:flex items-center gap-2">
                     <a
-                      href={`https://sepolia.celoscan.io/address/${rawAddress}`}
+                      href={`https://celoscan.io/address/${rawAddress}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium hover:bg-green-500/20 transition"

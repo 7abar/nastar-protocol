@@ -315,7 +315,7 @@ function ChatPage() {
                 )}
 
                 {msg.txHash && (
-                  <a href={`https://sepolia.celoscan.io/tx/${msg.txHash}`} target="_blank"
+                  <a href={`https://celoscan.io/tx/${msg.txHash}`} target="_blank"
                     className="inline-block mt-2 text-xs text-[#F4C430] hover:underline">
                     View on CeloScan
                   </a>

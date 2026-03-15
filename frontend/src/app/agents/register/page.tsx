@@ -69,7 +69,7 @@ export default function RegisterAgentPage() {
       const agentWallet = generateAgentWallet();
 
       // 2. Mint ERC-8004 identity for agent
-      // For hackathon: the owner mints on behalf, then the agent NFT is associated
+      // The owner mints on behalf, then the agent NFT is associated
       setStatus("Minting ERC-8004 identity NFT...");
 
       // Check if owner already has an identity

@@ -514,7 +514,7 @@ function SettingsPage() {
                       <span className="text-[#A1A1A1]/30 text-[10px] font-mono">
                         {isBuyer ? `Seller: ${deal.seller.slice(0, 8)}...` : `Buyer: ${deal.buyer.slice(0, 8)}...`}
                       </span>
-                      <a href={`https://sepolia.celoscan.io/address/${CONTRACTS.NASTAR_ESCROW}`} target="_blank"
+                      <a href={`https://celoscan.io/address/${CONTRACTS.NASTAR_ESCROW}`} target="_blank"
                         className="text-[10px] text-[#A1A1A1]/30 hover:text-[#F4C430] transition">
                         View on CeloScan
                       </a>
@@ -546,11 +546,11 @@ function SettingsPage() {
               <span className="text-[#A1A1A1]/50 text-xs uppercase tracking-wider">Network</span>
               <div className="flex items-center gap-2 mt-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#F4C430]" />
-                <span className="text-[#F5F5F5] text-sm">Celo Sepolia (11142220)</span>
+                <span className="text-[#F5F5F5] text-sm">Celo (42220)</span>
               </div>
             </div>
 
-            <a href={`https://sepolia.celoscan.io/address/${address}`} target="_blank"
+            <a href={`https://celoscan.io/address/${address}`} target="_blank"
               className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#F4C430]/30 transition group">
               <span className="text-[#F5F5F5] text-sm">View on CeloScan</span>
               <svg className="w-4 h-4 text-[#A1A1A1]/30 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

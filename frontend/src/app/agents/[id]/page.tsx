@@ -184,7 +184,7 @@ export default function AgentDetailPage() {
                   {onChainAgent.address.slice(0, 6)}...{onChainAgent.address.slice(-4)} {copied === "addr" ? "✓" : ""}
                 </button>
                 <a
-                  href={`https://sepolia.celoscan.io/address/${IDENTITY_REGISTRY}#readContract`}
+                  href={`https://celoscan.io/address/${IDENTITY_REGISTRY}#readContract`}
                   target="_blank"
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-[#F4C430]/10 text-[#F4C430] hover:bg-[#F4C430]/20 transition"
                 >
@@ -229,7 +229,7 @@ export default function AgentDetailPage() {
               <span key={tag} className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-[#A1A1A1] text-xs">{tag}</span>
             ))}
             <a
-              href={`https://sepolia.celoscan.io/address/${IDENTITY_REGISTRY}`}
+              href={`https://celoscan.io/address/${IDENTITY_REGISTRY}`}
               target="_blank"
               className="px-2.5 py-1 rounded-md bg-[#F4C430]/10 border border-[#F4C430]/30 text-[#F4C430] text-xs hover:bg-[#F4C430]/20 transition"
             >
@@ -315,14 +315,14 @@ export default function AgentDetailPage() {
                     <p className="text-[#A1A1A1]/70 text-xs mt-2 leading-relaxed">{r.text}</p>
                     <div className="flex gap-2 mt-2">
                       <a
-                        href={`https://sepolia.celoscan.io/address/${ESCROW}`}
+                        href={`https://celoscan.io/address/${ESCROW}`}
                         target="_blank"
                         className="text-[10px] px-2 py-0.5 rounded bg-white/[0.04] text-[#A1A1A1]/40 hover:text-[#F4C430] transition"
                       >
                         Job #{r.dealId}
                       </a>
                       <a
-                        href={`https://sepolia.celoscan.io/address/${IDENTITY_REGISTRY}`}
+                        href={`https://celoscan.io/address/${IDENTITY_REGISTRY}`}
                         target="_blank"
                         className="text-[10px] px-2 py-0.5 rounded bg-[#F4C430]/10 text-[#F4C430]/60 hover:text-[#F4C430] transition"
                       >
@@ -362,7 +362,7 @@ export default function AgentDetailPage() {
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="text-[#F4C430] text-sm font-medium">{tx.amount} USDC</span>
                     <a
-                      href={`https://sepolia.celoscan.io/address/${ESCROW}`}
+                      href={`https://celoscan.io/address/${ESCROW}`}
                       target="_blank"
                       className="text-[10px] text-[#A1A1A1]/30 hover:text-[#F4C430] transition"
                     >
@@ -383,10 +383,10 @@ export default function AgentDetailPage() {
             <h2 className="text-xs text-[#A1A1A1]/40 uppercase tracking-wider mb-3">On-Chain Identity</h2>
             <div className="rounded-xl glass-card divide-y divide-white/[0.06]">
               {[
-                { label: "ERC-8004 Token", value: `#${onChainAgent.agentId}`, link: `https://sepolia.celoscan.io/address/${IDENTITY_REGISTRY}` },
+                { label: "ERC-8004 Token", value: `#${onChainAgent.agentId}`, link: `https://celoscan.io/address/${IDENTITY_REGISTRY}` },
                 { label: "Wallet", value: onChainAgent.address, mono: true },
-                { label: "Registry", value: IDENTITY_REGISTRY.slice(0, 10) + "...", link: `https://sepolia.celoscan.io/address/${IDENTITY_REGISTRY}`, mono: true },
-                { label: "Escrow", value: ESCROW.slice(0, 10) + "...", link: `https://sepolia.celoscan.io/address/${ESCROW}`, mono: true },
+                { label: "Registry", value: IDENTITY_REGISTRY.slice(0, 10) + "...", link: `https://celoscan.io/address/${IDENTITY_REGISTRY}`, mono: true },
+                { label: "Escrow", value: ESCROW.slice(0, 10) + "...", link: `https://celoscan.io/address/${ESCROW}`, mono: true },
                 { label: "Network", value: "Celo Sepolia" },
                 { label: "Protocol Fee", value: "2.5% (immutable)" },
               ].map((row) => (
@@ -412,7 +412,7 @@ export default function AgentDetailPage() {
                 { label: "Profile", href: `/agents/${onChainAgent.agentId}`, value: `/agents/${onChainAgent.agentId}` },
                 { label: "Registration JSON", href: `/api/agent-registration/${onChainAgent.agentId}`, value: `/api/agent-registration/${onChainAgent.agentId}` },
                 { label: "Avatar", href: `/api/agent-avatar/${onChainAgent.agentId}`, value: `/api/agent-avatar/${onChainAgent.agentId}` },
-                { label: "CeloScan", href: `https://sepolia.celoscan.io/address/${onChainAgent.address}`, value: "View on explorer" },
+                { label: "CeloScan", href: `https://celoscan.io/address/${onChainAgent.address}`, value: "View on explorer" },
               ].map((ep) => (
                 <div key={ep.label} className="flex justify-between items-center px-4 py-3">
                   <span className="text-[#A1A1A1]/50 text-xs">{ep.label}</span>

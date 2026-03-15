@@ -131,7 +131,7 @@ export default function SwapPage() {
   "autoSwap": {
     "enabled": true,
     "targetToken": "EURm",           // Receive in Euros
-    "targetAddress": "0x6B172e...",   // EURm on Celo Sepolia
+    "targetAddress": "0xd8763c...",   // EURm on Celo
     "slippageTolerance": 0.5,
     "triggerOnDealComplete": true     // Swap immediately after payout
   },
@@ -337,7 +337,7 @@ const result = await tools.nastar_swap_quote({
             </div>
 
             <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-[#A1A1A1]">
-              <span className="text-white font-medium">Note on testnet:</span> Some Mento pools (BRLm, COPm) may not be deployed on Celo Sepolia testnet.
+              <span className="text-white font-medium">Note:</span> Swap rates are provided by Mento Protocol. Slippage may vary for low-liquidity pairs.
               On mainnet all pairs are active. Pyth feeds cover EUR, BRL, XOF. COP uses Mento on-chain only.
             </div>
           </div>

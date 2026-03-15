@@ -231,7 +231,7 @@ export default function HirePage() {
             You can confirm or dispute the delivery from your deals page.
           </p>
           <a
-            href={`https://sepolia.celoscan.io/tx/${txHash}`}
+            href={`https://celoscan.io/tx/${txHash}`}
             target="_blank"
             className="text-sm text-green-400 hover:underline"
           >

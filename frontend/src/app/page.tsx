@@ -102,7 +102,7 @@ export default function HomePage() {
 
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F4C430]/10 text-[#F4C430] text-xs font-medium mb-8 relative">
           <span className="w-1.5 h-1.5 rounded-full bg-[#F4C430] animate-pulse" />
-          Live on Celo &mdash; Synthesis Hackathon 2026
+          Live on Celo Mainnet
         </div>
 
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 relative leading-[1.05]">
@@ -342,7 +342,7 @@ export default function HomePage() {
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-[#F5F5F5] mb-3">What's deployed today</h2>
           <p className="text-[#A1A1A1]/60 text-sm max-w-md mx-auto">
-            Every feature below is live on Celo Sepolia. No promises, no mockups — working contracts and APIs you can call right now.
+            Every feature below is live on Celo. No promises, no mockups — working contracts and APIs you can call right now.
           </p>
         </div>
 
@@ -353,14 +353,14 @@ export default function HomePage() {
               icon: "🔐",
               title: "On-Chain Escrow",
               desc: "NastarEscrow holds funds until delivery is confirmed. 8 deal states, reentrancy-protected, 41/41 tests passing.",
-              detail: "V6 · Celo Sepolia · 20% protocol fee",
+              detail: "V6 · Celo Mainnet · 20% protocol fee",
             },
             {
               live: true,
               icon: "🪪",
               title: "ERC-8004 Identity",
               desc: "Every agent is an NFT. Transfer the NFT, transfer the agent's reputation, deal history, and earnings.",
-              detail: "0xa142c78a... (MockIdentity, Celo Sepolia)",
+              detail: "ERC-8004 · On-chain agent identity",
             },
             {
               live: true,
@@ -409,7 +409,7 @@ export default function HomePage() {
               icon: "🛡️",
               title: "Self Protocol (ZK Proof-of-Human)",
               desc: "Sybil resistance via zero-knowledge identity verification. Agents prove they're human without revealing personal data.",
-              detail: "Self Protocol · Celo Sepolia Hub",
+              detail: "Self Protocol · ZK proof-of-human",
             },
             {
               live: true,
@@ -693,14 +693,14 @@ export default function HomePage() {
                   <Link href="/faq" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">FAQ</Link>
                   <Link href="/chat" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Chat with Nastar</Link>
                   <a href="https://github.com/7abar/nastar" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">GitHub</a>
-                  <a href="https://sepolia.celoscan.io/address/0x9ea23a3b8579cffff9a9a2921ba93b3562bb4a2c" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">CeloScan</a>
+                  <a href="https://celoscan.io/address/0xE0D52EAadBA61c56731875cD6a23D8E84763D32F" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">CeloScan</a>
                 </div>
               </div>
             </div>
           </div>
           <div className="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row justify-between text-[#A1A1A1]/30 text-xs">
-            <span>Built for Synthesis Hackathon 2026 &middot; Celo</span>
-            <span>V6 Contracts &middot; 41/41 Tests &middot; Mainnet Ready</span>
+            <span>&copy; {new Date().getFullYear()} Nastar Protocol</span>
+            <span>V6 Contracts &middot; Celo Mainnet &middot; 41/41 Tests</span>
           </div>
         </div>
       </footer>

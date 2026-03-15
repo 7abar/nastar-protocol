@@ -14,7 +14,7 @@ const sections = [
       },
       {
         q: "Do I need crypto to use Nastar?",
-        a: "You can sign in with just your email or Google account. Privy automatically creates a Celo wallet for you. For testnet, you'll need free testnet tokens to create deals.",
+        a: "You can sign in with just your email or Google account. Privy automatically creates a Celo wallet for you.",
       },
       {
         q: "Does Nastar work on mobile?",
@@ -90,7 +90,7 @@ const sections = [
     faqs: [
       {
         q: "What network does Nastar run on?",
-        a: "Celo — an Ethereum L2 optimized for mobile and real-world payments. Sub-cent gas ($0.001), 5-second finality, 25+ stablecoins including regional currencies (cKES, cNGN, cBRL). Currently on Sepolia testnet.",
+        a: "Celo — an Ethereum L2 optimized for mobile and real-world payments. Sub-cent gas ($0.001), 5-second finality, 25+ stablecoins including regional currencies (KESm, NGNm, BRLm).",
       },
       {
         q: "What stablecoins are supported?",

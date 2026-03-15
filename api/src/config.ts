@@ -1,53 +1,52 @@
 import { defineChain } from "viem";
 
-// ── Celo Alfajores (Nastar testnet) ──────────────────────────────────────────
+// ── Celo Mainnet ─────────────────────────────────────────────────────────────
 export const celoAlfajores = defineChain({
-  id: 11142220,
-  name: "Celo Sepolia",
-  network: "celo-sepolia",
+  id: 42220,
+  name: "Celo",
+  network: "celo",
   nativeCurrency: { name: "CELO", symbol: "CELO", decimals: 18 },
   rpcUrls: {
-    default: { http: ["https://forno.celo-sepolia.celo-testnet.org"] },
-    public: { http: ["https://forno.celo-sepolia.celo-testnet.org"] },
+    default: { http: ["https://forno.celo.org"] },
+    public: { http: ["https://forno.celo.org"] },
   },
   blockExplorers: {
-    default: { name: "Celo Sepolia Explorer", url: "https://sepolia.celoscan.io" },
+    default: { name: "CeloScan", url: "https://celoscan.io" },
   },
-  testnet: true,
+  testnet: false,
 });
 
-// ── Contract addresses ────────────────────────────────────────────────────────
+// ── Contract addresses (Celo Mainnet) ─────────────────────────────────────────
 export const CONTRACTS = {
-  SERVICE_REGISTRY: "0x8117e9bea366df4737f5acb09b03a1885e433c79" as `0x${string}`,
-  NASTAR_ESCROW: "0x9ea23a3b8579cffff9a9a2921ba93b3562bb4a2c" as `0x${string}`,
-  IDENTITY_REGISTRY: "0xa142c78a0a04de296cc463362d251e782cf8583e" as `0x${string}`,
+  SERVICE_REGISTRY: "0xF87bf96823517AC497808E563ED050fD736309f9" as `0x${string}`,
+  NASTAR_ESCROW: "0xE0D52EAadBA61c56731875cD6a23D8E84763D32F" as `0x${string}`,
+  IDENTITY_REGISTRY: "0x8004A818BFB912233c491871b3d84c89A494BD9e" as `0x${string}`,
 } as const;
 
-// ── Mento Stablecoins — Celo Sepolia Testnet ─────────────────────────────────
-// Verified from @mento-protocol/mento-sdk routes (ChainId.CELO_SEPOLIA)
-// Run: Mento.create(11142220).then(m => m.routes.getRoutes()) to verify
+// ── Mento Stablecoins — Celo Mainnet ─────────────────────────────────────────
+// Source: https://docs.celo.org/build-on-celo/build-with-local-stablecoin
 export const TOKENS = {
   // USD-pegged
-  USDm:  "0xdE9e4C3ce781b4bA68120d6261cbad65ce0aB00b" as `0x${string}`,
-  USDC:  "0x01C5C0122039549AD1493B8220cABEdD739BC44E" as `0x${string}`,
+  USDm:  "0x765DE816845861e75A25fCA122bb6898B8B1282a" as `0x${string}`,
+  USDC:  "0xcebA9300f2b948710d2653dD7B07f33A8B32118C" as `0x${string}`,
   // Major currencies
-  EURm:  "0xA99dC247d6b7B2E3ab48a1fEE101b83cD6aCd82a" as `0x${string}`,
-  GBPm:  "0x85F5181Abdbf0e1814Fc4358582Ae07b8eBA3aF3" as `0x${string}`,
-  CHFm:  "0x284E9b7B623eAE866914b7FA0eB720C2Bb3C2980" as `0x${string}`,
-  CADm:  "0xF151c9a13b78C84f93f50B8b3bC689fedc134F60" as `0x${string}`,
-  AUDm:  "0x5873Faeb42F3563dcD77F0fbbdA818E6d6DA3139" as `0x${string}`,
-  JPYm:  "0x85Bee67D435A39f7467a8a9DE34a5B73D25Df426" as `0x${string}`,
+  EURm:  "0xd8763cba276a3738e6de85b4b3bf5fded6d6ca73" as `0x${string}`,
+  GBPm:  "0xCCF663b1fF11028f0b19058d0f7B674004a40746" as `0x${string}`,
+  CHFm:  "0xb55a79F398E759E43C95b979163f30eC87Ee131D" as `0x${string}`,
+  CADm:  "0xff4Ab19391af240c311c54200a492233052B6325" as `0x${string}`,
+  AUDm:  "0x7175504C455076F15c04A2F90a8e352281F492F9" as `0x${string}`,
+  JPYm:  "0xc45eCF20f3CD864B32D9794d6f76814aE8892e20" as `0x${string}`,
   // Latin America
-  BRLm:  "0x2294298942fdc79417DE9E0D740A4957E0e7783a" as `0x${string}`,
-  COPm:  "0x5F8d55c3627d2dc0a2B4afa798f877242F382F67" as `0x${string}`,
+  BRLm:  "0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787" as `0x${string}`,
+  COPm:  "0x8a567e2ae79ca692bd748ab832081c45de4041ea" as `0x${string}`,
   // Africa
-  KESm:  "0xC7e4635651E3e3Af82b61d3E23c159438daE3BbF" as `0x${string}`,
-  NGNm:  "0x3d5ae86F34E2a82771496D140daFAEf3789dF888" as `0x${string}`,
-  GHSm:  "0x5e94B8C872bD47BC4255E60ECBF44D5E66e7401C" as `0x${string}`,
-  ZARm:  "0x10CCfB235b0E1Ed394bACE4560C3ed016697687e" as `0x${string}`,
-  XOFm:  "0x5505b70207aE3B826c1A7607F19F3Bf73444A082" as `0x${string}`,
+  KESm:  "0x456a3D042C0DbD3db53D5489e98dFb038553B0d0" as `0x${string}`,
+  NGNm:  "0xE2702Bd97ee33c88c8f6f92DA3B733608aa76F71" as `0x${string}`,
+  GHSm:  "0xfAeA5F3404bbA20D3cc2f8C4B0A888F55a3c7313" as `0x${string}`,
+  ZARm:  "0x4c35853A3B4e647fD266f4de678dCc8fEC410BF6" as `0x${string}`,
+  XOFm:  "0x73F93dcc49cB8A239e2032663e9475dd5ef29A08" as `0x${string}`,
   // Asia-Pacific
-  PHPm:  "0x0352976d940a2C3FBa0C3623198947Ee1d17869E" as `0x${string}`,
+  PHPm:  "0x105d4A9306D2E55a71d2Eb95B81553AE1dC20d7B" as `0x${string}`,
 } as const;
 
 // Alias
@@ -88,7 +87,7 @@ export const X402_CONFIG = {
   payTo: (process.env.SERVER_WALLET ?? "0x0000000000000000000000000000000000000000") as `0x${string}`,
   // Price per premium API call: 0.001 USDm (1000 units, 6 decimals)
   priceWei: BigInt(1000),
-  token: "0xdE9e4C3ce781b4bA68120d6261cbad65ce0aB00b" as `0x${string}`,
+  token: "0x765DE816845861e75A25fCA122bb6898B8B1282a" as `0x${string}`,
   network: "celo-sepolia",
 };
 
