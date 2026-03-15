@@ -333,8 +333,12 @@ export default function OfferingsPage() {
                     <Link key={agent.agentId} href={`/agents/${agent.agentId}`}
                       className="p-5 rounded-xl glass-card hover:border-[#F4C430]/50 transition group block">
                       <div className="flex items-start gap-4 mb-4">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0 shadow-lg`}>
-                          <span className="text-xl">{icon}</span>
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0 shadow-lg overflow-hidden`}>
+                          {icon.startsWith("http") ? (
+                            <img src={icon} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-xl">{icon || "🤖"}</span>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">

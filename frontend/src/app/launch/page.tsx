@@ -14,6 +14,7 @@ import {
   CELO_TOKENS,
 } from "@/lib/contracts";
 import { generateApiKey, generateAgentWallet, storeAgent } from "@/lib/agents-api";
+import { supabase } from "@/lib/supabase";
 
 const client = createPublicClient({ chain: celoSepoliaCustom, transport: http() });
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
@@ -231,7 +232,7 @@ export default function LaunchPage() {
     name: "",
     description: "",
     systemPrompt: "",
-    avatarPreview: "🤖",
+    avatarPreview: "",
     tags: "",
     offerings: [],
     llmProvider: "openai",
@@ -289,6 +290,31 @@ export default function LaunchPage() {
       offerings: c.offerings.filter((_, i) => i !== idx),
     }));
     setEditingOffering(null);
+  }
+
+  async function uploadAvatar(agentId: string): Promise<string | null> {
+    const file = (window as any).__nastarAvatarFile as File | null;
+    if (!file) return null;
+
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${agentId.toLowerCase()}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type });
+
+      if (error) {
+        console.warn("Avatar upload failed:", error.message);
+        return null;
+      }
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      return data.publicUrl;
+    } catch (err) {
+      console.warn("Avatar upload error:", err);
+      return null;
+    }
   }
 
   async function handleDeploy() {
@@ -386,7 +412,7 @@ export default function LaunchPage() {
         tags: tagList,
         pricePerCall: primaryOffering.fee,
         paymentToken: primaryOffering.paymentToken,
-        avatar: config.avatarPreview || "🤖",
+        avatar: await uploadAvatar(agentWallet.address),
         createdAt: Date.now(),
       });
 
@@ -478,19 +504,49 @@ export default function LaunchPage() {
                 />
               </div>
               <div>
-                <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Agent Icon *</label>
-                <div className="flex flex-wrap gap-2">
-                  {["🤖", "🔍", "🌐", "🛡️", "📊", "⚡", "💬", "🧠", "📝", "🎨", "💰", "🔗", "💸", "💱", "🏦", "📈"].map((emoji) => (
-                    <button key={emoji} type="button"
-                      onClick={() => setConfig((c) => ({ ...c, avatarPreview: emoji }))}
-                      className={`w-11 h-11 rounded-xl text-xl flex items-center justify-center transition ${
-                        config.avatarPreview === emoji
-                          ? "bg-[#F4C430]/20 border-2 border-[#F4C430] scale-110"
-                          : "bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.2]"
-                      }`}>
-                      {emoji}
-                    </button>
-                  ))}
+                <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Agent Avatar *</label>
+                <div className="flex items-center gap-4">
+                  <button type="button"
+                    onClick={() => document.getElementById("avatar-upload")?.click()}
+                    className={`w-20 h-20 rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition shrink-0 ${
+                      config.avatarPreview
+                        ? "border-[#F4C430]/40"
+                        : "border-white/[0.15] hover:border-[#F4C430]/40"
+                    }`}>
+                    {config.avatarPreview ? (
+                      <img src={config.avatarPreview} alt="avatar" className="w-full h-full object-cover rounded-xl" />
+                    ) : (
+                      <div className="text-center">
+                        <span className="text-2xl block">📷</span>
+                        <span className="text-[#A1A1A1]/30 text-[9px]">Upload</span>
+                      </div>
+                    )}
+                  </button>
+                  <input id="avatar-upload" type="file" accept="image/*" className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 2 * 1024 * 1024) {
+                        setError("Image must be under 2MB");
+                        return;
+                      }
+                      // Store the File object for later upload
+                      (window as any).__nastarAvatarFile = file;
+                      const reader = new FileReader();
+                      reader.onload = () => setConfig((c) => ({ ...c, avatarPreview: reader.result as string }));
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  <div className="text-[#A1A1A1]/40 text-xs">
+                    <p>JPG, PNG, or GIF</p>
+                    <p>Max 2MB, square recommended</p>
+                    {config.avatarPreview && (
+                      <button type="button" onClick={() => {
+                        setConfig((c) => ({ ...c, avatarPreview: "" }));
+                        (window as any).__nastarAvatarFile = null;
+                      }} className="text-red-400/60 text-[10px] mt-1 hover:text-red-400">Remove</button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -971,8 +1027,12 @@ export default function LaunchPage() {
             {/* Agent summary */}
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-xl bg-[#F4C430]/10 flex items-center justify-center text-2xl">
-                  {config.avatarPreview || "🤖"}
+                <div className="w-12 h-12 rounded-xl bg-[#F4C430]/10 flex items-center justify-center overflow-hidden shrink-0">
+                  {config.avatarPreview ? (
+                    <img src={config.avatarPreview} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-2xl">🤖</span>
+                  )}
                 </div>
                 <div>
                   <p className="font-semibold">{config.name}</p>
