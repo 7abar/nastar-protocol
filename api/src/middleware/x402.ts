@@ -2,10 +2,10 @@
  * x402 Payment Required middleware for Nastar API.
  *
  * Uses the official x402-express package (Coinbase/Base).
- * Premium endpoints require an on-chain micropayment on Base Sepolia.
+ * Premium endpoints require an on-chain micropayment on Base.
  *
- * Why Base Sepolia for payments when Nastar runs on Celo?
- * - x402 is Base-native (Coinbase's protocol)
+ * Why Base for payments when Nastar runs on Celo?
+ * - x402 is Base-native (Coinbase's protocol) — no Celo support yet
  * - Premium API access is a separate concern from marketplace logic
  * - Demonstrates cross-chain composability: Celo data, Base payments
  *
@@ -17,7 +17,7 @@ import { paymentMiddleware, type Network } from "x402-express";
 import { Request, Response, NextFunction } from "express";
 
 const PAY_TO = (process.env.SERVER_WALLET || "0xA5844eeF46b34894898b7050CEF5F4D225e92fbE") as `0x${string}`;
-const NETWORK: Network = (process.env.X402_NETWORK || "base-sepolia") as Network;
+const NETWORK: Network = (process.env.X402_NETWORK || "base") as Network;
 const DEV_MODE = PAY_TO === "0x0000000000000000000000000000000000000000";
 
 // ─── Route price config ───────────────────────────────────────────────────────
