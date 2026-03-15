@@ -10,6 +10,8 @@ import {
   CONTRACTS,
   SERVICE_REGISTRY_ABI,
   ERC8004_ABI,
+  TOKEN_LIST,
+  CELO_TOKENS,
 } from "@/lib/contracts";
 import { generateApiKey, generateAgentWallet, storeAgent } from "@/lib/agents-api";
 
@@ -165,6 +167,7 @@ interface LaunchConfig {
   requireConfirmAboveUsd: string;
   price: string;
   tags: string;
+  paymentToken: `0x${string}`;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -193,6 +196,7 @@ export default function LaunchPage() {
     requireConfirmAboveUsd: "25",
     price: "1",
     tags: "",
+    paymentToken: CELO_TOKENS.USDm,
   });
 
   function selectTemplate(t: typeof TEMPLATES[0]) {
@@ -275,7 +279,7 @@ export default function LaunchPage() {
           config.name,
           config.description,
           hostedEndpoint,
-          CONTRACTS.MOCK_USDC,
+          config.paymentToken,
           priceWei,
           tagList,
         ],
@@ -326,7 +330,7 @@ export default function LaunchPage() {
         endpoint: hostedEndpoint,
         tags: tagList,
         pricePerCall: config.price,
-        paymentToken: CONTRACTS.MOCK_USDC,
+        paymentToken: config.paymentToken,
         avatar: null,
         createdAt: Date.now(),
       });
@@ -559,15 +563,28 @@ export default function LaunchPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-[#A1A1A1] text-sm mb-1 block">
-                  Price per Call (USDC)
+                  Price per Call
                   <span className="ml-1.5 text-[10px] text-[#A1A1A1]/50 font-normal">— buyers pay this per task</span>
                 </label>
-                <input
-                  value={config.price}
-                  onChange={(e) => setConfig((c) => ({ ...c, price: e.target.value }))}
-                  type="number" step="0.01" min="0.01"
-                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white focus:outline-none focus:border-[#F4C430]/70"
-                />
+                <div className="flex gap-2">
+                  <input
+                    value={config.price}
+                    onChange={(e) => setConfig((c) => ({ ...c, price: e.target.value }))}
+                    type="number" step="0.01" min="0.01"
+                    className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white focus:outline-none focus:border-[#F4C430]/70"
+                  />
+                  <select
+                    value={config.paymentToken}
+                    onChange={(e) => setConfig((c) => ({ ...c, paymentToken: e.target.value as `0x${string}` }))}
+                    className="px-3 py-3 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white focus:outline-none focus:border-[#F4C430]/70 text-sm"
+                  >
+                    {TOKEN_LIST.map((t) => (
+                      <option key={t.address} value={t.address} className="bg-[#111]">
+                        {t.flag} {t.symbol}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="text-[#A1A1A1] text-sm mb-1 block">Tags</label>
@@ -800,7 +817,7 @@ export default function LaunchPage() {
                       Amount buyers pay in USDC each time they hire your agent for a task. Goes into escrow — released to you after delivery.
                     </span>
                   </span>
-                  <span>{config.price} USDC</span>
+                  <span>{config.price} {TOKEN_LIST.find(t => t.address === config.paymentToken)?.symbol ?? "USDm"}</span>
                 </div>
                 <div className="flex justify-between"><span className="text-[#A1A1A1]">ERC-8004 Identity</span><span className="text-green-400">Auto-minted</span></div>
                 <div className="flex justify-between"><span className="text-[#A1A1A1]">Hosted Runtime</span><span className="text-green-400">OpenClaw</span></div>

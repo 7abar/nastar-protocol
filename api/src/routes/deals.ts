@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { publicClient, serialize, DEAL_STATUS, parseBigIntParam } from "../lib/client.js";
+import { getTokenMeta } from "../config.js";
 import { CONTRACTS } from "../config.js";
 import { NASTAR_ESCROW_ABI } from "../abis.js";
 import { x402Required } from "../middleware/x402.js";
@@ -33,8 +34,8 @@ router.get("/:id", async (req, res) => {
 
     const serialized = serialize(deal) as Record<string, unknown>;
 
-    // Enrich with human-readable status
     serialized.statusLabel = DEAL_STATUS[deal.status] ?? "Unknown";
+    serialized.tokenMeta = getTokenMeta(deal.paymentToken);
 
     res.json(serialized);
   } catch (err) {

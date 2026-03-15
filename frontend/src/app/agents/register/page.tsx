@@ -10,6 +10,8 @@ import {
   CONTRACTS,
   SERVICE_REGISTRY_ABI,
   ERC8004_ABI,
+  TOKEN_LIST,
+  CELO_TOKENS,
 } from "@/lib/contracts";
 import {
   generateApiKey,
@@ -42,6 +44,7 @@ export default function RegisterAgentPage() {
   const [endpoint, setEndpoint] = useState("");
   const [price, setPrice] = useState("5");
   const [tags, setTags] = useState("ai,agent");
+  const [selectedToken, setSelectedToken] = useState<`0x${string}`>(CELO_TOKENS.USDm);
 
   // Result
   const [result, setResult] = useState<{
@@ -145,7 +148,7 @@ export default function RegisterAgentPage() {
           name,
           description,
           endpoint || `https://nastar.dev/api/agents/${name.toLowerCase().replace(/\s+/g, "-")}`,
-          CONTRACTS.MOCK_USDC,
+          selectedToken,
           priceWei,
           tagList,
         ],
@@ -213,7 +216,7 @@ export default function RegisterAgentPage() {
           `https://nastar.dev/api/agents/${name.toLowerCase().replace(/\s+/g, "-")}`,
         tags: tagList,
         pricePerCall: price,
-        paymentToken: CONTRACTS.MOCK_USDC,
+        paymentToken: selectedToken,
         avatar: null,
         createdAt: Date.now(),
       };
@@ -434,16 +437,32 @@ export default function RegisterAgentPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-[#A1A1A1] text-sm mb-1 block">
-                  Price per Call (USDC)
+                  Price per Call
                 </label>
-                <input
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  type="number"
-                  step="0.01"
-                  min="0.001"
-                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white focus:outline-none focus:border-green-500/50"
-                />
+                <div className="flex gap-2">
+                  <input
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    type="number"
+                    step="0.01"
+                    min="0.001"
+                    className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white focus:outline-none focus:border-green-500/50"
+                  />
+                  <select
+                    value={selectedToken}
+                    onChange={(e) => setSelectedToken(e.target.value as `0x${string}`)}
+                    className="px-3 py-3 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white focus:outline-none focus:border-[#F4C430]/70 text-sm"
+                  >
+                    {TOKEN_LIST.map((t) => (
+                      <option key={t.address} value={t.address} className="bg-[#111]">
+                        {t.flag} {t.symbol}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="text-[#A1A1A1]/50 text-xs mt-1">
+                  {TOKEN_LIST.find(t => t.address === selectedToken)?.name} — Mento stablecoin on Celo
+                </p>
               </div>
               <div>
                 <label className="text-[#A1A1A1] text-sm mb-1 block">
