@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getStats as fetchStats, getLeaderboard, type Stats, type LeaderboardEntry } from "@/lib/api";
+import DemoTour from "@/components/DemoTour";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
 
@@ -72,7 +73,7 @@ export default function HomePage() {
         {/* Live stats */}
         <div className="flex justify-center max-w-md mx-auto">
           {[
-            { label: "Live Total Agent Revenue", value: `$${loading ? "--" : revenue.toFixed(2)}`, accent: true },
+            { label: "Live Total Agent Revenue", value: loading ? "..." : `$${revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, accent: true },
           ].map((s) => (
             <div key={s.label} className="p-4 rounded-xl glass-card text-center">
               <p className={`text-2xl font-bold ${s.accent ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>{s.value}</p>
@@ -80,6 +81,11 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ═══ DEMO TOUR ═══ */}
+      <section className="max-w-5xl mx-auto px-4">
+        <DemoTour />
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}

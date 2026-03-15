@@ -28,6 +28,8 @@ interface StoredAgent {
   avatar: string | null;
   description: string | null;
   owner_address: string | null;
+  tags: string[] | null;
+  price_per_call: string | null;
 }
 
 interface AgentItem {
@@ -121,7 +123,7 @@ export default function OfferingsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
-  const [tab, setTab] = useState<"offerings" | "agents">("offerings");
+  const [tab, setTab] = useState<"offerings" | "agents">("agents");
 
   useEffect(() => {
     async function load() {
@@ -135,7 +137,7 @@ export default function OfferingsPage() {
       try {
         const { data: agents } = await supabase
           .from("registered_agents")
-          .select("agent_nft_id, name, avatar, description, owner_address");
+          .select("agent_nft_id, name, avatar, description, owner_address, tags, price_per_call");
         if (agents) {
           const map = new Map<string, StoredAgent>();
           for (const a of agents) {
@@ -175,6 +177,29 @@ export default function OfferingsPage() {
   // ── Derive agents from services + Supabase metadata ──────────────────────
 
   const agentMap = new Map<string, AgentItem>();
+
+  // First, add all Supabase agents (so marketplace never looks empty)
+  for (const [id, stored] of storedAgents.entries()) {
+    if (!agentMap.has(id)) {
+      const tags = stored.tags || [];
+      const tagServices = tags.map((t) => ({
+        name: t.charAt(0).toUpperCase() + t.slice(1).replace(/-/g, " "),
+        price: stored.price_per_call ? formatPrice(BigInt(Math.round(parseFloat(stored.price_per_call) * 1e18)).toString()) : "1.00",
+        description: "",
+      }));
+      agentMap.set(id, {
+        agentId: id,
+        provider: stored.owner_address || "",
+        name: stored.name || `Agent #${id}`,
+        description: stored.description || "",
+        avatar: stored.avatar || "",
+        serviceCount: tagServices.length || 1,
+        services: tagServices.length > 0 ? tagServices : [{ name: "General", price: "1.00", description: "" }],
+      });
+    }
+  }
+
+  // Then enrich with on-chain service data from API
   for (const svc of services) {
     const id = svc.agentId;
     const stored = storedAgents.get(id);
@@ -191,6 +216,10 @@ export default function OfferingsPage() {
       });
     }
     const a = agentMap.get(id)!;
+    // Update name/desc from Supabase if available
+    if (stored?.name && stored.name !== "tes") { a.name = stored.name; }
+    if (stored?.description) { a.description = stored.description; }
+    if (stored?.avatar) { a.avatar = stored.avatar; }
     a.serviceCount++;
     a.services.push({
       name: svc.name,
@@ -224,7 +253,7 @@ export default function OfferingsPage() {
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-1">Browse</h1>
           <p className="text-[#A1A1A1]/60 text-sm">
-            {services.length} service{services.length !== 1 && "s"} from {agents.length} agent{agents.length !== 1 && "s"}
+            {agents.length} agent{agents.length !== 1 && "s"}{services.length > 0 && ` · ${services.length} service${services.length !== 1 ? "s" : ""}`}
           </p>
         </div>
 
@@ -271,8 +300,12 @@ export default function OfferingsPage() {
               </div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-16">
-                <p className="text-[#A1A1A1]/40 mb-2">{search ? "No services match your search" : "No services in this category"}</p>
-                {search && <button onClick={() => setSearch("")} className="text-[#F4C430] text-sm hover:underline">Clear search</button>}
+                <p className="text-[#A1A1A1]/40 mb-2">{search ? "No services match your search" : "No on-chain services indexed yet"}</p>
+                {search ? (
+                  <button onClick={() => setSearch("")} className="text-[#F4C430] text-sm hover:underline">Clear search</button>
+                ) : agents.length > 0 ? (
+                  <button onClick={() => setTab("agents")} className="text-[#F4C430] text-sm hover:underline">Browse {agents.length} registered agents instead →</button>
+                ) : null}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
