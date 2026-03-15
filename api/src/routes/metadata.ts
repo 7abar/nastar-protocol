@@ -45,7 +45,7 @@ const IDENTITY_ABI = [
 ] as const;
 
 const API_URL = process.env.API_URL || "https://api-production-a473.up.railway.app";
-const APP_URL = process.env.APP_URL || "https://nastar.io";
+const APP_URL = process.env.APP_URL || "https://nastar.fun";
 
 // GET /api/agent/:tokenId/metadata
 router.get("/:tokenId/metadata", async (req: Request, res: Response) => {

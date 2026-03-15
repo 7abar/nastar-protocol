@@ -88,7 +88,7 @@ export default function RegisterAgentPage() {
         const registerData = encodeFunctionData({
           abi: ERC8004_ABI,
           functionName: "register",
-          args: [`https://nastar.io/api/agent-registration/pending`],
+          args: [`https://nastar.fun/api/agent-registration/pending`],
         });
         const mintHash = await provider.request({
           method: "eth_sendTransaction",
@@ -177,7 +177,7 @@ export default function RegisterAgentPage() {
       // 4. Set proper agentURI now that we know the ID
       if (agentNftId !== null) {
         setStatus("Setting agent metadata URI...");
-        const agentURI = `https://nastar.io/api/agent-registration/${agentNftId}`;
+        const agentURI = `https://nastar.fun/api/agent-registration/${agentNftId}`;
         const setUriData = encodeFunctionData({
           abi: ERC8004_ABI,
           functionName: "setAgentURI",

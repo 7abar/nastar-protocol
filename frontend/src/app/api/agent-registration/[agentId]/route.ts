@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
-const NASTAR_URL = "https://nastar.io";
+const NASTAR_URL = "https://nastar.fun";
 const CELO_SEPOLIA_CHAIN_ID = 11142220;
 const IDENTITY_REGISTRY = "0x8004A818BFB912233c491871b3d84c89A494BD9e";
 
