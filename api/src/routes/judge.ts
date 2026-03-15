@@ -6,17 +6,10 @@
 import { Router, Request, Response } from "express";
 import { createWalletClient, createPublicClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { defineChain } from "viem";
+import { celoAlfajores as celoSepolia } from "../config.js";
 import { db, dbGet, dbUpsert, dbUpdate } from "../lib/supabase.js";
 
 const router = Router();
-
-const celoSepolia = defineChain({
-  id: 11142220,
-  name: "Celo Sepolia",
-  nativeCurrency: { name: "CELO", symbol: "CELO", decimals: 18 },
-  rpcUrls: { default: { http: ["https://forno.celo-sepolia.celo-testnet.org"] } },
-});
 
 const ESCROW_ADDRESS = (process.env.NASTAR_ESCROW || "0xAE17AaccD135BD434E13990Dd2fAAA743f32b1e1") as `0x${string}`;
 
@@ -98,8 +91,12 @@ router.post("/:dealId/request", async (req: Request, res: Response) => {
   const singlePartyOk = elapsed > 60 * 60 * 1000;
 
   if (hasBoth || singlePartyOk) {
-    await dbUpdate("judge_cases", { deal_id: dealId }, { status: "deliberating" });
-    runJudge(dealId, deal).catch(console.error);
+    // Re-fetch status to prevent race condition — only one request should trigger judge
+    const freshCase = await dbGet<any>("judge_cases", { deal_id: dealId });
+    if (freshCase?.status === "open") {
+      await dbUpdate("judge_cases", { deal_id: dealId }, { status: "deliberating" });
+      runJudge(dealId, deal).catch(console.error);
+    }
   }
 
   return res.json({

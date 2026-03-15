@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { toBytes, toHex, pad } from "viem";
-import { publicClient, serialize } from "../lib/client.js";
+import { publicClient, serialize, parseBigIntParam } from "../lib/client.js";
 import { CONTRACTS } from "../config.js";
 import { SERVICE_REGISTRY_ABI } from "../abis.js";
 import { x402Required } from "../middleware/x402.js";
@@ -11,8 +11,10 @@ const router = Router();
 // List all active services (paginated)
 router.get("/", async (req, res) => {
   try {
-    const offset = BigInt((req.query.offset as string) ?? "0");
-    const limit = BigInt((req.query.limit as string) ?? "20");
+    const offsetStr = ((req.query.offset as string) ?? "0").replace(/\D/g, "") || "0";
+    const limitStr = ((req.query.limit as string) ?? "20").replace(/\D/g, "") || "20";
+    const offset = BigInt(offsetStr);
+    const limit = BigInt(Math.min(100, parseInt(limitStr))); // cap at 100
 
     const [services, total] = await publicClient.readContract({
       address: CONTRACTS.SERVICE_REGISTRY,
@@ -82,7 +84,7 @@ router.get("/tag/:tag", async (req, res) => {
 // Get a specific service by ID
 router.get("/:id", async (req, res) => {
   try {
-    const serviceId = BigInt(req.params.id);
+    const serviceId = parseBigIntParam(req.params.id, "serviceId");
     const service = await publicClient.readContract({
       address: CONTRACTS.SERVICE_REGISTRY,
       abi: SERVICE_REGISTRY_ABI,
@@ -99,7 +101,7 @@ router.get("/:id", async (req, res) => {
 // All services registered by a specific agent (by ERC-8004 NFT ID)
 router.get("/agent/:agentId", async (req, res) => {
   try {
-    const agentId = BigInt(req.params.agentId);
+    const agentId = parseBigIntParam(req.params.agentId, "agentId");
     const ids = await publicClient.readContract({
       address: CONTRACTS.SERVICE_REGISTRY,
       abi: SERVICE_REGISTRY_ABI,

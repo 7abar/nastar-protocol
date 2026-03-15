@@ -14,18 +14,11 @@
  */
 
 import { Router, Request, Response } from "express";
+import { db } from "../lib/supabase.js";
 import { createPublicClient, http, formatUnits } from "viem";
-import { defineChain } from "viem";
+import { celoAlfajores as celoSepolia } from "../config.js";
 
 const router = Router();
-
-const celoSepolia = defineChain({
-  id: 11142220,
-  name: "Celo Sepolia",
-  network: "celo-sepolia",
-  nativeCurrency: { name: "CELO", symbol: "CELO", decimals: 18 },
-  rpcUrls: { default: { http: ["https://forno.celo-sepolia.celo-testnet.org"] } },
-});
 
 const publicClient = createPublicClient({ chain: celoSepolia, transport: http() });
 
@@ -220,8 +213,41 @@ async function refreshReputations(): Promise<void> {
 
     cachedReputations = newCache;
     lastRefresh = Date.now();
+
+    // Persist to Supabase (best-effort — don't fail if DB is down)
+    try {
+      const rows = [...newCache.values()].map((r) => ({
+        agent_id: r.agentId,
+        score: r.score,
+        tier: r.tier,
+        metrics: r.metrics,
+        breakdown: r.breakdown,
+        last_updated: new Date(r.lastUpdated).toISOString(),
+      }));
+      if (rows.length > 0) {
+        await db.from("reputation_cache").upsert(rows, { onConflict: "agent_id" });
+      }
+    } catch { /* silent — cache is still in-memory */ }
+
   } catch (err) {
     console.error("Reputation refresh error:", err);
+
+    // Fallback: load last known values from Supabase on cold start
+    if (cachedReputations.size === 0) {
+      try {
+        const { data } = await db.from("reputation_cache").select("*").order("score", { ascending: false });
+        if (data) {
+          for (const row of data) {
+            cachedReputations.set(row.agent_id, {
+              agentId: row.agent_id, score: row.score, tier: row.tier,
+              metrics: row.metrics, breakdown: row.breakdown,
+              lastUpdated: new Date(row.last_updated).getTime(),
+            });
+          }
+          console.log(`[Reputation] Loaded ${data.length} cached scores from Supabase`);
+        }
+      } catch { /* fully offline */ }
+    }
   }
 }
 

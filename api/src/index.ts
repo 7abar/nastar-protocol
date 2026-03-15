@@ -132,6 +132,12 @@ app.use((_req, res) => {
   res.status(404).json({ error: "Not found. See GET / for available endpoints." });
 });
 
+// ── Global error handler ──────────────────────────────────────────────────────
+app.use((err: Error & { statusCode?: number }, _req: import("express").Request, res: import("express").Response, _next: import("express").NextFunction) => {
+  const status = err.statusCode || 500;
+  res.status(status).json({ error: err.message || "Internal server error" });
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n  NASTAR API running on http://localhost:${PORT}`);

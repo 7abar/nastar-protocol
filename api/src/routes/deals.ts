@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { publicClient, serialize, DEAL_STATUS } from "../lib/client.js";
+import { publicClient, serialize, DEAL_STATUS, parseBigIntParam } from "../lib/client.js";
 import { CONTRACTS } from "../config.js";
 import { NASTAR_ESCROW_ABI } from "../abis.js";
 import { x402Required } from "../middleware/x402.js";
@@ -23,7 +23,7 @@ router.get("/count", async (_req, res) => {
 // ── GET /deals/:id ────────────────────────────────────────────────────────────
 router.get("/:id", async (req, res) => {
   try {
-    const dealId = BigInt(req.params.id);
+    const dealId = parseBigIntParam(req.params.id, "dealId");
     const deal = await publicClient.readContract({
       address: CONTRACTS.NASTAR_ESCROW,
       abi: NASTAR_ESCROW_ABI,
@@ -46,7 +46,7 @@ router.get("/:id", async (req, res) => {
 // All deals for an agent (both buyer and seller sides)
 router.get("/agent/:agentId", async (req, res) => {
   try {
-    const agentId = BigInt(req.params.agentId);
+    const agentId = parseBigIntParam(req.params.agentId, "agentId");
 
     const [buyerIds, sellerIds] = await Promise.all([
       publicClient.readContract({

@@ -138,7 +138,7 @@ export async function x402Required(req: Request, res: Response, next: NextFuncti
     res.status(402).json({
       error: "Payment verification failed",
       reason,
-      ...serialize(buildPaymentRequired(req.path)),
+      ...(serialize(buildPaymentRequired(req.path)) as object),
     });
     return;
   }
