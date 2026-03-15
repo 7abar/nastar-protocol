@@ -231,7 +231,7 @@ export default function LaunchPage() {
     name: "",
     description: "",
     systemPrompt: "",
-    avatarPreview: "",
+    avatarPreview: "🤖",
     tags: "",
     offerings: [],
     llmProvider: "openai",
@@ -466,40 +466,32 @@ export default function LaunchPage() {
 
           <div className="space-y-6">
 
-            {/* Avatar + Name row */}
-            <div className="flex items-start gap-4">
-              <div
-                onClick={() => document.getElementById("agent-avatar-input")?.click()}
-                className="w-20 h-20 rounded-2xl bg-white/[0.03] border-2 border-dashed border-white/[0.1] hover:border-[#F4C430]/40 transition cursor-pointer flex items-center justify-center overflow-hidden group shrink-0"
-              >
-                {config.avatarPreview ? (
-                  <img src={config.avatarPreview} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <svg className="w-7 h-7 text-[#A1A1A1]/20 group-hover:text-[#F4C430]/60 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-                  </svg>
-                )}
-              </div>
-              <input id="agent-avatar-input" type="file" accept="image/*" className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  if (file.size > 2 * 1024 * 1024) { alert("Max 2MB"); return; }
-                  const reader = new FileReader();
-                  reader.onload = () => setConfig((c) => ({ ...c, avatarPreview: reader.result as string }));
-                  reader.readAsDataURL(file);
-                }}
-              />
-              <div className="flex-1 space-y-1">
-                <label className="text-[#A1A1A1]/60 text-xs">Agent Name *</label>
+            {/* Icon + Name row */}
+            <div className="space-y-3">
+              <div>
+                <label className="text-[#A1A1A1]/60 text-xs mb-1.5 block">Agent Name *</label>
                 <input
                   value={config.name}
                   onChange={(e) => setConfig((c) => ({ ...c, name: e.target.value }))}
                   placeholder={`e.g. ${tmpl.name}`}
                   className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
                 />
-                <p className="text-[#A1A1A1]/30 text-[10px]">Click image to upload avatar</p>
+              </div>
+              <div>
+                <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Agent Icon *</label>
+                <div className="flex flex-wrap gap-2">
+                  {["🤖", "🔍", "🌐", "🛡️", "📊", "⚡", "💬", "🧠", "📝", "🎨", "💰", "🔗", "💸", "💱", "🏦", "📈"].map((emoji) => (
+                    <button key={emoji} type="button"
+                      onClick={() => setConfig((c) => ({ ...c, avatarPreview: emoji }))}
+                      className={`w-11 h-11 rounded-xl text-xl flex items-center justify-center transition ${
+                        config.avatarPreview === emoji
+                          ? "bg-[#F4C430]/20 border-2 border-[#F4C430] scale-110"
+                          : "bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.2]"
+                      }`}>
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -979,11 +971,9 @@ export default function LaunchPage() {
             {/* Agent summary */}
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
               <div className="flex items-center gap-3 mb-3">
-                {config.avatarPreview ? (
-                  <img src={config.avatarPreview} alt="" className="w-12 h-12 rounded-xl object-cover" />
-                ) : (
-                  <div className="w-12 h-12 rounded-xl bg-[#F4C430]/10 flex items-center justify-center text-[#F4C430] text-lg">A</div>
-                )}
+                <div className="w-12 h-12 rounded-xl bg-[#F4C430]/10 flex items-center justify-center text-2xl">
+                  {config.avatarPreview || "🤖"}
+                </div>
                 <div>
                   <p className="font-semibold">{config.name}</p>
                   <p className="text-[#A1A1A1]/50 text-xs">{config.description}</p>
