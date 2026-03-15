@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import { createPublicClient, http, encodeFunctionData } from "viem";
@@ -12,6 +12,9 @@ import {
   ERC8004_ABI,
 } from "@/lib/contracts";
 import { generateApiKey, generateAgentWallet, storeAgent } from "@/lib/agents-api";
+
+// Lazy-load ReactFlow (heavy, client-only)
+const AgentFlowBuilder = lazy(() => import("@/components/AgentFlowBuilder"));
 
 const client = createPublicClient({ chain: celoSepoliaCustom, transport: http() });
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
@@ -172,6 +175,7 @@ export default function LaunchPage() {
   const router = useRouter();
 
   const [step, setStep] = useState<Step>("template");
+  const [viewMode, setViewMode] = useState<"form" | "visual">("form");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [deployedId, setDeployedId] = useState("");
@@ -429,22 +433,89 @@ export default function LaunchPage() {
 
   if (step === "configure") {
     const tmpl = TEMPLATES.find((t) => t.id === config.templateId)!;
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <button onClick={() => setStep("template")} className="text-[#A1A1A1] text-sm mb-6 hover:text-white transition flex items-center gap-1">
-            ← Back to templates
-          </button>
 
-          <div className="flex items-center gap-3 mb-8">
-            <span className="text-3xl">{tmpl.icon}</span>
-            <div>
-              <h1 className="text-2xl font-bold">{tmpl.name}</h1>
-              <p className="text-[#A1A1A1] text-sm">Configure your agent</p>
+    return (
+      <div className={`bg-[#0A0A0A] text-[#F5F5F5] ${viewMode === "visual" ? "h-screen flex flex-col overflow-hidden" : "min-h-screen"}`}>
+        <div className={viewMode === "visual" ? "flex flex-col h-full" : "max-w-2xl mx-auto px-4 py-12"}>
+
+          {/* Header */}
+          <div className={viewMode === "visual" ? "flex items-center justify-between px-6 py-4 border-b border-white/10 flex-shrink-0" : "mb-8"}>
+            <div className="flex items-center gap-3">
+              {viewMode === "form" && (
+                <button onClick={() => setStep("template")} className="text-[#A1A1A1] text-sm hover:text-white transition mr-2">
+                  ←
+                </button>
+              )}
+              <span className="text-2xl">{tmpl.icon}</span>
+              <div>
+                <h1 className="text-xl font-bold">{tmpl.name}</h1>
+                <p className="text-[#A1A1A1] text-xs">Configure your agent</p>
+              </div>
+            </div>
+
+            {/* View toggle */}
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
+              <button
+                onClick={() => setViewMode("form")}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${viewMode === "form" ? "bg-[#F4C430] text-[#0A0A0A]" : "text-[#A1A1A1] hover:text-white"}`}
+              >
+                Form
+              </button>
+              <button
+                onClick={() => setViewMode("visual")}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-1.5 ${viewMode === "visual" ? "bg-[#F4C430] text-[#0A0A0A]" : "text-[#A1A1A1] hover:text-white"}`}
+              >
+                <span>Visual</span>
+                <span className="text-[10px] px-1 py-0.5 rounded bg-purple-500/30 text-purple-300">β</span>
+              </button>
             </div>
           </div>
 
-          <div className="space-y-5">
+          {/* Visual mode */}
+          {viewMode === "visual" && (
+            <div className="flex-1 relative">
+              <Suspense fallback={
+                <div className="h-full flex items-center justify-center text-[#A1A1A1]">
+                  <div className="text-center">
+                    <div className="animate-spin w-8 h-8 border-2 border-[#F4C430] border-t-transparent rounded-full mx-auto mb-3" />
+                    <p className="text-sm">Loading visual builder...</p>
+                  </div>
+                </div>
+              }>
+                <AgentFlowBuilder
+                  config={{
+                    name: config.name,
+                    systemPrompt: config.systemPrompt,
+                    llmProvider: config.llmProvider,
+                    llmModel: config.llmModel,
+                    llmApiKey: config.llmApiKey,
+                    maxPerCallUsd: config.maxPerCallUsd,
+                    dailyLimitUsd: config.dailyLimitUsd,
+                    requireConfirmAboveUsd: config.requireConfirmAboveUsd,
+                    templateId: config.templateId,
+                  }}
+                  onChange={(updates) => setConfig((c) => ({ ...c, ...updates }))}
+                />
+              </Suspense>
+              {/* Deploy bar */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 px-4 py-3 rounded-xl bg-[#111]/90 border border-white/10 backdrop-blur-sm">
+                <div className="text-xs text-[#A1A1A1]">
+                  {config.name ? <span className="text-white font-medium">{config.name}</span> : <span className="text-yellow-400">Set agent name →</span>}
+                  {config.llmApiKey && <span className="ml-2 text-green-400">✓ API key set</span>}
+                </div>
+                <button
+                  onClick={() => setStep("limits")}
+                  disabled={!config.name.trim() || !config.systemPrompt.trim() || !config.llmApiKey.trim()}
+                  className="px-5 py-2 rounded-lg gradient-btn text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_15px_#F4C430] transition"
+                >
+                  Deploy Agent ⚡
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Form mode */}
+          {viewMode === "form" && (<div className="space-y-5">
             <div>
               <label className="text-[#A1A1A1] text-sm mb-1 block">Agent Name *</label>
               <input
@@ -508,7 +579,7 @@ export default function LaunchPage() {
             >
               Next: LLM Backend →
             </button>
-          </div>
+          </div>)}
         </div>
       </div>
     );
