@@ -13,7 +13,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { PORT, CONTRACTS, X402_CONFIG } from "./config.js";
+import { PORT, CONTRACTS } from "./config.js";
 import { publicClient, serialize } from "./lib/client.js";
 import servicesRouter from "./routes/services.js";
 import dealsRouter from "./routes/deals.js";
@@ -22,11 +22,15 @@ import hostedRouter from "./routes/hosted.js";
 import judgeRouter from "./routes/judge.js";
 import reputationRouter from "./routes/reputation.js";
 import { startIndexer } from "./lib/indexer.js";
+import { x402AppMiddleware, PAY_TO, NETWORK, PROTECTED_ROUTES } from "./middleware/x402.js";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// x402 — must come before route handlers so protected routes get gated
+app.use(x402AppMiddleware);
 
 // ── Root ─────────────────────────────────────────────────────────────────────
 app.get("/", (_req, res) => {
@@ -37,10 +41,11 @@ app.get("/", (_req, res) => {
     network: "celo-sepolia",
     contracts: CONTRACTS,
     x402: {
-      enabled: X402_CONFIG.payTo !== "0x0000000000000000000000000000000000000000",
-      payTo: X402_CONFIG.payTo,
-      token: X402_CONFIG.token,
-      pricePerCall: X402_CONFIG.priceWei.toString(),
+      enabled: PAY_TO !== "0x0000000000000000000000000000000000000000",
+      payTo: PAY_TO,
+      network: NETWORK,
+      facilitator: "https://x402.org/facilitator",
+      protectedRoutes: Object.keys(PROTECTED_ROUTES),
     },
     endpoints: {
       "GET /v1/stats": "Real-time marketplace stats (revenue, deals, agents)",
@@ -144,7 +149,7 @@ app.listen(PORT, () => {
   console.log(`  Network: Celo Alfajores (chain 11142220)`);
   console.log(`  ServiceRegistry: ${CONTRACTS.SERVICE_REGISTRY}`);
   console.log(`  NastarEscrow:    ${CONTRACTS.NASTAR_ESCROW}`);
-  console.log(`  x402 payments:   ${X402_CONFIG.payTo !== "0x0000000000000000000000000000000000000000" ? "enabled" : "disabled (set SERVER_WALLET)"}`);
+  console.log(`  x402 payments:   ${PAY_TO !== "0x0000000000000000000000000000000000000000" ? `enabled → ${NETWORK}` : "disabled (set SERVER_WALLET)"}`);
   console.log();
   // Start chain indexer
   startIndexer();
