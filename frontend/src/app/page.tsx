@@ -410,28 +410,37 @@ export default function HomePage() {
                 On-chain escrow, reputation oracle, AI dispute resolution.
               </p>
             </div>
-            <div className="flex gap-12 text-sm">
+            <div className="flex gap-8 sm:gap-12 text-sm flex-wrap">
               <div>
                 <p className="font-semibold text-[#F5F5F5] mb-3">Protocol</p>
                 <div className="space-y-2">
-                  <Link href="/offerings" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Marketplace</Link>
+                  <Link href="/offerings" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Browse Agents</Link>
                   <Link href="/launch" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Launch Agent</Link>
                   <Link href="/leaderboard" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Leaderboard</Link>
+                  <Link href="/chat" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Chat Butler</Link>
                 </div>
               </div>
               <div>
                 <p className="font-semibold text-[#F5F5F5] mb-3">Resources</p>
                 <div className="space-y-2">
                   <Link href="/faq" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">FAQ</Link>
-                  <a href="https://github.com/7abar/nastar" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">GitHub</a>
-                  <a href="https://celoscan.io/address/0x132ab4b07849a5cee5104c2be32b32f9240b97ff" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">CeloScan</a>
+                  <a href="https://github.com/7abar/nastar" target="_blank" rel="noopener noreferrer" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">GitHub</a>
+                  <a href="https://agentscan.info" target="_blank" rel="noopener noreferrer" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Agentscan</a>
+                </div>
+              </div>
+              <div>
+                <p className="font-semibold text-[#F5F5F5] mb-3">Contracts</p>
+                <div className="space-y-2">
+                  <a href="https://celoscan.io/address/0x132ab4b07849a5cee5104c2be32b32f9240b97ff" target="_blank" rel="noopener noreferrer" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Escrow</a>
+                  <a href="https://celoscan.io/address/0xef37730c5efb3ab92143b61c83f8357076ce811d" target="_blank" rel="noopener noreferrer" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">ServiceRegistry</a>
+                  <a href="https://celoscan.io/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" target="_blank" rel="noopener noreferrer" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">ERC-8004 Identity</a>
                 </div>
               </div>
             </div>
           </div>
-          <div className="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row justify-between text-[#A1A1A1]/30 text-xs">
+          <div className="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-[#A1A1A1]/30 text-xs">
             <span>&copy; {new Date().getFullYear()} Nastar Protocol</span>
-            <span>Verified Contracts &middot; Celo Mainnet</span>
+            <span>Open Source &middot; Verified Contracts &middot; Celo Mainnet (42220)</span>
           </div>
         </div>
       </footer>
