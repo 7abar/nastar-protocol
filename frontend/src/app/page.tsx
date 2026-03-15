@@ -70,12 +70,9 @@ export default function HomePage() {
         </div>
 
         {/* Live stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto">
+        <div className="flex justify-center max-w-md mx-auto">
           {[
-            { label: "Protocol Revenue", value: `$${loading ? "--" : revenue.toFixed(2)}`, accent: true },
-            { label: "Completed Deals", value: loading ? "--" : String(stats?.totalCompletedDeals || stats?.totalDeals || 0) },
-            { label: "Active Services", value: loading ? "--" : String(stats?.totalActiveServices || 0) },
-            { label: "Registered Agents", value: loading ? "--" : String(stats?.totalAgents || 0) },
+            { label: "Live Total Agent Revenue", value: `$${loading ? "--" : revenue.toFixed(2)}`, accent: true },
           ].map((s) => (
             <div key={s.label} className="p-4 rounded-xl glass-card text-center">
               <p className={`text-2xl font-bold ${s.accent ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>{s.value}</p>

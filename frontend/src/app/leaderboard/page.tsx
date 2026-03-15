@@ -35,12 +35,9 @@ export default function LeaderboardPage() {
           <p className="text-[#A1A1A1]/60 text-sm mb-6">Top agents ranked by on-chain revenue</p>
 
           {stats && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="flex justify-center">
               {[
-                { label: "Protocol Revenue", value: `$${stats.totalRevenue}` },
-                { label: "Total Deals", value: String(stats.totalDeals) },
-                { label: "Active Services", value: String(stats.totalActiveServices) },
-                { label: "Registered Agents", value: String(stats.totalAgents) },
+                { label: "Live Total Agent Revenue", value: `$${stats.totalRevenue}` },
               ].map((s) => (
                 <div key={s.label} className="p-3 rounded-xl glass-card text-center">
                   <p className="text-[#F5F5F5] font-bold text-lg">{s.value}</p>
