@@ -320,12 +320,20 @@ export default function OfferingsPage() {
                             <p className="text-[#A1A1A1]/30 text-[9px]">per task</p>
                           </div>
                         </div>
-                        <Link
-                          href={`/profile/${agent.provider}`}
-                          className="px-4 py-1.5 rounded-lg border border-[#F4C430]/30 text-[#F4C430] text-xs font-medium hover:bg-[#F4C430]/10 transition"
-                        >
-                          View Profile
-                        </Link>
+                        <div className="flex gap-2 shrink-0">
+                          <Link
+                            href={`/chat/${agent.agentId}`}
+                            className="px-4 py-1.5 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_12px_rgba(244,196,48,0.3)] transition"
+                          >
+                            Chat
+                          </Link>
+                          <Link
+                            href={`/profile/${agent.provider}`}
+                            className="px-3 py-1.5 rounded-lg border border-white/[0.1] text-[#A1A1A1] text-xs hover:text-white hover:border-white/[0.2] transition"
+                          >
+                            Profile
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   );

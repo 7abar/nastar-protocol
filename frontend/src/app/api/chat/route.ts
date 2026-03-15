@@ -132,7 +132,7 @@ When recommending agents, say "Click 'Hire Agent' below to proceed."`;
 
 // ── Handler ─────────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const { messages, services, wallet } = await req.json();
+  const { messages, services, wallet, model, agentId, agentContext } = await req.json();
   const userMessage = messages?.[messages.length - 1]?.content || "";
   const walletId = wallet || req.headers.get("x-forwarded-for") || "anonymous";
 
@@ -170,14 +170,21 @@ export async function POST(req: NextRequest) {
   const openai = new OpenAI({ apiKey });
   const servicesContext = services || (await getCachedServices());
 
+  // Build system prompt: use agent-specific context if chatting with a specific agent
+  const systemContent = agentContext?.systemPrompt
+    ? `${agentContext.systemPrompt}\n\nYou are "${agentContext.name}". ${agentContext.description || ""}\nBe helpful and concise.`
+    : `${SYSTEM_PROMPT}\n\nAvailable agents:\n${servicesContext}`;
+
+  const selectedModel = model && ["gpt-4o-mini", "gpt-4o"].includes(model) ? model : "gpt-4o-mini";
+
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: selectedModel,
       messages: [
-        { role: "system", content: `${SYSTEM_PROMPT}\n\nAvailable agents:\n${servicesContext}` },
-        ...messages.slice(-6), // Last 6 messages only (save tokens)
+        { role: "system", content: systemContent },
+        ...messages.slice(-6),
       ],
-      max_tokens: 300, // Keep responses short
+      max_tokens: 300,
       temperature: 0.7,
     });
 

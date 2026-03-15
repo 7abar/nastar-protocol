@@ -790,6 +790,7 @@ export default function LaunchPage() {
   // ─── Step: LLM ──────────────────────────────────────────────────────────────
 
   if (step === "llm") {
+    const useOwnKey = config.llmProvider !== "platform";
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
         <div className="max-w-xl mx-auto px-4 py-10">
@@ -800,95 +801,164 @@ export default function LaunchPage() {
               </svg>
             </button>
             <div>
-              <h1 className="text-lg font-bold">LLM Backend</h1>
-              <p className="text-[#A1A1A1]/50 text-xs">Step 3 of 4 -- Choose the AI model powering your agent</p>
+              <h1 className="text-lg font-bold">AI Model</h1>
+              <p className="text-[#A1A1A1]/50 text-xs">Step 3 of 4 -- Choose how your agent thinks</p>
             </div>
           </div>
 
           <div className="space-y-5">
-            <div>
-              <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Provider</label>
-              <div className="grid grid-cols-3 gap-3">
-                {LLM_PROVIDERS.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setConfig((c) => ({ ...c, llmProvider: p.id, llmModel: p.models[0] }))}
-                    className={`py-3 rounded-xl border font-medium transition text-sm ${
-                      config.llmProvider === p.id
-                        ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
-                        : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
-                    }`}
-                  >
-                    {p.name}
-                  </button>
-                ))}
-              </div>
+            {/* Platform vs Own Key toggle */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setConfig((c) => ({ ...c, llmProvider: "platform", llmModel: "gpt-4o-mini", llmApiKey: "" }))}
+                className={`p-4 rounded-xl border text-left transition ${
+                  !useOwnKey
+                    ? "border-[#F4C430]/40 bg-[#F4C430]/5"
+                    : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
+                }`}
+              >
+                <p className={`text-sm font-medium ${!useOwnKey ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>Nastar Models</p>
+                <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Free -- powered by the platform</p>
+              </button>
+              <button
+                onClick={() => setConfig((c) => ({ ...c, llmProvider: "openai", llmModel: "gpt-4o-mini" }))}
+                className={`p-4 rounded-xl border text-left transition ${
+                  useOwnKey
+                    ? "border-[#F4C430]/40 bg-[#F4C430]/5"
+                    : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
+                }`}
+              >
+                <p className={`text-sm font-medium ${useOwnKey ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>Bring Your Key</p>
+                <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Use your own OpenAI / Anthropic / Google key</p>
+              </button>
             </div>
 
-            <div>
-              <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Model</label>
-              <div className="grid grid-cols-2 gap-3">
-                {selectedProvider.models.map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setConfig((c) => ({ ...c, llmModel: m }))}
-                    className={`py-2.5 px-4 rounded-xl border font-mono text-sm transition ${
-                      config.llmModel === m
-                        ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
-                        : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
-                    }`}
-                  >
-                    {m}
-                  </button>
-                ))}
+            {/* Platform model picker */}
+            {!useOwnKey && (
+              <div>
+                <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Model</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { id: "gpt-4o-mini", label: "GPT-4o Mini", desc: "Fast & cheap" },
+                    { id: "gpt-4o", label: "GPT-4o", desc: "Smartest" },
+                    { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash", desc: "Google's fastest" },
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      onClick={() => setConfig((c) => ({ ...c, llmModel: m.id }))}
+                      className={`py-3 px-4 rounded-xl border text-left transition ${
+                        config.llmModel === m.id
+                          ? "border-[#F4C430]/40 bg-[#F4C430]/5"
+                          : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
+                      }`}
+                    >
+                      <p className={`text-sm font-mono ${config.llmModel === m.id ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>{m.label}</p>
+                      <p className="text-[#A1A1A1]/30 text-[10px]">{m.desc}</p>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[#A1A1A1]/25 text-[10px] mt-2">No API key needed. Nastar handles the LLM infrastructure.</p>
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="text-[#A1A1A1]/60 text-xs mb-1 block">
-                {selectedProvider.name} API Key *
-              </label>
-              {(() => {
-                const key = config.llmApiKey.trim();
-                const valid =
-                  config.llmProvider === "openai" ? /^sk-[A-Za-z0-9_-]{20,}$/.test(key) :
-                  config.llmProvider === "anthropic" ? /^sk-ant-[A-Za-z0-9_-]{20,}$/.test(key) :
-                  config.llmProvider === "google" ? /^AIza[A-Za-z0-9_-]{30,}$/.test(key) :
-                  key.length > 10;
-                const placeholder =
-                  config.llmProvider === "openai" ? "sk-proj-..." :
-                  config.llmProvider === "anthropic" ? "sk-ant-api03-..." : "AIzaSy...";
-                return (
-                  <>
-                    <div className="relative">
-                      <input
-                        type="password"
-                        value={config.llmApiKey}
-                        onChange={(e) => setConfig((c) => ({ ...c, llmApiKey: e.target.value }))}
-                        placeholder={placeholder}
-                        className={`w-full px-3 py-2.5 pr-10 rounded-xl bg-white/[0.04] border text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none font-mono text-sm transition ${
-                          key.length === 0 ? "border-white/[0.08] focus:border-[#F4C430]/40" :
-                          valid ? "border-green-400/30 focus:border-green-400/60" :
-                          "border-red-400/30 focus:border-red-400/60"
+            {/* Own key config */}
+            {useOwnKey && (
+              <>
+                <div>
+                  <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Provider</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {LLM_PROVIDERS.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setConfig((c) => ({ ...c, llmProvider: p.id, llmModel: p.models[0] }))}
+                        className={`py-3 rounded-xl border font-medium transition text-sm ${
+                          config.llmProvider === p.id
+                            ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
+                            : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
                         }`}
-                      />
-                      {key.length > 0 && (
-                        <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm ${valid ? "text-green-400" : "text-red-400"}`}>
-                          {valid ? "Valid" : "Invalid"}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[#A1A1A1]/30 text-[10px] mt-1">
-                      {config.llmProvider === "openai" && "Get yours at platform.openai.com/api-keys"}
-                      {config.llmProvider === "anthropic" && "Get yours at console.anthropic.com/settings/keys"}
-                      {config.llmProvider === "google" && "Get yours at aistudio.google.com/app/apikey"}
-                    </p>
-                  </>
-                );
-              })()}
-            </div>
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Model</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {selectedProvider.models.map((m) => (
+                      <button
+                        key={m}
+                        onClick={() => setConfig((c) => ({ ...c, llmModel: m }))}
+                        className={`py-2.5 px-4 rounded-xl border font-mono text-sm transition ${
+                          config.llmModel === m
+                            ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
+                            : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[#A1A1A1]/60 text-xs mb-1 block">
+                    {selectedProvider.name} API Key *
+                  </label>
+                  {(() => {
+                    const key = config.llmApiKey.trim();
+                    const valid =
+                      config.llmProvider === "openai" ? /^sk-[A-Za-z0-9_-]{20,}$/.test(key) :
+                      config.llmProvider === "anthropic" ? /^sk-ant-[A-Za-z0-9_-]{20,}$/.test(key) :
+                      config.llmProvider === "google" ? /^AIza[A-Za-z0-9_-]{30,}$/.test(key) :
+                      key.length > 10;
+                    const placeholder =
+                      config.llmProvider === "openai" ? "sk-proj-..." :
+                      config.llmProvider === "anthropic" ? "sk-ant-api03-..." : "AIzaSy...";
+                    return (
+                      <>
+                        <div className="relative">
+                          <input
+                            type="password"
+                            value={config.llmApiKey}
+                            onChange={(e) => setConfig((c) => ({ ...c, llmApiKey: e.target.value }))}
+                            placeholder={placeholder}
+                            className={`w-full px-3 py-2.5 pr-10 rounded-xl bg-white/[0.04] border text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none font-mono text-sm transition ${
+                              key.length === 0 ? "border-white/[0.08] focus:border-[#F4C430]/40" :
+                              valid ? "border-green-400/30 focus:border-green-400/60" :
+                              "border-red-400/30 focus:border-red-400/60"
+                            }`}
+                          />
+                          {key.length > 0 && (
+                            <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm ${valid ? "text-green-400" : "text-red-400"}`}>
+                              {valid ? "Valid" : "Invalid"}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[#A1A1A1]/30 text-[10px] mt-1">
+                          {config.llmProvider === "openai" && "Get yours at platform.openai.com/api-keys"}
+                          {config.llmProvider === "anthropic" && "Get yours at console.anthropic.com/settings/keys"}
+                          {config.llmProvider === "google" && "Get yours at aistudio.google.com/app/apikey"}
+                        </p>
+                      </>
+                    );
+                  })()}
+                </div>
+              </>
+            )}
 
             {(() => {
+              if (!useOwnKey) {
+                return (
+                  <button
+                    onClick={() => setStep("review")}
+                    className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition"
+                  >
+                    Next: Review & Deploy
+                  </button>
+                );
+              }
               const key = config.llmApiKey.trim();
               const valid =
                 config.llmProvider === "openai" ? /^sk-[A-Za-z0-9_-]{20,}$/.test(key) :
@@ -982,7 +1052,7 @@ export default function LaunchPage() {
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
               <p className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider mb-3">Configuration</p>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-[#A1A1A1]/50">LLM</span><span className="font-mono text-xs">{config.llmProvider} / {config.llmModel}</span></div>
+                <div className="flex justify-between"><span className="text-[#A1A1A1]/50">LLM</span><span className="font-mono text-xs">{config.llmProvider === "platform" ? "Nastar" : config.llmProvider} / {config.llmModel}</span></div>
                 <div className="flex justify-between"><span className="text-[#A1A1A1]/50">ERC-8004 Identity</span><span className="text-green-400 text-xs">Auto-minted</span></div>
                 <div className="flex justify-between"><span className="text-[#A1A1A1]/50">Hosted Runtime</span><span className="text-green-400 text-xs">OpenClaw</span></div>
               </div>
