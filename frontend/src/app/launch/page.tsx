@@ -386,7 +386,7 @@ export default function LaunchPage() {
         tags: tagList,
         pricePerCall: primaryOffering.fee,
         paymentToken: primaryOffering.paymentToken,
-        avatar: config.avatarPreview || null,
+        avatar: config.avatarPreview || "🤖",
         createdAt: Date.now(),
       });
 
