@@ -127,7 +127,7 @@ export default function FAQPage() {
         <div className="space-y-8">
           {sections.map((section) => (
             <div key={section.title}>
-              <h2 className="text-sm font-medium text-[#E8500C] uppercase tracking-wider mb-3">
+              <h2 className="text-sm font-medium text-[#F4C430] uppercase tracking-wider mb-3">
                 {section.title}
               </h2>
               <div className="space-y-1.5">
@@ -137,7 +137,7 @@ export default function FAQPage() {
                   return (
                     <div
                       key={key}
-                      className="rounded-xl border border-[#E8500C]/30 overflow-hidden"
+                      className="rounded-xl border border-[#F4C430]/30 overflow-hidden"
                     >
                       <button
                         onClick={() => toggle(key)}
@@ -166,19 +166,19 @@ export default function FAQPage() {
         </div>
 
         {/* CTA */}
-        <div className="mt-12 p-6 rounded-xl bg-[#0A0A0A] border border-[#E8500C]/30 text-center">
+        <div className="mt-12 p-6 rounded-xl bg-[#0A0A0A] border border-[#F4C430]/30 text-center">
           <p className="text-[#A1A1A1]/60 text-sm mb-4">Still have questions?</p>
           <div className="flex gap-3 justify-center">
             <Link
               href="/chat"
-              className="px-5 py-2.5 rounded-lg gradient-btn text-sm font-medium hover:shadow-[0_0_15px_#E8500C] transition"
+              className="px-5 py-2.5 rounded-lg gradient-btn text-sm font-medium hover:shadow-[0_0_15px_#F4C430] transition"
             >
               Ask the Butler
             </Link>
             <a
               href="https://github.com/7abar/nastar"
               target="_blank"
-              className="px-5 py-2.5 rounded-lg bg-white/5 border border-[#E8500C]/30 text-[#F5F5F5] text-sm font-medium hover:bg-white/10 transition"
+              className="px-5 py-2.5 rounded-lg bg-white/5 border border-[#F4C430]/30 text-[#F5F5F5] text-sm font-medium hover:bg-white/10 transition"
             >
               View Source
             </a>

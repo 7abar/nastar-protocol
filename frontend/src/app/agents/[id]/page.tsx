@@ -70,7 +70,7 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <svg key={i} className={`w-3.5 h-3.5 ${i <= rating ? "text-[#E8500C]" : "text-[#A1A1A1]/20"}`} fill="currentColor" viewBox="0 0 20 20">
+        <svg key={i} className={`w-3.5 h-3.5 ${i <= rating ? "text-[#F4C430]" : "text-[#A1A1A1]/20"}`} fill="currentColor" viewBox="0 0 20 20">
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
       ))}
@@ -174,7 +174,7 @@ export default function AgentDetailPage() {
 
           {/* Header */}
           <div className="flex items-start gap-4 mb-5">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#E8500C]/20 to-[#FF6B1A]/20 border border-[#E8500C]/30 flex items-center justify-center text-[#E8500C] font-bold text-xl shrink-0">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/20 border border-[#F4C430]/30 flex items-center justify-center text-[#F4C430] font-bold text-xl shrink-0">
               {onChainAgent.name.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
@@ -186,7 +186,7 @@ export default function AgentDetailPage() {
                 <a
                   href={`https://sepolia.celoscan.io/address/${IDENTITY_REGISTRY}#readContract`}
                   target="_blank"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-[#E8500C]/10 text-[#E8500C] hover:bg-[#E8500C]/20 transition"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-[#F4C430]/10 text-[#F4C430] hover:bg-[#F4C430]/20 transition"
                 >
                   ERC-8004
                 </a>
@@ -200,7 +200,7 @@ export default function AgentDetailPage() {
             <div className="flex flex-col gap-2 shrink-0">
               <Link
                 href={`/chat?agent=${onChainAgent.agentId}&name=${encodeURIComponent(onChainAgent.name)}`}
-                className="px-5 py-2 rounded-lg gradient-btn text-sm font-bold hover:shadow-[0_0_15px_rgba(232,80,12,0.3)] transition"
+                className="px-5 py-2 rounded-lg gradient-btn text-sm font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition"
               >
                 Hire
               </Link>
@@ -218,7 +218,7 @@ export default function AgentDetailPage() {
               <div key={s.label} className="p-3 rounded-xl glass-card">
                 <p className="text-[#A1A1A1]/50 text-[10px] uppercase tracking-wider">{s.label}</p>
                 <p className="text-[#F5F5F5] font-bold text-lg mt-1">{s.value}</p>
-                {s.sub && <p className="text-[#E8500C]/60 text-[10px] mt-0.5">{s.sub}</p>}
+                {s.sub && <p className="text-[#F4C430]/60 text-[10px] mt-0.5">{s.sub}</p>}
               </div>
             ))}
           </div>
@@ -231,7 +231,7 @@ export default function AgentDetailPage() {
             <a
               href={`https://sepolia.celoscan.io/address/${IDENTITY_REGISTRY}`}
               target="_blank"
-              className="px-2.5 py-1 rounded-md bg-[#E8500C]/10 border border-[#E8500C]/30 text-[#E8500C] text-xs hover:bg-[#E8500C]/20 transition"
+              className="px-2.5 py-1 rounded-md bg-[#F4C430]/10 border border-[#F4C430]/30 text-[#F4C430] text-xs hover:bg-[#F4C430]/20 transition"
             >
               ERC-8004
             </a>
@@ -246,7 +246,7 @@ export default function AgentDetailPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-5 py-3 text-sm capitalize transition border-b-2 ${
                   activeTab === tab
-                    ? "border-[#E8500C] text-[#F5F5F5] font-medium"
+                    ? "border-[#F4C430] text-[#F5F5F5] font-medium"
                     : "border-transparent text-[#A1A1A1]/50 hover:text-[#A1A1A1]"
                 }`}
               >
@@ -262,20 +262,20 @@ export default function AgentDetailPage() {
           {activeTab === "services" && (
             <div className="space-y-2">
               {onChainAgent.services.map((svc) => (
-                <div key={svc.serviceId} className="p-4 rounded-xl glass-card hover:border-[#E8500C]/50 transition group">
+                <div key={svc.serviceId} className="p-4 rounded-xl glass-card hover:border-[#F4C430]/50 transition group">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0 mr-4">
                       <div className="flex items-center gap-2">
-                        <span className="text-[#F5F5F5] font-medium text-sm group-hover:text-[#E8500C] transition">{svc.name}</span>
+                        <span className="text-[#F5F5F5] font-medium text-sm group-hover:text-[#F4C430] transition">{svc.name}</span>
                         <span className="text-[#A1A1A1]/30 text-xs font-mono">#{svc.serviceId}</span>
                       </div>
                       <p className="text-[#A1A1A1]/60 text-xs mt-1 leading-relaxed">{svc.description}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-[#E8500C] font-medium text-sm">{svc.pricePerCall} USDC</span>
+                      <span className="text-[#F4C430] font-medium text-sm">{svc.pricePerCall} USDC</span>
                       <Link
                         href={`/chat?agent=${onChainAgent.agentId}&name=${encodeURIComponent(svc.name)}`}
-                        className="px-3 py-1.5 rounded-lg bg-[#E8500C] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(232,80,12,0.3)] transition"
+                        className="px-3 py-1.5 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(244,196,48,0.3)] transition"
                       >
                         Hire
                       </Link>
@@ -304,7 +304,7 @@ export default function AgentDetailPage() {
                   <div key={r.dealId} className="p-4 rounded-xl glass-card">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#E8500C]/30 to-[#FF6B1A]/30 flex items-center justify-center text-[10px] text-[#E8500C] font-bold">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4C430]/30 to-[#FF9F1C]/30 flex items-center justify-center text-[10px] text-[#F4C430] font-bold">
                           {r.buyer.charAt(0)}
                         </div>
                         <span className="text-[#A1A1A1] text-xs font-mono">{r.buyer}</span>
@@ -317,14 +317,14 @@ export default function AgentDetailPage() {
                       <a
                         href={`https://sepolia.celoscan.io/address/${ESCROW}`}
                         target="_blank"
-                        className="text-[10px] px-2 py-0.5 rounded bg-white/[0.04] text-[#A1A1A1]/40 hover:text-[#E8500C] transition"
+                        className="text-[10px] px-2 py-0.5 rounded bg-white/[0.04] text-[#A1A1A1]/40 hover:text-[#F4C430] transition"
                       >
                         Job #{r.dealId}
                       </a>
                       <a
                         href={`https://sepolia.celoscan.io/address/${IDENTITY_REGISTRY}`}
                         target="_blank"
-                        className="text-[10px] px-2 py-0.5 rounded bg-[#E8500C]/10 text-[#E8500C]/60 hover:text-[#E8500C] transition"
+                        className="text-[10px] px-2 py-0.5 rounded bg-[#F4C430]/10 text-[#F4C430]/60 hover:text-[#F4C430] transition"
                       >
                         ERC-8004
                       </a>
@@ -353,18 +353,18 @@ export default function AgentDetailPage() {
               })).map((tx) => (
                 <div key={tx.dealId} className="flex items-center justify-between p-3 rounded-xl glass-card">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-2 h-2 rounded-full shrink-0 ${tx.status === "Completed" ? "bg-[#E8500C]" : "bg-[#A1A1A1]/30"}`} />
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${tx.status === "Completed" ? "bg-[#F4C430]" : "bg-[#A1A1A1]/30"}`} />
                     <div className="min-w-0">
                       <p className="text-[#F5F5F5] text-sm truncate">{tx.task}</p>
                       <p className="text-[#A1A1A1]/40 text-[10px]">by {tx.buyer} · {tx.time}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-[#E8500C] text-sm font-medium">{tx.amount} USDC</span>
+                    <span className="text-[#F4C430] text-sm font-medium">{tx.amount} USDC</span>
                     <a
                       href={`https://sepolia.celoscan.io/address/${ESCROW}`}
                       target="_blank"
-                      className="text-[10px] text-[#A1A1A1]/30 hover:text-[#E8500C] transition"
+                      className="text-[10px] text-[#A1A1A1]/30 hover:text-[#F4C430] transition"
                     >
                       #{tx.dealId}
                     </a>
@@ -393,7 +393,7 @@ export default function AgentDetailPage() {
                 <div key={row.label} className="flex justify-between items-center px-4 py-3">
                   <span className="text-[#A1A1A1]/50 text-xs">{row.label}</span>
                   {row.link ? (
-                    <a href={row.link} target="_blank" className={`text-[#E8500C] text-xs hover:underline ${row.mono ? "font-mono" : ""}`}>
+                    <a href={row.link} target="_blank" className={`text-[#F4C430] text-xs hover:underline ${row.mono ? "font-mono" : ""}`}>
                       {row.value}
                     </a>
                   ) : (
@@ -416,7 +416,7 @@ export default function AgentDetailPage() {
               ].map((ep) => (
                 <div key={ep.label} className="flex justify-between items-center px-4 py-3">
                   <span className="text-[#A1A1A1]/50 text-xs">{ep.label}</span>
-                  <a href={ep.href} target={ep.href.startsWith("http") ? "_blank" : undefined} className="text-[#FF6B1A] text-xs font-mono hover:underline truncate max-w-[60%]">
+                  <a href={ep.href} target={ep.href.startsWith("http") ? "_blank" : undefined} className="text-[#FF9F1C] text-xs font-mono hover:underline truncate max-w-[60%]">
                     {ep.value}
                   </a>
                 </div>
@@ -436,7 +436,7 @@ export default function AgentDetailPage() {
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
         <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
           <div className="flex items-start gap-4 mb-6">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#E8500C]/20 to-[#FF6B1A]/20 border border-[#E8500C]/30 flex items-center justify-center text-[#E8500C] font-bold text-xl shrink-0">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/20 border border-[#F4C430]/30 flex items-center justify-center text-[#F4C430] font-bold text-xl shrink-0">
               {localAgent.name.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -444,7 +444,7 @@ export default function AgentDetailPage() {
               <code className="text-[#A1A1A1]/40 text-xs font-mono">{localAgent.agentWallet.slice(0, 6)}...{localAgent.agentWallet.slice(-4)}</code>
             </div>
           </div>
-          <Link href="/chat" className="block w-full py-3 rounded-xl gradient-btn text-center font-semibold hover:shadow-[0_0_15px_#E8500C] transition text-sm mb-8">
+          <Link href="/chat" className="block w-full py-3 rounded-xl gradient-btn text-center font-semibold hover:shadow-[0_0_15px_#F4C430] transition text-sm mb-8">
             Hire this Agent
           </Link>
           {isOwner && localAgent.apiKeyActive && (
@@ -452,7 +452,7 @@ export default function AgentDetailPage() {
               <h2 className="text-xs text-[#A1A1A1]/40 uppercase tracking-wider mb-3">API Key</h2>
               <div className="p-4 rounded-xl glass-card">
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 text-xs font-mono text-[#E8500C] break-all">{showKey ? localAgent.apiKey : "nst_" + "\u2022".repeat(36)}</code>
+                  <code className="flex-1 text-xs font-mono text-[#F4C430] break-all">{showKey ? localAgent.apiKey : "nst_" + "\u2022".repeat(36)}</code>
                   <button onClick={() => setShowKey(!showKey)} className="text-[#A1A1A1]/40 text-xs">{showKey ? "Hide" : "Show"}</button>
                   <button onClick={() => copy(localAgent.apiKey, "key")} className="text-[#A1A1A1]/40 text-xs">{copied === "key" ? "Done" : "Copy"}</button>
                 </div>
@@ -472,7 +472,7 @@ export default function AgentDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#A1A1A1]/60 text-sm">
-      Agent not found. <Link href="/agents" className="text-[#E8500C] ml-2 hover:underline">Back</Link>
+      Agent not found. <Link href="/agents" className="text-[#F4C430] ml-2 hover:underline">Back</Link>
     </div>
   );
 }

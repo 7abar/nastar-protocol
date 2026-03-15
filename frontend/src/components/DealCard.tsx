@@ -110,7 +110,7 @@ export function DealCard({
         {deal.status === 4 && (
           <Link
             href={`/disputes/${deal.dealId.toString()}`}
-            className="flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-[#E8500C]/20 text-[#E8500C] hover:bg-[#E8500C]/30 transition text-center"
+            className="flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-[#F4C430]/20 text-[#F4C430] hover:bg-[#F4C430]/30 transition text-center"
           >
             AI Judge
           </Link>

@@ -60,16 +60,16 @@ const nodeBase = "rounded-xl border text-xs font-medium shadow-lg min-w-[180px]"
 
 function InputNode({ data, selected }: { data: InputNodeData; selected: boolean }) {
   return (
-    <div className={`${nodeBase} border-[#E8500C]/50 bg-[#E8500C]/10 ${selected ? "ring-1 ring-[#E8500C]" : ""}`}>
-      <div className="px-4 py-2 border-b border-[#E8500C]/30 flex items-center gap-2">
+    <div className={`${nodeBase} border-[#F4C430]/50 bg-[#F4C430]/10 ${selected ? "ring-1 ring-[#F4C430]" : ""}`}>
+      <div className="px-4 py-2 border-b border-[#F4C430]/30 flex items-center gap-2">
         <span className="text-base">📥</span>
-        <span className="text-[#E8500C] font-semibold text-sm">Task Input</span>
+        <span className="text-[#F4C430] font-semibold text-sm">Task Input</span>
       </div>
       <div className="px-4 py-3">
         <div className="text-[#A1A1A1] text-[10px] uppercase tracking-wider mb-1">Source</div>
         <div className="text-white text-xs font-medium capitalize">{data.source || "Nastar Marketplace"}</div>
       </div>
-      <Handle type="source" position={Position.Right} className="!bg-[#E8500C] !border-[#0A0A0A] !w-3 !h-3" />
+      <Handle type="source" position={Position.Right} className="!bg-[#F4C430] !border-[#0A0A0A] !w-3 !h-3" />
     </div>
   );
 }
@@ -271,7 +271,7 @@ function buildInitialNodes(config: AgentFlowBuilderProps["config"]): Node[] {
 function buildInitialEdges(templateId: string): Edge[] {
   const hasTools = ["research", "remittance", "fx-hedge", "trading"].includes(templateId);
   const edges: Edge[] = [
-    { id: "e-input-guard", source: "input", target: "guard", animated: true, style: { stroke: "#E8500C", strokeWidth: 1.5 } },
+    { id: "e-input-guard", source: "input", target: "guard", animated: true, style: { stroke: "#F4C430", strokeWidth: 1.5 } },
     { id: "e-input-llm", source: "input", target: "llm", animated: true, style: { stroke: "#a855f7", strokeWidth: 1.5 } },
     { id: "e-llm-output", source: "llm", target: "output", animated: true, style: { stroke: "#4ade80", strokeWidth: 1.5 } },
   ];
@@ -372,7 +372,7 @@ function SidePanel({ node, config, onChange, onClose }: {
         )}
 
         {node.type === "input_task" && (
-          <div className="p-3 rounded-lg bg-[#E8500C]/5 border border-[#E8500C]/20 text-xs text-[#A1A1A1]">
+          <div className="p-3 rounded-lg bg-[#F4C430]/5 border border-[#F4C430]/20 text-xs text-[#A1A1A1]">
             Tasks come from the Nastar marketplace when buyers hire your agent. The task description is passed directly to the LLM.
           </div>
         )}
@@ -461,7 +461,7 @@ function FlowCanvas({ config, onChange }: AgentFlowBuilderProps) {
             n.type === "guard" ? "#f87171" :
             n.type === "tool" ? "#facc15" :
             n.type === "output" ? "#4ade80" :
-            "#E8500C"
+            "#F4C430"
           }
         />
       </ReactFlow>

@@ -438,10 +438,10 @@ export default function LaunchPage() {
                 key={t.id}
                 onClick={() => authenticated && selectTemplate(t)}
                 disabled={!authenticated}
-                className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#E8500C]/30 transition text-left group disabled:opacity-50"
+                className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#F4C430]/30 transition text-left group disabled:opacity-50"
               >
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-[#F5F5F5] group-hover:text-[#E8500C] transition">{t.name}</h3>
+                  <h3 className="font-semibold text-[#F5F5F5] group-hover:text-[#F4C430] transition">{t.name}</h3>
                   <span className="text-[#A1A1A1]/30 text-xs">{t.defaultOffering.feeType === "fixed" ? `$${t.defaultOffering.fee}` : `${(parseFloat(t.defaultOffering.fee) * 100).toFixed(1)}%`}</span>
                 </div>
                 <p className="text-[#A1A1A1]/50 text-xs leading-relaxed mb-3">{t.tagline}</p>
@@ -485,12 +485,12 @@ export default function LaunchPage() {
             <div className="flex items-start gap-4">
               <div
                 onClick={() => document.getElementById("agent-avatar-input")?.click()}
-                className="w-20 h-20 rounded-2xl bg-white/[0.03] border-2 border-dashed border-white/[0.1] hover:border-[#E8500C]/40 transition cursor-pointer flex items-center justify-center overflow-hidden group shrink-0"
+                className="w-20 h-20 rounded-2xl bg-white/[0.03] border-2 border-dashed border-white/[0.1] hover:border-[#F4C430]/40 transition cursor-pointer flex items-center justify-center overflow-hidden group shrink-0"
               >
                 {config.avatarPreview ? (
                   <img src={config.avatarPreview} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <svg className="w-7 h-7 text-[#A1A1A1]/20 group-hover:text-[#E8500C]/60 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <svg className="w-7 h-7 text-[#A1A1A1]/20 group-hover:text-[#F4C430]/60 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
                   </svg>
@@ -512,7 +512,7 @@ export default function LaunchPage() {
                   value={config.name}
                   onChange={(e) => setConfig((c) => ({ ...c, name: e.target.value }))}
                   placeholder={`e.g. ${tmpl.name}`}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm transition"
+                  className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
                 />
                 <p className="text-[#A1A1A1]/30 text-[10px]">Click image to upload avatar</p>
               </div>
@@ -526,7 +526,7 @@ export default function LaunchPage() {
                 onChange={(e) => setConfig((c) => ({ ...c, description: e.target.value }))}
                 placeholder="What does this agent do? This is shown in the marketplace."
                 rows={2}
-                className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm resize-none transition"
+                className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm resize-none transition"
               />
             </div>
 
@@ -541,7 +541,7 @@ export default function LaunchPage() {
                 onChange={(e) => setConfig((c) => ({ ...c, systemPrompt: e.target.value }))}
                 placeholder="Define how your agent thinks and behaves..."
                 rows={6}
-                className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm resize-none font-mono transition"
+                className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm resize-none font-mono transition"
               />
             </div>
 
@@ -552,7 +552,7 @@ export default function LaunchPage() {
                 value={config.tags}
                 onChange={(e) => setConfig((c) => ({ ...c, tags: e.target.value }))}
                 placeholder="e.g. trading, defi, celo"
-                className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm transition"
+                className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
               />
               <p className="text-[#A1A1A1]/30 text-[10px] mt-1">Comma-separated. Helps buyers discover your agent.</p>
             </div>
@@ -560,7 +560,7 @@ export default function LaunchPage() {
             <button
               onClick={() => setStep("offerings")}
               disabled={!config.name.trim() || !config.systemPrompt.trim()}
-              className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(232,80,12,0.3)] transition mt-2"
+              className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition mt-2"
             >
               Next: Configure Offerings
             </button>
@@ -606,8 +606,8 @@ export default function LaunchPage() {
                   className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-[#E8500C]/10 flex items-center justify-center shrink-0">
-                      <svg className="w-4 h-4 text-[#E8500C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <div className="w-8 h-8 rounded-lg bg-[#F4C430]/10 flex items-center justify-center shrink-0">
+                      <svg className="w-4 h-4 text-[#F4C430]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0" />
                       </svg>
                     </div>
@@ -638,7 +638,7 @@ export default function LaunchPage() {
                         value={offering.name}
                         onChange={(e) => updateOffering(idx, { name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })}
                         placeholder="e.g. token_swap"
-                        className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm font-mono transition"
+                        className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm font-mono transition"
                       />
                       <p className="text-[#A1A1A1]/25 text-[10px] mt-0.5">Lowercase, underscores only</p>
                     </div>
@@ -651,7 +651,7 @@ export default function LaunchPage() {
                         onChange={(e) => updateOffering(idx, { description: e.target.value })}
                         placeholder="What does this offering do for the buyer?"
                         rows={2}
-                        className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm resize-none transition"
+                        className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm resize-none transition"
                       />
                     </div>
 
@@ -664,11 +664,11 @@ export default function LaunchPage() {
                           onClick={() => updateOffering(idx, { feeType: "fixed" })}
                           className={`p-3 rounded-xl border text-left transition ${
                             offering.feeType === "fixed"
-                              ? "border-[#E8500C]/40 bg-[#E8500C]/5"
+                              ? "border-[#F4C430]/40 bg-[#F4C430]/5"
                               : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
                           }`}
                         >
-                          <p className={`text-sm font-medium ${offering.feeType === "fixed" ? "text-[#E8500C]" : "text-[#F5F5F5]"}`}>Fixed Fee</p>
+                          <p className={`text-sm font-medium ${offering.feeType === "fixed" ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>Fixed Fee</p>
                           <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Flat rate per job</p>
                         </button>
                         <button
@@ -676,11 +676,11 @@ export default function LaunchPage() {
                           onClick={() => updateOffering(idx, { feeType: "percentage", requiresFunds: true })}
                           className={`p-3 rounded-xl border text-left transition ${
                             offering.feeType === "percentage"
-                              ? "border-[#E8500C]/40 bg-[#E8500C]/5"
+                              ? "border-[#F4C430]/40 bg-[#F4C430]/5"
                               : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
                           }`}
                         >
-                          <p className={`text-sm font-medium ${offering.feeType === "percentage" ? "text-[#E8500C]" : "text-[#F5F5F5]"}`}>Percentage</p>
+                          <p className={`text-sm font-medium ${offering.feeType === "percentage" ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>Percentage</p>
                           <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Commission on capital</p>
                         </button>
                       </div>
@@ -705,13 +705,13 @@ export default function LaunchPage() {
                           }}
                           type="number" step={offering.feeType === "fixed" ? "0.01" : "0.1"} min="0"
                           placeholder={offering.feeType === "fixed" ? "5.00" : "5"}
-                          className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] focus:outline-none focus:border-[#E8500C]/40 text-sm transition"
+                          className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
                         />
                         {offering.feeType === "fixed" && (
                           <select
                             value={offering.paymentToken}
                             onChange={(e) => updateOffering(idx, { paymentToken: e.target.value as `0x${string}` })}
-                            className="px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] focus:outline-none focus:border-[#E8500C]/40 text-sm transition"
+                            className="px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
                           >
                             {TOKEN_LIST.map((t) => (
                               <option key={t.address} value={t.address} className="bg-[#111]">
@@ -749,7 +749,7 @@ export default function LaunchPage() {
           <button
             type="button"
             onClick={addOffering}
-            className="w-full py-3 rounded-xl border border-dashed border-white/[0.1] text-[#A1A1A1]/50 text-sm hover:border-[#E8500C]/30 hover:text-[#E8500C] transition flex items-center justify-center gap-2 mb-6"
+            className="w-full py-3 rounded-xl border border-dashed border-white/[0.1] text-[#A1A1A1]/50 text-sm hover:border-[#F4C430]/30 hover:text-[#F4C430] transition flex items-center justify-center gap-2 mb-6"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -760,7 +760,7 @@ export default function LaunchPage() {
           <button
             onClick={() => setStep("llm")}
             disabled={config.offerings.length === 0 || !config.offerings[0].name || !config.offerings[0].description}
-            className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(232,80,12,0.3)] transition"
+            className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition"
           >
             Next: LLM Backend
           </button>
@@ -795,22 +795,22 @@ export default function LaunchPage() {
                 onClick={() => setConfig((c) => ({ ...c, llmProvider: "platform", llmModel: "gpt-4o-mini", llmApiKey: "" }))}
                 className={`p-4 rounded-xl border text-left transition ${
                   !useOwnKey
-                    ? "border-[#E8500C]/40 bg-[#E8500C]/5"
+                    ? "border-[#F4C430]/40 bg-[#F4C430]/5"
                     : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
                 }`}
               >
-                <p className={`text-sm font-medium ${!useOwnKey ? "text-[#E8500C]" : "text-[#F5F5F5]"}`}>Nastar Models</p>
+                <p className={`text-sm font-medium ${!useOwnKey ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>Nastar Models</p>
                 <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Free -- powered by the platform</p>
               </button>
               <button
                 onClick={() => setConfig((c) => ({ ...c, llmProvider: "openai", llmModel: "gpt-4o-mini" }))}
                 className={`p-4 rounded-xl border text-left transition ${
                   useOwnKey
-                    ? "border-[#E8500C]/40 bg-[#E8500C]/5"
+                    ? "border-[#F4C430]/40 bg-[#F4C430]/5"
                     : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
                 }`}
               >
-                <p className={`text-sm font-medium ${useOwnKey ? "text-[#E8500C]" : "text-[#F5F5F5]"}`}>Bring Your Key</p>
+                <p className={`text-sm font-medium ${useOwnKey ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>Bring Your Key</p>
                 <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Use your own OpenAI / Anthropic / Google key</p>
               </button>
             </div>
@@ -830,11 +830,11 @@ export default function LaunchPage() {
                       onClick={() => setConfig((c) => ({ ...c, llmModel: m.id }))}
                       className={`py-3 px-4 rounded-xl border text-left transition ${
                         config.llmModel === m.id
-                          ? "border-[#E8500C]/40 bg-[#E8500C]/5"
+                          ? "border-[#F4C430]/40 bg-[#F4C430]/5"
                           : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]"
                       }`}
                     >
-                      <p className={`text-sm font-mono ${config.llmModel === m.id ? "text-[#E8500C]" : "text-[#F5F5F5]"}`}>{m.label}</p>
+                      <p className={`text-sm font-mono ${config.llmModel === m.id ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>{m.label}</p>
                       <p className="text-[#A1A1A1]/30 text-[10px]">{m.desc}</p>
                     </button>
                   ))}
@@ -855,7 +855,7 @@ export default function LaunchPage() {
                         onClick={() => setConfig((c) => ({ ...c, llmProvider: p.id, llmModel: p.models[0] }))}
                         className={`py-2.5 rounded-xl border font-medium transition text-xs ${
                           config.llmProvider === p.id
-                            ? "border-[#E8500C]/40 bg-[#E8500C]/5 text-[#E8500C]"
+                            ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
                             : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
                         }`}
                       >
@@ -874,7 +874,7 @@ export default function LaunchPage() {
                         onClick={() => setConfig((c) => ({ ...c, llmModel: m }))}
                         className={`py-2 px-3 rounded-xl border font-mono text-xs transition ${
                           config.llmModel === m
-                            ? "border-[#E8500C]/40 bg-[#E8500C]/5 text-[#E8500C]"
+                            ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
                             : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
                         }`}
                       >
@@ -907,7 +907,7 @@ export default function LaunchPage() {
                             onChange={(e) => setConfig((c) => ({ ...c, llmApiKey: e.target.value }))}
                             placeholder={placeholder}
                             className={`w-full px-3 py-2.5 pr-10 rounded-xl bg-white/[0.04] border text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none font-mono text-sm transition ${
-                              key.length === 0 ? "border-white/[0.08] focus:border-[#E8500C]/40" :
+                              key.length === 0 ? "border-white/[0.08] focus:border-[#F4C430]/40" :
                               valid ? "border-green-400/30 focus:border-green-400/60" :
                               "border-red-400/30 focus:border-red-400/60"
                             }`}
@@ -935,7 +935,7 @@ export default function LaunchPage() {
                 return (
                   <button
                     onClick={() => setStep("review")}
-                    className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm hover:shadow-[0_0_20px_rgba(232,80,12,0.3)] transition"
+                    className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition"
                   >
                     Next: Review & Deploy
                   </button>
@@ -951,7 +951,7 @@ export default function LaunchPage() {
                 <button
                   onClick={() => setStep("review")}
                   disabled={!valid}
-                  className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(232,80,12,0.3)] transition"
+                  className="w-full py-3.5 rounded-xl gradient-btn font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition"
                 >
                   Next: Review & Deploy
                 </button>
@@ -995,7 +995,7 @@ export default function LaunchPage() {
                 {config.avatarPreview ? (
                   <img src={config.avatarPreview} alt="" className="w-12 h-12 rounded-xl object-cover" />
                 ) : (
-                  <div className="w-12 h-12 rounded-xl bg-[#E8500C]/10 flex items-center justify-center text-[#E8500C] text-lg">A</div>
+                  <div className="w-12 h-12 rounded-xl bg-[#F4C430]/10 flex items-center justify-center text-[#F4C430] text-lg">A</div>
                 )}
                 <div>
                   <p className="font-semibold">{config.name}</p>
@@ -1019,7 +1019,7 @@ export default function LaunchPage() {
                       <p className="text-sm font-mono">{o.name}</p>
                       <p className="text-[#A1A1A1]/40 text-[10px] truncate">{o.description}</p>
                     </div>
-                    <span className="text-[#E8500C] text-xs font-medium shrink-0 ml-3">
+                    <span className="text-[#F4C430] text-xs font-medium shrink-0 ml-3">
                       {o.feeType === "fixed"
                         ? `$${o.fee}`
                         : `${(parseFloat(o.fee) * 100).toFixed(1)}%`
@@ -1049,7 +1049,7 @@ export default function LaunchPage() {
                   <input
                     type="number" min="1" value={config.maxPerCallUsd}
                     onChange={(e) => setConfig((c) => ({ ...c, maxPerCallUsd: e.target.value }))}
-                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#E8500C]/40 transition"
+                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/40 transition"
                   />
                 </div>
                 <div>
@@ -1057,7 +1057,7 @@ export default function LaunchPage() {
                   <input
                     type="number" min="5" value={config.dailyLimitUsd}
                     onChange={(e) => setConfig((c) => ({ ...c, dailyLimitUsd: e.target.value }))}
-                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#E8500C]/40 transition"
+                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/40 transition"
                   />
                 </div>
                 <div>
@@ -1065,7 +1065,7 @@ export default function LaunchPage() {
                   <input
                     type="number" min="1" value={config.requireConfirmAboveUsd}
                     onChange={(e) => setConfig((c) => ({ ...c, requireConfirmAboveUsd: e.target.value }))}
-                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#E8500C]/40 transition"
+                    className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/40 transition"
                   />
                 </div>
               </div>
@@ -1077,7 +1077,7 @@ export default function LaunchPage() {
 
             <button
               onClick={handleDeploy}
-              className="w-full py-4 rounded-xl gradient-btn font-bold text-base hover:shadow-[0_0_25px_rgba(232,80,12,0.3)] transition"
+              className="w-full py-4 rounded-xl gradient-btn font-bold text-base hover:shadow-[0_0_25px_rgba(244,196,48,0.3)] transition"
             >
               Deploy Agent
             </button>
@@ -1094,8 +1094,8 @@ export default function LaunchPage() {
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-full border-2 border-[#E8500C]/20" />
-            <div className="absolute inset-0 rounded-full border-2 border-[#E8500C] border-t-transparent animate-spin" />
+            <div className="absolute inset-0 rounded-full border-2 border-[#F4C430]/20" />
+            <div className="absolute inset-0 rounded-full border-2 border-[#F4C430] border-t-transparent animate-spin" />
           </div>
           <h2 className="text-xl font-semibold text-white mb-2">Deploying Agent</h2>
           <p className="text-[#A1A1A1]/60 text-sm max-w-xs">{status}</p>
@@ -1118,27 +1118,27 @@ export default function LaunchPage() {
             </div>
             <h1 className="text-2xl font-bold mb-1">Agent Live</h1>
             <p className="text-[#A1A1A1]/60 text-sm">
-              <span className="text-[#E8500C]">{config.name}</span> is registered on Celo and ready to serve.
+              <span className="text-[#F4C430]">{config.name}</span> is registered on Celo and ready to serve.
             </p>
           </div>
 
           <div className="space-y-4">
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
               <label className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider">Agent Wallet</label>
-              <code className="text-[#E8500C] text-sm font-mono block mt-1 break-all">{deployedId}</code>
+              <code className="text-[#F4C430] text-sm font-mono block mt-1 break-all">{deployedId}</code>
             </div>
 
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-                <div className="text-sm font-bold text-[#E8500C]">{config.offerings.length}</div>
+                <div className="text-sm font-bold text-[#F4C430]">{config.offerings.length}</div>
                 <div className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Offerings</div>
               </div>
               <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-                <div className="text-sm font-bold text-[#E8500C] font-mono">{config.llmModel}</div>
+                <div className="text-sm font-bold text-[#F4C430] font-mono">{config.llmModel}</div>
                 <div className="text-[#A1A1A1]/40 text-[10px] mt-0.5">LLM</div>
               </div>
               <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-                <div className="text-sm font-bold text-[#E8500C]">${config.dailyLimitUsd}</div>
+                <div className="text-sm font-bold text-[#F4C430]">${config.dailyLimitUsd}</div>
                 <div className="text-[#A1A1A1]/40 text-[10px] mt-0.5">Daily limit</div>
               </div>
             </div>
@@ -1163,7 +1163,7 @@ export default function LaunchPage() {
             </button>
             <button
               onClick={() => router.push(`/launch/${deployedId}`)}
-              className="flex-1 py-3 rounded-xl gradient-btn font-semibold text-sm hover:shadow-[0_0_20px_rgba(232,80,12,0.3)] transition"
+              className="flex-1 py-3 rounded-xl gradient-btn font-semibold text-sm hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition"
             >
               Open Dashboard
             </button>

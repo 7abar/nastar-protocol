@@ -110,7 +110,7 @@ export default function AgentsPage() {
             <h1 className="text-3xl font-bold mb-1">Agents</h1>
             <p className="text-[#A1A1A1]/60 text-sm">{agents.length} registered agents on Celo</p>
           </div>
-          <Link href="/agents/register" className="px-5 py-2.5 rounded-xl gradient-btn font-bold text-sm hover:shadow-[0_0_15px_rgba(232,80,12,0.3)] transition">
+          <Link href="/agents/register" className="px-5 py-2.5 rounded-xl gradient-btn font-bold text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
             + Register Agent
           </Link>
         </div>
@@ -121,7 +121,7 @@ export default function AgentsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search agents, services, addresses..."
-            className="flex-1 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm transition"
+            className="flex-1 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
           />
           <div className="flex rounded-xl overflow-hidden border border-white/[0.08]">
             {(["all", "active", "mine"] as const).map((f) => (
@@ -129,7 +129,7 @@ export default function AgentsPage() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-2.5 text-xs capitalize transition ${
-                  filter === f ? "bg-[#E8500C] text-[#0A0A0A] font-bold" : "bg-white/[0.02] text-[#A1A1A1] hover:bg-white/[0.06]"
+                  filter === f ? "bg-[#F4C430] text-[#0A0A0A] font-bold" : "bg-white/[0.02] text-[#A1A1A1] hover:bg-white/[0.06]"
                 }`}
               >
                 {f}
@@ -146,7 +146,7 @@ export default function AgentsPage() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-[#A1A1A1]/40 mb-4">No agents found</p>
-            <Link href="/agents/register" className="text-[#E8500C] text-sm hover:underline">Register the first one</Link>
+            <Link href="/agents/register" className="text-[#F4C430] text-sm hover:underline">Register the first one</Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -154,26 +154,26 @@ export default function AgentsPage() {
               <Link
                 key={agent.agentId + agent.walletAddress}
                 href={agent.localId ? `/agents/${agent.localId}` : `/agents/${agent.agentId}`}
-                className="block p-5 rounded-xl glass-card hover:border-[#E8500C]/50 transition group"
+                className="block p-5 rounded-xl glass-card hover:border-[#F4C430]/50 transition group"
               >
                 {/* Top */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                      agent.active ? "bg-[#E8500C]/15 text-[#E8500C]" : "bg-white/[0.06] text-[#A1A1A1]/50"
+                      agent.active ? "bg-[#F4C430]/15 text-[#F4C430]" : "bg-white/[0.06] text-[#A1A1A1]/50"
                     }`}>
                       {agent.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#E8500C] transition">{agent.name}</h3>
+                      <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#F4C430] transition">{agent.name}</h3>
                       <p className="text-[#A1A1A1]/30 text-[10px] font-mono">
                         #{agent.agentId} · {agent.walletAddress.slice(0, 6)}...{agent.walletAddress.slice(-4)}
                       </p>
                     </div>
                   </div>
                   {agent.active && (
-                    <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-[#E8500C]/10 text-[#E8500C]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#E8500C]" /> Active
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-[#F4C430]/10 text-[#F4C430]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#F4C430]" /> Active
                     </span>
                   )}
                 </div>
@@ -184,7 +184,7 @@ export default function AgentsPage() {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   <div className="text-center py-2 rounded-lg bg-white/[0.02]">
-                    <p className="text-[#E8500C] font-bold text-sm">${agent.revenue}</p>
+                    <p className="text-[#F4C430] font-bold text-sm">${agent.revenue}</p>
                     <p className="text-[#A1A1A1]/30 text-[9px] uppercase">Revenue</p>
                   </div>
                   <div className="text-center py-2 rounded-lg bg-white/[0.02]">
@@ -192,7 +192,7 @@ export default function AgentsPage() {
                     <p className="text-[#A1A1A1]/30 text-[9px] uppercase">Jobs</p>
                   </div>
                   <div className="text-center py-2 rounded-lg bg-white/[0.02]">
-                    <p className={`font-bold text-sm ${agent.completionRate >= 90 ? "text-[#E8500C]" : "text-[#A1A1A1]"}`}>{agent.completionRate}%</p>
+                    <p className={`font-bold text-sm ${agent.completionRate >= 90 ? "text-[#F4C430]" : "text-[#A1A1A1]"}`}>{agent.completionRate}%</p>
                     <p className="text-[#A1A1A1]/30 text-[9px] uppercase">Success</p>
                   </div>
                 </div>
@@ -200,7 +200,7 @@ export default function AgentsPage() {
                 {/* Bottom */}
                 <div className="flex items-center justify-between pt-3 border-t border-white/[0.06] text-xs">
                   <span className="text-[#A1A1A1]/40">{agent.serviceCount} service{agent.serviceCount !== 1 ? "s" : ""} · from {agent.price} USDC</span>
-                  <svg className="w-4 h-4 text-[#A1A1A1]/20 group-hover:text-[#E8500C] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-4 h-4 text-[#A1A1A1]/20 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </div>

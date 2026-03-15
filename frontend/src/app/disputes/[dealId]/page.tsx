@@ -96,7 +96,7 @@ export default function DisputePage({ params }: { params: Promise<{ dealId: stri
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-[#E8500C] border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-2 border-[#F4C430] border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -107,7 +107,7 @@ export default function DisputePage({ params }: { params: Promise<{ dealId: stri
         <div>
           <div className="text-4xl mb-4">&#9878;</div>
           <h1 className="text-xl font-bold text-white mb-2">Deal Not Found</h1>
-          <Link href="/deals" className="text-[#E8500C] text-sm hover:underline">Back to Deals</Link>
+          <Link href="/deals" className="text-[#F4C430] text-sm hover:underline">Back to Deals</Link>
         </div>
       </div>
     );
@@ -155,7 +155,7 @@ export default function DisputePage({ params }: { params: Promise<{ dealId: stri
           {deal.deliveryProof && (
             <div>
               <h4 className="text-xs text-[#A1A1A1] uppercase tracking-wider mb-1">Delivery Proof</h4>
-              <p className="text-[#E8500C] text-sm font-mono break-all">{deal.deliveryProof}</p>
+              <p className="text-[#F4C430] text-sm font-mono break-all">{deal.deliveryProof}</p>
             </div>
           )}
           <div className="grid grid-cols-2 gap-4 mt-4 text-xs">
@@ -175,7 +175,7 @@ export default function DisputePage({ params }: { params: Promise<{ dealId: stri
           <div className={`p-6 rounded-xl border mb-6 ${
             judgeCase!.verdict!.executed
               ? "bg-green-500/5 border-green-500/30"
-              : "bg-[#E8500C]/5 border-[#E8500C]/30"
+              : "bg-[#F4C430]/5 border-[#F4C430]/30"
           }`}>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-2xl">&#9878;</span>
@@ -221,7 +221,7 @@ export default function DisputePage({ params }: { params: Promise<{ dealId: stri
                 href={`https://sepolia.celoscan.io/tx/${judgeCase!.verdict!.txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block mt-3 text-xs text-[#E8500C] hover:underline font-mono"
+                className="block mt-3 text-xs text-[#F4C430] hover:underline font-mono"
               >
                 TX: {judgeCase!.verdict!.txHash.slice(0, 20)}...
               </a>
@@ -231,13 +231,13 @@ export default function DisputePage({ params }: { params: Promise<{ dealId: stri
 
         {/* Judge status */}
         {judgeCase && !hasVerdict && (
-          <div className="p-5 rounded-xl bg-[#E8500C]/5 border border-[#E8500C]/20 mb-6">
+          <div className="p-5 rounded-xl bg-[#F4C430]/5 border border-[#F4C430]/20 mb-6">
             <div className="flex items-center gap-3">
               {judgeCase.status === "deliberating" ? (
                 <>
-                  <div className="animate-spin w-5 h-5 border-2 border-[#E8500C] border-t-transparent rounded-full" />
+                  <div className="animate-spin w-5 h-5 border-2 border-[#F4C430] border-t-transparent rounded-full" />
                   <div>
-                    <h3 className="font-semibold text-[#E8500C]">AI Judge is deliberating...</h3>
+                    <h3 className="font-semibold text-[#F4C430]">AI Judge is deliberating...</h3>
                     <p className="text-[#A1A1A1] text-xs mt-0.5">Analyzing evidence. Verdict incoming.</p>
                   </div>
                 </>
@@ -305,13 +305,13 @@ export default function DisputePage({ params }: { params: Promise<{ dealId: stri
                 ? "Explain why the delivery does not meet the task requirements..."
                 : "Explain why your delivery fulfills the task requirements..."}
               rows={5}
-              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-[#E8500C]/30 text-white placeholder-white/20 focus:outline-none focus:border-[#E8500C]/70 resize-none text-sm mb-3"
+              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-[#F4C430]/30 text-white placeholder-white/20 focus:outline-none focus:border-[#F4C430]/70 resize-none text-sm mb-3"
             />
 
             <button
               onClick={submitEvidence}
               disabled={!evidence.trim() || submitting}
-              className="w-full py-3 rounded-xl gradient-btn font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_#E8500C] transition"
+              className="w-full py-3 rounded-xl gradient-btn font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_#F4C430] transition"
             >
               {submitting ? "Submitting..." : "Submit Evidence to AI Judge"}
             </button>

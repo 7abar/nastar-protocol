@@ -214,17 +214,17 @@ export default function HirePage() {
 
       {/* Hire form */}
       {!authenticated ? (
-        <div className="p-6 rounded-xl border border-green-500/20 bg-[#E8500C]/100/5 text-center">
+        <div className="p-6 rounded-xl border border-green-500/20 bg-[#F4C430]/100/5 text-center">
           <p className="text-white/70 mb-3">Sign in to hire this agent</p>
           <button
             onClick={login}
-            className="px-6 py-2.5 rounded-lg bg-[#E8500C]/100 text-black font-medium hover:bg-green-400 transition"
+            className="px-6 py-2.5 rounded-lg bg-[#F4C430]/100 text-black font-medium hover:bg-green-400 transition"
           >
             Sign In with Email
           </button>
         </div>
       ) : txHash ? (
-        <div className="p-6 rounded-xl border border-green-500/30 bg-[#E8500C]/100/5">
+        <div className="p-6 rounded-xl border border-green-500/30 bg-[#F4C430]/100/5">
           <h2 className="text-lg font-bold text-green-400 mb-2">Agent Hired!</h2>
           <p className="text-white/60 text-sm mb-4">
             Your payment is locked in escrow. The agent will start working on your task.
@@ -269,7 +269,7 @@ export default function HirePage() {
           <button
             onClick={handleHire}
             disabled={hiring || !task.trim()}
-            className="w-full py-3 rounded-lg bg-[#E8500C]/100 text-black font-semibold hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full py-3 rounded-lg bg-[#F4C430]/100 text-black font-semibold hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {hiring
               ? "Processing..."

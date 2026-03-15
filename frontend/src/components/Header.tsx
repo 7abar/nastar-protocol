@@ -29,7 +29,7 @@ function ProfileDropdown() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="w-8 h-8 rounded-full bg-[#E8500C] text-[#0A0A0A] text-xs font-bold flex items-center justify-center hover:shadow-[0_0_15px_#E8500C] transition"
+        className="w-8 h-8 rounded-full bg-[#F4C430] text-[#0A0A0A] text-xs font-bold flex items-center justify-center hover:shadow-[0_0_15px_#F4C430] transition"
       >
         {initials}
       </button>
@@ -40,20 +40,20 @@ function ProfileDropdown() {
           <div className="px-4 py-3.5 border-b border-white/[0.06]">
             <button
               onClick={() => { navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-              className="flex items-center gap-2 text-[#F5F5F5] font-mono text-sm hover:text-[#E8500C] transition w-full"
+              className="flex items-center gap-2 text-[#F5F5F5] font-mono text-sm hover:text-[#F4C430] transition w-full"
             >
-              <div className="w-7 h-7 rounded-full bg-[#E8500C] text-[#0A0A0A] text-xs font-bold flex items-center justify-center flex-shrink-0">
+              <div className="w-7 h-7 rounded-full bg-[#F4C430] text-[#0A0A0A] text-xs font-bold flex items-center justify-center flex-shrink-0">
                 {initials}
               </div>
               <span className="flex-1 text-left">{shortAddr}</span>
               {copied
-                ? <span className="text-[#E8500C] text-[10px]">Copied!</span>
+                ? <span className="text-[#F4C430] text-[10px]">Copied!</span>
                 : <svg className="w-3.5 h-3.5 text-[#A1A1A1]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
               }
             </button>
             {email && <p className="text-[#A1A1A1]/40 text-[11px] mt-1.5 pl-9 truncate">{email}</p>}
             <div className="flex items-center gap-1.5 mt-2 pl-9">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E8500C]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#F4C430]" />
               <span className="text-[#A1A1A1]/40 text-[11px]">Celo Sepolia</span>
             </div>
           </div>
@@ -138,7 +138,7 @@ export function Header() {
             </>
           ) : (
             <button onClick={login}
-              className="px-4 py-1.5 rounded-full bg-[#E8500C] text-[#0A0A0A] text-sm font-bold hover:shadow-[0_0_20px_rgba(232,80,12,0.4)] transition">
+              className="px-4 py-1.5 rounded-full bg-[#F4C430] text-[#0A0A0A] text-sm font-bold hover:shadow-[0_0_20px_rgba(244,196,48,0.4)] transition">
               Connect
             </button>
           )}
@@ -171,7 +171,7 @@ export function Header() {
             ].map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
                 className={`block px-3 py-2.5 rounded-lg text-sm transition ${
-                  pathname === item.href ? "text-[#E8500C] font-medium bg-[#E8500C]/5" : "text-[#A1A1A1]/70 hover:text-[#F5F5F5]"
+                  pathname === item.href ? "text-[#F4C430] font-medium bg-[#F4C430]/5" : "text-[#A1A1A1]/70 hover:text-[#F5F5F5]"
                 }`}>
                 {item.label}
               </Link>

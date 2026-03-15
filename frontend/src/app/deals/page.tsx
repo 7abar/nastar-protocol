@@ -122,7 +122,7 @@ export default function DealsPage() {
         <p className="text-[#A1A1A1] mb-6">Sign in to see your deals</p>
         <button
           onClick={login}
-          className="px-6 py-2.5 rounded-lg gradient-btn font-medium hover:shadow-[0_0_15px_#E8500C] transition"
+          className="px-6 py-2.5 rounded-lg gradient-btn font-medium hover:shadow-[0_0_15px_#F4C430] transition"
         >
           Sign In
         </button>
