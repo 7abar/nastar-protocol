@@ -4,10 +4,11 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatUnits } from "viem";
+import { supabase } from "@/lib/supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
 
-// Generate unique avatar style per agent
+// Fallback avatar styles when no stored avatar exists
 const AGENT_AVATARS: { gradient: string; icon: string }[] = [
   { gradient: "from-blue-500 to-cyan-400", icon: "🔍" },
   { gradient: "from-purple-500 to-pink-400", icon: "🌐" },
@@ -19,7 +20,13 @@ const AGENT_AVATARS: { gradient: string; icon: string }[] = [
   { gradient: "from-fuchsia-500 to-purple-400", icon: "🧠" },
 ];
 
-function getAgentAvatar(agentId: string) {
+function getAgentAvatar(agentId: string, storedAvatars: Map<string, string>) {
+  // Use the icon stored during launch if available
+  const stored = storedAvatars.get(agentId);
+  if (stored) {
+    const idx = parseInt(agentId) % AGENT_AVATARS.length;
+    return { gradient: AGENT_AVATARS[idx].gradient, icon: stored };
+  }
   const idx = parseInt(agentId) % AGENT_AVATARS.length;
   return AGENT_AVATARS[idx];
 }
@@ -106,6 +113,7 @@ export default function OfferingsPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [tab, setTab] = useState<"offerings" | "agents">("offerings");
+  const [storedAvatars, setStoredAvatars] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     async function load() {
@@ -114,6 +122,23 @@ export default function OfferingsPage() {
         const data = await res.json();
         setServices(data.services || data || []);
       } catch {}
+
+      // Load stored avatars from Supabase (icons picked during agent launch)
+      try {
+        const { data: agents } = await supabase
+          .from("registered_agents")
+          .select("agent_nft_id, avatar");
+        if (agents) {
+          const map = new Map<string, string>();
+          for (const a of agents) {
+            if (a.agent_nft_id != null && a.avatar) {
+              map.set(String(a.agent_nft_id), a.avatar);
+            }
+          }
+          setStoredAvatars(map);
+        }
+      } catch {}
+
       setLoading(false);
     }
     load();
@@ -283,7 +308,7 @@ export default function OfferingsPage() {
                     ? Math.min(...agentServices.map((s) => parseFloat(formatUnits(BigInt(s.pricePerCall), 18))))
                     : 0;
 
-                  const avatar = getAgentAvatar(agent.agentId);
+                  const avatar = getAgentAvatar(agent.agentId, storedAvatars);
                   const agentName = agent.services[0] || `Agent #${agent.agentId}`;
 
                   return (
