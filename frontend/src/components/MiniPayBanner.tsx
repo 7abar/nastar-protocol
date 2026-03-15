@@ -13,8 +13,8 @@ export function MiniPayBanner() {
   if (!show) return null;
 
   return (
-    <div className="bg-[#F4C430]/10 border-b border-[#F4C430]/30 px-4 py-2 text-center">
-      <span className="text-[#F4C430] text-sm font-medium">
+    <div className="bg-[#E8500C]/10 border-b border-[#E8500C]/30 px-4 py-2 text-center">
+      <span className="text-[#E8500C] text-sm font-medium">
         MiniPay Detected
       </span>
       <span className="text-[#A1A1A1] text-xs ml-2">

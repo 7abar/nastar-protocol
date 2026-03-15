@@ -40,14 +40,14 @@ export default function BountiesPage() {
           {authenticated ? (
             <a
               href="/chat"
-              className="px-4 py-2 rounded-lg bg-[#F4C430]/100 text-black font-medium hover:bg-green-400 transition text-sm"
+              className="px-4 py-2 rounded-lg bg-[#E8500C]/100 text-black font-medium hover:bg-green-400 transition text-sm"
             >
               + Post Bounty
             </a>
           ) : (
             <button
               onClick={login}
-              className="px-4 py-2 rounded-lg bg-[#F4C430]/100 text-black font-medium hover:bg-green-400 transition text-sm"
+              className="px-4 py-2 rounded-lg bg-[#E8500C]/100 text-black font-medium hover:bg-green-400 transition text-sm"
             >
               Sign In
             </button>
@@ -87,7 +87,7 @@ export default function BountiesPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-white/20 text-xs font-mono">#{bounty.dealId}</span>
-                        <span className={`px-2 py-0.5 rounded text-xs ${expired ? "bg-red-500/20 text-red-400" : "bg-[#F4C430]/100/20 text-green-400"}`}>
+                        <span className={`px-2 py-0.5 rounded text-xs ${expired ? "bg-red-500/20 text-red-400" : "bg-[#E8500C]/100/20 text-green-400"}`}>
                           {expired ? "Expired" : "Open"}
                         </span>
                       </div>

@@ -133,7 +133,7 @@ export default function AgentChatPage() {
                   onClick={() => { setModel(m.id); setShowModelPicker(false); }}
                   className={`w-full text-left px-4 py-2.5 text-xs transition ${
                     model === m.id
-                      ? "bg-[#F4C430]/10 text-[#F4C430]"
+                      ? "bg-[#E8500C]/10 text-[#E8500C]"
                       : "text-[#A1A1A1] hover:bg-white/[0.04] hover:text-white"
                   }`}
                 >
@@ -163,7 +163,7 @@ export default function AgentChatPage() {
             <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                 msg.role === "user"
-                  ? "bg-[#F4C430] text-[#0A0A0A] rounded-br-md"
+                  ? "bg-[#E8500C] text-[#0A0A0A] rounded-br-md"
                   : "bg-white/[0.06] text-[#F5F5F5] rounded-bl-md"
               }`}>
                 {msg.content}
@@ -196,12 +196,12 @@ export default function AgentChatPage() {
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
             placeholder="Type your message..."
             disabled={loading}
-            className="flex-1 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/30 text-sm transition disabled:opacity-50"
+            className="flex-1 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/30 text-sm transition disabled:opacity-50"
           />
           <button
             onClick={sendMessage}
             disabled={!input.trim() || loading}
-            className="px-4 py-3 rounded-xl bg-[#F4C430] text-[#0A0A0A] font-medium text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            className="px-4 py-3 rounded-xl bg-[#E8500C] text-[#0A0A0A] font-medium text-sm hover:shadow-[0_0_15px_rgba(232,80,12,0.3)] transition disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />

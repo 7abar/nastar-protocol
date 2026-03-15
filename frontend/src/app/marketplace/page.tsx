@@ -79,11 +79,11 @@ export default function Marketplace() {
       )}
 
       {!authenticated && services.length > 0 && (
-        <div className="mt-8 p-6 rounded-xl border border-green-500/20 bg-[#F4C430]/100/5 text-center">
+        <div className="mt-8 p-6 rounded-xl border border-green-500/20 bg-[#E8500C]/100/5 text-center">
           <p className="text-white/70 mb-3">Sign in to hire an agent</p>
           <button
             onClick={login}
-            className="px-6 py-2.5 rounded-lg bg-[#F4C430]/100 text-black font-medium hover:bg-green-400 transition"
+            className="px-6 py-2.5 rounded-lg bg-[#E8500C]/100 text-black font-medium hover:bg-green-400 transition"
           >
             Sign In with Email
           </button>

@@ -228,14 +228,14 @@ function ChatPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-56px)] bg-[#0A0A0A] px-4">
         <div className="max-w-sm text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F4C430] to-[#FF9F1C] flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(244,196,48,0.3)]">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E8500C] to-[#FF6B1A] flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(232,80,12,0.3)]">
             <span className="text-[#0A0A0A] font-bold text-2xl">N</span>
           </div>
           <h2 className="text-xl font-bold text-[#F5F5F5] mb-2">Nastar</h2>
           <p className="text-[#A1A1A1] text-sm mb-8">
             AI-powered agent discovery. Tell me what you need, I'll find and hire the right agent.
           </p>
-          <button onClick={login} className="w-full py-3 rounded-xl gradient-btn font-semibold hover:shadow-[0_0_20px_rgba(244,196,48,0.4)] transition text-sm">
+          <button onClick={login} className="w-full py-3 rounded-xl gradient-btn font-semibold hover:shadow-[0_0_20px_rgba(232,80,12,0.4)] transition text-sm">
             Connect Wallet to Chat
           </button>
           <p className="text-[#A1A1A1]/40 text-xs mt-4">Email, Google, or any Celo wallet</p>
@@ -252,7 +252,7 @@ function ChatPage() {
           {/* Empty state with suggestions */}
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center min-h-[50vh]">
-              <div className="w-20 h-20 rounded-full overflow-hidden mb-4 shadow-[0_0_20px_rgba(244,196,48,0.2)]">
+              <div className="w-20 h-20 rounded-full overflow-hidden mb-4 shadow-[0_0_20px_rgba(232,80,12,0.2)]">
                 <img src="/nastar-mascot.png" alt="Nastar" className="w-full h-full object-cover" />
               </div>
               <h3 className="text-[#F5F5F5] font-semibold mb-1">What do you need done?</h3>
@@ -262,7 +262,7 @@ function ChatPage() {
                   <button
                     key={s}
                     onClick={() => { setInput(s); inputRef.current?.focus(); }}
-                    className="px-4 py-2.5 rounded-xl glass-card text-[#A1A1A1] text-sm text-left hover:text-[#F4C430] hover:border-[#F4C430]/50 transition"
+                    className="px-4 py-2.5 rounded-xl glass-card text-[#A1A1A1] text-sm text-left hover:text-[#E8500C] hover:border-[#E8500C]/50 transition"
                   >
                     {s}
                   </button>
@@ -276,7 +276,7 @@ function ChatPage() {
             <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-in`}>
               {/* Avatar for assistant */}
               {msg.role === "assistant" && (
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#F4C430] to-[#FF9F1C] flex items-center justify-center mr-2 mt-1 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#E8500C] to-[#FF6B1A] flex items-center justify-center mr-2 mt-1 shrink-0">
                   <span className="text-[#0A0A0A] font-bold text-xs">N</span>
                 </div>
               )}
@@ -284,7 +284,7 @@ function ChatPage() {
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-[#F4C430] text-[#0A0A0A] rounded-br-md"
+                    ? "bg-[#E8500C] text-[#0A0A0A] rounded-br-md"
                     : msg.role === "system"
                     ? "bg-transparent text-[#A1A1A1]/60 text-xs italic px-0 py-1"
                     : "bg-white/[0.06] text-[#F5F5F5] border border-white/[0.08] rounded-bl-md"
@@ -296,16 +296,16 @@ function ChatPage() {
                 {msg.services && (
                   <div className="mt-3 space-y-2">
                     {msg.services.map((svc, i) => (
-                      <div key={i} className="p-3 rounded-xl bg-[#0A0A0A]/50 border border-[#F4C430]/20">
+                      <div key={i} className="p-3 rounded-xl bg-[#0A0A0A]/50 border border-[#E8500C]/20">
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-semibold text-[#F5F5F5] text-sm">{svc.name}</span>
-                          <span className="text-[#F4C430] text-xs font-medium">{formatUnits(svc.pricePerCall, 18)} USDC</span>
+                          <span className="text-[#E8500C] text-xs font-medium">{formatUnits(svc.pricePerCall, 18)} USDC</span>
                         </div>
                         <p className="text-[#A1A1A1] text-xs mb-2 line-clamp-2">{svc.description}</p>
                         <button
                           onClick={() => handleHire(svc, i)}
                           disabled={loading}
-                          className="w-full py-1.5 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-50 transition"
+                          className="w-full py-1.5 rounded-lg bg-[#E8500C] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_15px_rgba(232,80,12,0.3)] disabled:opacity-50 transition"
                         >
                           Hire — {formatUnits(svc.pricePerCall, 18)} USDC
                         </button>
@@ -316,7 +316,7 @@ function ChatPage() {
 
                 {msg.txHash && (
                   <a href={`https://sepolia.celoscan.io/tx/${msg.txHash}`} target="_blank"
-                    className="inline-block mt-2 text-xs text-[#F4C430] hover:underline">
+                    className="inline-block mt-2 text-xs text-[#E8500C] hover:underline">
                     View on CeloScan
                   </a>
                 )}
@@ -326,14 +326,14 @@ function ChatPage() {
 
           {loading && (
             <div className="flex items-start">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#F4C430] to-[#FF9F1C] flex items-center justify-center mr-2 mt-1 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#E8500C] to-[#FF6B1A] flex items-center justify-center mr-2 mt-1 shrink-0">
                 <span className="text-[#0A0A0A] font-bold text-xs">N</span>
               </div>
               <div className="bg-white/[0.06] border border-white/[0.08] rounded-2xl rounded-bl-md px-4 py-3">
                 <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-[#F4C430]/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-2 h-2 bg-[#F4C430]/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-2 h-2 bg-[#F4C430]/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <span className="w-2 h-2 bg-[#E8500C]/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-2 h-2 bg-[#E8500C]/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 bg-[#E8500C]/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             </div>
@@ -352,13 +352,13 @@ function ChatPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="What do you need an agent to do?"
-            className="flex-1 px-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/40 focus:outline-none focus:border-[#F4C430]/40 transition text-sm"
+            className="flex-1 px-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/40 focus:outline-none focus:border-[#E8500C]/40 transition text-sm"
             disabled={loading}
           />
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="px-5 py-3 rounded-xl bg-[#F4C430] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-30 transition"
+            className="px-5 py-3 rounded-xl bg-[#E8500C] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(232,80,12,0.3)] disabled:opacity-30 transition"
           >
             Send
           </button>

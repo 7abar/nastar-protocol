@@ -172,7 +172,7 @@ export default function OfferingsPage() {
             onClick={() => setTab("offerings")}
             className={`px-5 py-3 text-sm font-medium transition border-b-2 -mb-px ${
               tab === "offerings"
-                ? "text-[#F4C430] border-[#F4C430]"
+                ? "text-[#E8500C] border-[#E8500C]"
                 : "text-[#A1A1A1]/50 border-transparent hover:text-[#F5F5F5]"
             }`}
           >
@@ -182,7 +182,7 @@ export default function OfferingsPage() {
             onClick={() => setTab("agents")}
             className={`px-5 py-3 text-sm font-medium transition border-b-2 -mb-px ${
               tab === "agents"
-                ? "text-[#F4C430] border-[#F4C430]"
+                ? "text-[#E8500C] border-[#E8500C]"
                 : "text-[#A1A1A1]/50 border-transparent hover:text-[#F5F5F5]"
             }`}
           >
@@ -196,7 +196,7 @@ export default function OfferingsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={tab === "offerings" ? "Search services..." : "Search agents..."}
-            className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
+            className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm transition"
           />
 
           {/* Category filter (only for Offerings tab) */}
@@ -208,7 +208,7 @@ export default function OfferingsPage() {
                   onClick={() => setCategory(cat.key)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs whitespace-nowrap transition ${
                     category === cat.key
-                      ? "bg-[#F4C430] text-[#0A0A0A] font-bold"
+                      ? "bg-[#E8500C] text-[#0A0A0A] font-bold"
                       : "bg-white/[0.04] text-[#A1A1A1] hover:bg-white/[0.08]"
                   }`}
                 >
@@ -230,29 +230,29 @@ export default function OfferingsPage() {
             ) : filtered.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-[#A1A1A1]/40 mb-2">{search ? "No services match your search" : "No services in this category"}</p>
-                {search && <button onClick={() => setSearch("")} className="text-[#F4C430] text-sm hover:underline">Clear search</button>}
+                {search && <button onClick={() => setSearch("")} className="text-[#E8500C] text-sm hover:underline">Clear search</button>}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filtered.map((svc, idx) => (
-                  <div key={idx} className="p-5 rounded-xl glass-card hover:border-[#F4C430]/50 transition group flex flex-col">
+                  <div key={idx} className="p-5 rounded-xl glass-card hover:border-[#E8500C]/50 transition group flex flex-col">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/10 flex items-center justify-center text-lg shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E8500C]/20 to-[#FF6B1A]/10 flex items-center justify-center text-lg shrink-0">
                           {getServiceIcon(svc.name)}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#F4C430] transition">{svc.name}</h3>
+                          <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#E8500C] transition">{svc.name}</h3>
                           <p className="text-[#A1A1A1]/30 text-[10px] font-mono">Agent #{svc.agentId}</p>
                         </div>
                       </div>
                     </div>
                     <p className="text-[#A1A1A1]/60 text-xs leading-relaxed flex-1 mb-4 line-clamp-3">{svc.description}</p>
                     <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-                      <span className="text-[#F4C430] font-semibold text-sm">{formatPrice(svc.pricePerCall)} USDC</span>
+                      <span className="text-[#E8500C] font-semibold text-sm">{formatPrice(svc.pricePerCall)} USDC</span>
                       <Link
                         href={`/chat?agent=${svc.agentId}&name=${encodeURIComponent(svc.name)}`}
-                        className="px-4 py-1.5 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(244,196,48,0.3)] transition"
+                        className="px-4 py-1.5 rounded-lg bg-[#E8500C] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(232,80,12,0.3)] transition"
                       >
                         Hire
                       </Link>
@@ -287,14 +287,14 @@ export default function OfferingsPage() {
                   const agentName = agent.services[0] || `Agent #${agent.agentId}`;
 
                   return (
-                    <div key={agent.agentId} className="p-5 rounded-xl glass-card hover:border-[#F4C430]/50 transition group">
+                    <div key={agent.agentId} className="p-5 rounded-xl glass-card hover:border-[#E8500C]/50 transition group">
                       <div className="flex items-start gap-4 mb-4">
                         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${avatar.gradient} flex items-center justify-center shrink-0 shadow-lg`}>
                           <span className="text-xl">{avatar.icon}</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#F4C430] transition">{agentName}</h3>
+                            <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#E8500C] transition">{agentName}</h3>
                             <span className="px-2 py-0.5 rounded-full bg-green-400/10 text-green-400 text-[10px] font-medium">Active</span>
                           </div>
                           <p className="text-[#A1A1A1]/40 text-[11px] font-mono truncate">{agent.provider.slice(0, 6)}...{agent.provider.slice(-4)}</p>
@@ -316,14 +316,14 @@ export default function OfferingsPage() {
                       <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
                         <div className="flex items-center gap-4">
                           <div>
-                            <p className="text-[#F4C430] font-semibold text-sm">from ${minPrice.toFixed(0)}</p>
+                            <p className="text-[#E8500C] font-semibold text-sm">from ${minPrice.toFixed(0)}</p>
                             <p className="text-[#A1A1A1]/30 text-[9px]">per task</p>
                           </div>
                         </div>
                         <div className="flex gap-2 shrink-0">
                           <Link
                             href={`/chat/${agent.agentId}`}
-                            className="px-4 py-1.5 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_12px_rgba(244,196,48,0.3)] transition"
+                            className="px-4 py-1.5 rounded-lg bg-[#E8500C] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_12px_rgba(232,80,12,0.3)] transition"
                           >
                             Chat
                           </Link>

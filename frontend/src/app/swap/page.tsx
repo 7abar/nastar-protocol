@@ -54,8 +54,8 @@ export default function SwapPage() {
 
         {/* Header */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F4C430]/10 text-[#F4C430] text-xs font-medium mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F4C430] animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8500C]/10 text-[#E8500C] text-xs font-medium mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E8500C] animate-pulse" />
             Agent-Native · Mento Protocol
           </div>
           <h1 className="text-3xl font-bold mb-2">Multi-Currency Swap</h1>
@@ -74,7 +74,7 @@ export default function SwapPage() {
             { id: "rates", label: "Live FX Rates" },
           ].map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`px-5 py-2 rounded-lg text-sm font-medium transition ${activeTab === tab.id ? "bg-[#F4C430] text-[#0A0A0A]" : "text-[#A1A1A1] hover:text-white"}`}>
+              className={`px-5 py-2 rounded-lg text-sm font-medium transition ${activeTab === tab.id ? "bg-[#E8500C] text-[#0A0A0A]" : "text-[#A1A1A1] hover:text-white"}`}>
               {tab.label}
             </button>
           ))}
@@ -91,8 +91,8 @@ export default function SwapPage() {
                   step: "1",
                   title: "Deal Completed",
                   desc: "Buyer pays 100 USDm into escrow. Deal delivered → Nastar releases 80 USDm to seller agent.",
-                  color: "border-[#F4C430]/30 bg-[#F4C430]/5",
-                  badge: "text-[#F4C430]",
+                  color: "border-[#E8500C]/30 bg-[#E8500C]/5",
+                  badge: "text-[#E8500C]",
                 },
                 {
                   step: "2",
@@ -180,7 +180,7 @@ const result = await tools.nastar_swap_quote({
                     <div className="text-xl mb-1">{t.icon}</div>
                     <div className="font-semibold text-sm">{t.name}</div>
                     <div className="text-[#A1A1A1] text-xs mt-0.5">{t.desc}</div>
-                    <div className="text-[#F4C430] text-[10px] font-mono mt-1.5">{t.pair}</div>
+                    <div className="text-[#E8500C] text-[10px] font-mono mt-1.5">{t.pair}</div>
                   </div>
                 ))}
               </div>
@@ -235,7 +235,7 @@ const result = await tools.nastar_swap_quote({
                     <code className="text-white font-mono text-sm">{ep.path}</code>
                     <p className="text-[#A1A1A1] text-xs mt-1">{ep.desc}</p>
                     {ep.params && (
-                      <code className="text-[#F4C430]/70 text-xs font-mono mt-1 block">{ep.params}</code>
+                      <code className="text-[#E8500C]/70 text-xs font-mono mt-1 block">{ep.params}</code>
                     )}
                   </div>
                 </div>
@@ -243,9 +243,9 @@ const result = await tools.nastar_swap_quote({
             ))}
 
             {/* Live query tester */}
-            <div className="rounded-xl border border-[#F4C430]/20 bg-[#F4C430]/5 overflow-hidden">
-              <div className="px-5 py-3 border-b border-[#F4C430]/10">
-                <span className="text-sm font-medium text-[#F4C430]">Try it — Live Quote</span>
+            <div className="rounded-xl border border-[#E8500C]/20 bg-[#E8500C]/5 overflow-hidden">
+              <div className="px-5 py-3 border-b border-[#E8500C]/10">
+                <span className="text-sm font-medium text-[#E8500C]">Try it — Live Quote</span>
               </div>
               <div className="p-5 space-y-4">
                 <div className="flex gap-3 flex-wrap">
@@ -269,7 +269,7 @@ const result = await tools.nastar_swap_quote({
                       className="w-24 px-3 py-1.5 rounded-lg bg-black/30 border border-white/10 text-white text-sm font-mono" />
                   </div>
                   <button onClick={runQuote} disabled={quoteLoading}
-                    className="px-4 py-1.5 rounded-lg bg-[#F4C430] text-black text-sm font-semibold hover:bg-[#F4C430]/90 disabled:opacity-50 transition">
+                    className="px-4 py-1.5 rounded-lg bg-[#E8500C] text-black text-sm font-semibold hover:bg-[#E8500C]/90 disabled:opacity-50 transition">
                     {quoteLoading ? "Loading..." : "Run →"}
                   </button>
                 </div>

@@ -88,7 +88,7 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-[#F4C430] border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-2 border-[#E8500C] border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -102,7 +102,7 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
           <p className="text-[#A1A1A1] mb-6 text-sm">
             This agent was not registered from this browser, or the wallet address is incorrect.
           </p>
-          <Link href="/launch" className="px-6 py-3 rounded-xl gradient-btn font-medium hover:shadow-[0_0_15px_#F4C430] transition">
+          <Link href="/launch" className="px-6 py-3 rounded-xl gradient-btn font-medium hover:shadow-[0_0_15px_#E8500C] transition">
             Launch an Agent
           </Link>
         </div>
@@ -161,7 +161,7 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
           ].map((s) => (
             <div key={s.label} className="p-4 rounded-xl bg-white/5 border border-white/10">
               <div className="text-xl mb-1">{s.icon}</div>
-              <div className="text-xl font-bold text-[#F4C430]">{s.value}</div>
+              <div className="text-xl font-bold text-[#E8500C]">{s.value}</div>
               <div className="text-[#A1A1A1] text-xs mt-0.5">{s.label}</div>
             </div>
           ))}
@@ -193,7 +193,7 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
             <div className="space-y-3 text-sm">
               <div>
                 <div className="text-[#A1A1A1] text-xs mb-0.5">Agent Wallet</div>
-                <code className="text-[#F4C430] font-mono text-xs break-all">{agent.agentWallet}</code>
+                <code className="text-[#E8500C] font-mono text-xs break-all">{agent.agentWallet}</code>
               </div>
               <div>
                 <div className="text-[#A1A1A1] text-xs mb-0.5">ERC-8004 Token ID</div>
@@ -216,7 +216,7 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
             <div className="space-y-3 text-sm">
               <div>
                 <div className="text-[#A1A1A1] text-xs mb-0.5">Endpoint</div>
-                <code className="text-[#F4C430] font-mono text-xs break-all">{agent.endpoint}</code>
+                <code className="text-[#E8500C] font-mono text-xs break-all">{agent.endpoint}</code>
               </div>
               <div>
                 <div className="text-[#A1A1A1] text-xs mb-0.5">Payment Token</div>
@@ -255,13 +255,13 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
                       <span className="text-xs text-[#A1A1A1]">
                         {new Date(log.timestamp).toLocaleTimeString()}
                       </span>
-                      {log.amount && <span className="text-xs text-[#F4C430]">{log.amount} USDC</span>}
+                      {log.amount && <span className="text-xs text-[#E8500C]">{log.amount} USDC</span>}
                       {log.txHash && (
                         <a
                           href={`https://celoscan.io/tx/${log.txHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-[#F4C430]/60 hover:text-[#F4C430] transition font-mono"
+                          className="text-xs text-[#E8500C]/60 hover:text-[#E8500C] transition font-mono"
                         >
                           {log.txHash.slice(0, 10)}...
                         </a>
@@ -284,7 +284,7 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
           </Link>
           <Link
             href="/launch"
-            className="flex-1 py-3 rounded-xl gradient-btn font-semibold text-center hover:shadow-[0_0_15px_#F4C430] transition text-sm"
+            className="flex-1 py-3 rounded-xl gradient-btn font-semibold text-center hover:shadow-[0_0_15px_#E8500C] transition text-sm"
           >
             Launch Another Agent
           </Link>

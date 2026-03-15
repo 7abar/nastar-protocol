@@ -114,9 +114,9 @@ export default function ComparePage() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="p-4 rounded-xl bg-[#F4C430]/10 border border-green-200 text-center"
+              className="p-4 rounded-xl bg-[#E8500C]/10 border border-green-200 text-center"
             >
-              <p className="text-[#F4C430] font-bold text-lg">{stat.value}</p>
+              <p className="text-[#E8500C] font-bold text-lg">{stat.value}</p>
               <p className="text-[#A1A1A1] text-sm">{stat.label}</p>
               <p className="text-[#A1A1A1]/40 text-xs mt-1">{stat.sub}</p>
             </div>
@@ -129,7 +129,7 @@ export default function ComparePage() {
           <div className="grid grid-cols-12 gap-4 px-4 py-3 text-xs text-[#A1A1A1]/60 uppercase tracking-wider">
             <div className="col-span-2">Feature</div>
             <div className="col-span-5">
-              <span className="text-[#F4C430]">Nastar</span> (Celo)
+              <span className="text-[#E8500C]">Nastar</span> (Celo)
             </div>
             <div className="col-span-5">ACP / Virtuals (Base)</div>
           </div>
@@ -139,8 +139,8 @@ export default function ComparePage() {
               key={row.feature}
               className={`grid grid-cols-12 gap-4 p-4 rounded-xl border ${
                 row.advantage === "nastar"
-                  ? "bg-[#F4C430]/100/[0.03] border-green-500/10"
-                  : "bg-[#0A0A0A]/[0.02] border-[#F4C430]/20"
+                  ? "bg-[#E8500C]/100/[0.03] border-green-500/10"
+                  : "bg-[#0A0A0A]/[0.02] border-[#E8500C]/20"
               }`}
             >
               <div className="col-span-2">
@@ -151,7 +151,7 @@ export default function ComparePage() {
               <div className="col-span-5">
                 <p className="text-white/70 text-sm leading-relaxed">
                   {row.advantage === "nastar" && (
-                    <span className="text-[#F4C430] mr-1">&#10003;</span>
+                    <span className="text-[#E8500C] mr-1">&#10003;</span>
                   )}
                   {row.nastar}
                 </p>
@@ -166,8 +166,8 @@ export default function ComparePage() {
         </div>
 
         {/* Key Differentiator: Agent ID */}
-        <div className="mt-12 p-6 rounded-xl bg-[#F4C430]/10 border border-green-200">
-          <h2 className="text-xl font-bold mb-4 text-[#F4C430]">
+        <div className="mt-12 p-6 rounded-xl bg-[#E8500C]/10 border border-green-200">
+          <h2 className="text-xl font-bold mb-4 text-[#E8500C]">
             Key Differentiator: On-Chain Agent Identity
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,7 +177,7 @@ export default function ComparePage() {
               </h3>
               <div className="bg-white/50 rounded-lg p-4 font-mono text-sm space-y-1">
                 <p className="text-[#A1A1A1]/60">// Register agent → get on-chain ID</p>
-                <p className="text-[#F4C430]">Agent #42 minted</p>
+                <p className="text-[#E8500C]">Agent #42 minted</p>
                 <p className="text-[#A1A1A1]">
                   Address: 0xA584...2fbE
                 </p>
@@ -226,13 +226,13 @@ export default function ComparePage() {
           <div className="flex gap-4 justify-center">
             <Link
               href="/join"
-              className="px-6 py-3 rounded-xl gradient-btn font-semibold hover:shadow-[0_0_15px_#F4C430] transition"
+              className="px-6 py-3 rounded-xl gradient-btn font-semibold hover:shadow-[0_0_15px_#E8500C] transition"
             >
               Deploy Your Agent
             </Link>
             <Link
               href="/faq"
-              className="px-6 py-3 rounded-xl bg-white/5 border border-[#F4C430]/30 text-[#F5F5F5] font-semibold hover:bg-white/10 transition"
+              className="px-6 py-3 rounded-xl bg-white/5 border border-[#E8500C]/30 text-[#F5F5F5] font-semibold hover:bg-white/10 transition"
             >
               Read FAQ
             </Link>

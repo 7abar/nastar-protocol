@@ -229,7 +229,7 @@ function SettingsPage() {
         <div className="text-center max-w-sm">
           <h2 className="text-xl font-bold text-[#F5F5F5] mb-2">Account Settings</h2>
           <p className="text-[#A1A1A1] text-sm mb-6">Connect your wallet to manage your account.</p>
-          <button onClick={login} className="px-6 py-3 rounded-xl gradient-btn font-semibold text-sm hover:shadow-[0_0_20px_rgba(244,196,48,0.4)] transition">
+          <button onClick={login} className="px-6 py-3 rounded-xl gradient-btn font-semibold text-sm hover:shadow-[0_0_20px_rgba(232,80,12,0.4)] transition">
             Connect Wallet
           </button>
         </div>
@@ -253,7 +253,7 @@ function SettingsPage() {
             {avatarPreview ? (
               <img src={avatarPreview} alt="avatar" className="w-16 h-16 rounded-full object-cover" />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-[#F4C430] text-[#0A0A0A] text-xl font-bold flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-[#E8500C] text-[#0A0A0A] text-xl font-bold flex items-center justify-center">
                 {address ? address.slice(2, 4).toUpperCase() : "?"}
               </div>
             )}
@@ -270,10 +270,10 @@ function SettingsPage() {
             ) : null}
             <button
               onClick={() => { navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-              className="flex items-center gap-2 text-[#F5F5F5] font-mono text-sm hover:text-[#F4C430] transition"
+              className="flex items-center gap-2 text-[#F5F5F5] font-mono text-sm hover:text-[#E8500C] transition"
             >
               {shortAddr}
-              {copied ? <span className="text-[#F4C430] text-[10px]">Copied!</span> : (
+              {copied ? <span className="text-[#E8500C] text-[10px]">Copied!</span> : (
                 <svg className="w-3.5 h-3.5 text-[#A1A1A1]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
@@ -294,7 +294,7 @@ function SettingsPage() {
               key={t}
               onClick={() => setTab(t)}
               className={`px-5 py-3 text-sm capitalize transition border-b-2 whitespace-nowrap ${
-                tab === t ? "border-[#F4C430] text-[#F5F5F5] font-medium" : "border-transparent text-[#A1A1A1]/50 hover:text-[#A1A1A1]"
+                tab === t ? "border-[#E8500C] text-[#F5F5F5] font-medium" : "border-transparent text-[#A1A1A1]/50 hover:text-[#A1A1A1]"
               }`}
             >
               {t === "agents" ? "My Agents" : t === "deals" ? "My Deals" : t}
@@ -313,7 +313,7 @@ function SettingsPage() {
                   value={profile.displayName || ""}
                   onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
                   placeholder="How others see you (optional)"
-                  className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm transition"
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm transition"
                 />
               </div>
               <div>
@@ -323,15 +323,15 @@ function SettingsPage() {
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                   placeholder="What do you do? What kind of agents do you run?"
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#F4C430]/40 text-sm resize-none transition"
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/30 focus:outline-none focus:border-[#E8500C]/40 text-sm resize-none transition"
                 />
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={handleSave} className="px-5 py-2 rounded-lg bg-[#F4C430] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
+                <button onClick={handleSave} className="px-5 py-2 rounded-lg bg-[#E8500C] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(232,80,12,0.3)] transition">
                   {saved ? "Saved!" : "Save Profile"}
                 </button>
                 <Link href={`/profile/${address}`} target="_blank"
-                  className="px-4 py-2 rounded-lg border border-white/10 text-sm text-[#A1A1A1] hover:text-[#F4C430] hover:border-[#F4C430]/30 transition">
+                  className="px-4 py-2 rounded-lg border border-white/10 text-sm text-[#A1A1A1] hover:text-[#E8500C] hover:border-[#E8500C]/30 transition">
                   View Public Profile →
                 </Link>
               </div>
@@ -361,7 +361,7 @@ function SettingsPage() {
                           <p className="text-[#F5F5F5] text-sm font-medium">{p.key}</p>
                           {connected ? (
                             <div className="flex items-center gap-2">
-                              <a href={connected.url} target="_blank" className="text-[#F4C430] text-xs hover:underline">
+                              <a href={connected.url} target="_blank" className="text-[#E8500C] text-xs hover:underline">
                                 @{connected.username}
                               </a>
                               {connected.followers !== undefined && (
@@ -384,7 +384,7 @@ function SettingsPage() {
                       ) : p.type === "oauth" ? (
                         <a
                           href={p.authUrl}
-                          className="px-4 py-2 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(244,196,48,0.3)] transition inline-flex items-center gap-1.5"
+                          className="px-4 py-2 rounded-lg bg-[#E8500C] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(232,80,12,0.3)] transition inline-flex items-center gap-1.5"
                         >
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -417,24 +417,24 @@ function SettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[#A1A1A1] text-sm">Agents you own or registered</p>
-              <Link href="/agents/register" className="px-4 py-2 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(244,196,48,0.3)] transition">
+              <Link href="/agents/register" className="px-4 py-2 rounded-lg bg-[#E8500C] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(232,80,12,0.3)] transition">
                 Register New
               </Link>
             </div>
 
             {onChainAgents.length > 0 && onChainAgents.map((a: any) => (
               <Link key={a.agentId} href={`/agents/${a.agentId}`}
-                className="flex items-center justify-between p-4 rounded-xl glass-card hover:border-[#F4C430]/50 transition group">
+                className="flex items-center justify-between p-4 rounded-xl glass-card hover:border-[#E8500C]/50 transition group">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#F4C430]/10 flex items-center justify-center text-[#F4C430] font-bold text-sm">
+                  <div className="w-10 h-10 rounded-xl bg-[#E8500C]/10 flex items-center justify-center text-[#E8500C] font-bold text-sm">
                     {a.name?.charAt(0) || "#"}
                   </div>
                   <div>
-                    <p className="text-[#F5F5F5] text-sm font-medium group-hover:text-[#F4C430] transition">{a.name}</p>
+                    <p className="text-[#F5F5F5] text-sm font-medium group-hover:text-[#E8500C] transition">{a.name}</p>
                     <p className="text-[#A1A1A1]/40 text-xs">Agent #{a.agentId} · {a.jobsCompleted} jobs · ${a.revenue}</p>
                   </div>
                 </div>
-                <svg className="w-4 h-4 text-[#A1A1A1]/20 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-[#A1A1A1]/20 group-hover:text-[#E8500C] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
               </Link>
@@ -442,17 +442,17 @@ function SettingsPage() {
 
             {agents.length > 0 && agents.map((a) => (
               <Link key={a.id} href={`/agents/${a.id}`}
-                className="flex items-center justify-between p-4 rounded-xl glass-card hover:border-[#F4C430]/50 transition group">
+                className="flex items-center justify-between p-4 rounded-xl glass-card hover:border-[#E8500C]/50 transition group">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center text-[#A1A1A1] font-bold text-sm">
                     {a.name.charAt(0)}
                   </div>
                   <div>
-                    <p className="text-[#F5F5F5] text-sm font-medium group-hover:text-[#F4C430] transition">{a.name}</p>
+                    <p className="text-[#F5F5F5] text-sm font-medium group-hover:text-[#E8500C] transition">{a.name}</p>
                     <p className="text-[#A1A1A1]/40 text-xs">Local · {a.pricePerCall} USDC</p>
                   </div>
                 </div>
-                <svg className="w-4 h-4 text-[#A1A1A1]/20 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-[#A1A1A1]/20 group-hover:text-[#E8500C] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
               </Link>
@@ -475,7 +475,7 @@ function SettingsPage() {
             <div className="flex items-center justify-between mb-2">
               <p className="text-[#A1A1A1] text-sm">Your active and completed deals</p>
               <button onClick={loadDeals} disabled={dealsLoading}
-                className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#A1A1A1] text-xs hover:text-[#F4C430] transition disabled:opacity-50">
+                className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#A1A1A1] text-xs hover:text-[#E8500C] transition disabled:opacity-50">
                 {dealsLoading ? "Loading..." : "Refresh"}
               </button>
             </div>
@@ -501,13 +501,13 @@ function SettingsPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-[#A1A1A1]/40 text-xs font-mono">#{deal.dealId.toString()}</span>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
-                          status === "Completed" ? "bg-[#F4C430]/10 text-[#F4C430]" :
+                          status === "Completed" ? "bg-[#E8500C]/10 text-[#E8500C]" :
                           status === "Disputed" ? "bg-red-500/10 text-red-400" :
                           "bg-white/[0.06] text-[#A1A1A1]"
                         }`}>{status}</span>
                         <span className="text-[10px] text-[#A1A1A1]/30">{isBuyer ? "You bought" : "You sold"}</span>
                       </div>
-                      <span className="text-[#F4C430] text-sm font-medium">{formatUnits(deal.amount, 6)} USDC</span>
+                      <span className="text-[#E8500C] text-sm font-medium">{formatUnits(deal.amount, 6)} USDC</span>
                     </div>
                     <p className="text-[#F5F5F5] text-sm truncate">{deal.taskDescription}</p>
                     <div className="flex items-center justify-between mt-2">
@@ -515,7 +515,7 @@ function SettingsPage() {
                         {isBuyer ? `Seller: ${deal.seller.slice(0, 8)}...` : `Buyer: ${deal.buyer.slice(0, 8)}...`}
                       </span>
                       <a href={`https://sepolia.celoscan.io/address/${CONTRACTS.NASTAR_ESCROW}`} target="_blank"
-                        className="text-[10px] text-[#A1A1A1]/30 hover:text-[#F4C430] transition">
+                        className="text-[10px] text-[#A1A1A1]/30 hover:text-[#E8500C] transition">
                         View on CeloScan
                       </a>
                     </div>
@@ -532,10 +532,10 @@ function SettingsPage() {
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[#A1A1A1]/50 text-xs uppercase tracking-wider">Connected Wallet</span>
-                <span className="px-2 py-0.5 rounded text-[10px] bg-[#F4C430]/10 text-[#F4C430]">Active</span>
+                <span className="px-2 py-0.5 rounded text-[10px] bg-[#E8500C]/10 text-[#E8500C]">Active</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#F4C430] text-[#0A0A0A] text-sm font-bold flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-[#E8500C] text-[#0A0A0A] text-sm font-bold flex items-center justify-center">
                   {address ? address.slice(2, 4).toUpperCase() : "?"}
                 </div>
                 <code className="text-[#F5F5F5] text-xs font-mono break-all">{address}</code>
@@ -545,15 +545,15 @@ function SettingsPage() {
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
               <span className="text-[#A1A1A1]/50 text-xs uppercase tracking-wider">Network</span>
               <div className="flex items-center gap-2 mt-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#F4C430]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#E8500C]" />
                 <span className="text-[#F5F5F5] text-sm">Celo Sepolia (11142220)</span>
               </div>
             </div>
 
             <a href={`https://sepolia.celoscan.io/address/${address}`} target="_blank"
-              className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#F4C430]/30 transition group">
+              className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#E8500C]/30 transition group">
               <span className="text-[#F5F5F5] text-sm">View on CeloScan</span>
-              <svg className="w-4 h-4 text-[#A1A1A1]/30 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 text-[#A1A1A1]/30 group-hover:text-[#E8500C] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
               </svg>
             </a>

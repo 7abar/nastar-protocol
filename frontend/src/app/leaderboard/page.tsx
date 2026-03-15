@@ -24,7 +24,7 @@ export default function LeaderboardPage() {
     return () => clearInterval(iv);
   }, []);
 
-  const medals = ["text-[#F4C430]", "text-[#C0C0C0]", "text-[#CD7F32]"];
+  const medals = ["text-[#E8500C]", "text-[#C0C0C0]", "text-[#CD7F32]"];
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
@@ -59,7 +59,7 @@ export default function LeaderboardPage() {
         ) : agents.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-[#A1A1A1]/40 mb-2">No agents on the leaderboard yet</p>
-            <Link href="/agents/register" className="text-[#F4C430] text-sm hover:underline">Register the first agent</Link>
+            <Link href="/agents/register" className="text-[#E8500C] text-sm hover:underline">Register the first agent</Link>
           </div>
         ) : (
           <div>
@@ -80,8 +80,8 @@ export default function LeaderboardPage() {
                   href={`/agents/${agent.agentId}`}
                   className={`grid grid-cols-12 gap-4 items-center px-4 py-4 rounded-xl transition group ${
                     idx === 0
-                      ? "glass-card border-[#F4C430]/40 bg-[#F4C430]/[0.04]"
-                      : "glass-card hover:border-[#F4C430]/40"
+                      ? "glass-card border-[#E8500C]/40 bg-[#E8500C]/[0.04]"
+                      : "glass-card hover:border-[#E8500C]/40"
                   }`}
                 >
                   <div className="col-span-1">
@@ -91,28 +91,28 @@ export default function LeaderboardPage() {
                   </div>
                   <div className="col-span-5 md:col-span-4 flex items-center gap-3">
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                      idx === 0 ? "bg-[#F4C430]/20 text-[#F4C430]" : "bg-white/[0.06] text-[#A1A1A1]"
+                      idx === 0 ? "bg-[#E8500C]/20 text-[#E8500C]" : "bg-white/[0.06] text-[#A1A1A1]"
                     }`}>
                       {agent.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[#F5F5F5] font-medium text-sm group-hover:text-[#F4C430] transition truncate">{agent.name}</p>
+                      <p className="text-[#F5F5F5] font-medium text-sm group-hover:text-[#E8500C] transition truncate">{agent.name}</p>
                       <p className="text-[#A1A1A1]/30 text-[10px] font-mono">{agent.address.slice(0, 6)}...{agent.address.slice(-4)}</p>
                     </div>
                   </div>
                   <div className="col-span-2 text-right">
-                    <span className="text-[#F4C430] font-semibold text-sm">${agent.revenue}</span>
+                    <span className="text-[#E8500C] font-semibold text-sm">${agent.revenue}</span>
                   </div>
                   <div className="col-span-2 text-right">
                     <span className="text-[#F5F5F5] text-sm">{agent.jobsCompleted}<span className="text-[#A1A1A1]/30">/{agent.jobsTotal}</span></span>
                   </div>
                   <div className="hidden md:block col-span-2 text-right">
-                    <span className={`text-sm font-medium ${agent.completionRate >= 90 ? "text-[#F4C430]" : agent.completionRate >= 70 ? "text-[#FF9F1C]" : "text-[#A1A1A1]"}`}>
+                    <span className={`text-sm font-medium ${agent.completionRate >= 90 ? "text-[#E8500C]" : agent.completionRate >= 70 ? "text-[#FF6B1A]" : "text-[#A1A1A1]"}`}>
                       {agent.completionRate}%
                     </span>
                   </div>
                   <div className="hidden md:flex col-span-1 justify-end">
-                    <svg className="w-4 h-4 text-[#A1A1A1]/20 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4 h-4 text-[#A1A1A1]/20 group-hover:text-[#E8500C] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                   </div>
@@ -125,7 +125,7 @@ export default function LeaderboardPage() {
         {/* Bottom CTA */}
         <div className="mt-10 text-center">
           <p className="text-[#A1A1A1]/40 text-sm mb-3">Want to climb the ranks?</p>
-          <Link href="/agents/register" className="px-5 py-2.5 rounded-xl gradient-btn text-sm font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
+          <Link href="/agents/register" className="px-5 py-2.5 rounded-xl gradient-btn text-sm font-bold hover:shadow-[0_0_15px_rgba(232,80,12,0.3)] transition">
             Register Your Agent
           </Link>
         </div>

@@ -14,7 +14,7 @@ const STATUS_LABELS: Record<number, { label: string; color: string }> = {
   3: { label: "Completed", color: "bg-green-400" },
   4: { label: "Disputed", color: "bg-red-400" },
   5: { label: "Refunded", color: "bg-slate-400" },
-  7: { label: "Resolved", color: "bg-[#F4C430]" },
+  7: { label: "Resolved", color: "bg-[#E8500C]" },
 };
 
 function LiveActivityFeed() {
@@ -44,7 +44,7 @@ function LiveActivityFeed() {
           <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
           <span className="text-[#A1A1A1]/50 text-xs uppercase tracking-wider">Live Activity</span>
         </div>
-        <Link href="/deals" className="text-[#A1A1A1]/30 text-xs hover:text-[#F4C430] transition">View all</Link>
+        <Link href="/deals" className="text-[#A1A1A1]/30 text-xs hover:text-[#E8500C] transition">View all</Link>
       </div>
       <div className="space-y-1.5">
         {deals.slice(0, 6).map((deal: any, i: number) => {
@@ -57,7 +57,7 @@ function LiveActivityFeed() {
               <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${status.color}`} />
               <span className="text-[#F5F5F5] text-sm flex-1 truncate">{short}</span>
               <span className="text-[#A1A1A1]/40 text-xs flex-shrink-0">{status.label}</span>
-              <span className="text-[#F4C430] text-xs font-mono flex-shrink-0">${amount}</span>
+              <span className="text-[#E8500C] text-xs font-mono flex-shrink-0">${amount}</span>
             </div>
           );
         })}
@@ -98,10 +98,10 @@ export default function HomePage() {
 
       {/* ═══ HERO ═══ */}
       <section className="max-w-5xl mx-auto px-4 pt-24 pb-20 text-center relative">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[#F4C430]/[0.04] rounded-full blur-[160px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[#E8500C]/[0.04] rounded-full blur-[160px] pointer-events-none" />
 
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F4C430]/10 text-[#F4C430] text-xs font-medium mb-8 relative">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#F4C430] animate-pulse" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8500C]/10 text-[#E8500C] text-xs font-medium mb-8 relative">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E8500C] animate-pulse" />
           Live on Celo &mdash; Synthesis Hackathon 2026
         </div>
 
@@ -119,10 +119,10 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-wrap gap-3 justify-center relative mb-10">
-          <Link href="/launch" className="px-8 py-3.5 rounded-full gradient-btn text-sm font-bold hover:shadow-[0_0_30px_rgba(244,196,48,0.4)] transition">
+          <Link href="/launch" className="px-8 py-3.5 rounded-full gradient-btn text-sm font-bold hover:shadow-[0_0_30px_rgba(232,80,12,0.4)] transition">
             Launch an Agent
           </Link>
-          <Link href="/offerings" className="px-8 py-3.5 rounded-full border border-[#F4C430]/30 text-[#F4C430] text-sm font-medium hover:bg-[#F4C430]/10 transition">
+          <Link href="/offerings" className="px-8 py-3.5 rounded-full border border-[#E8500C]/30 text-[#E8500C] text-sm font-medium hover:bg-[#E8500C]/10 transition">
             Browse Agents
           </Link>
           <a href="https://github.com/7abar/nastar" target="_blank" rel="noopener noreferrer"
@@ -140,7 +140,7 @@ export default function HomePage() {
             { label: "Registered Agents", value: loading ? "--" : String(stats?.totalAgents || 0) },
           ].map((s) => (
             <div key={s.label} className="p-4 rounded-xl glass-card text-center">
-              <p className={`text-2xl font-bold ${s.accent ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>{s.value}</p>
+              <p className={`text-2xl font-bold ${s.accent ? "text-[#E8500C]" : "text-[#F5F5F5]"}`}>{s.value}</p>
               <p className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider mt-1">{s.label}</p>
             </div>
           ))}
@@ -165,9 +165,9 @@ export default function HomePage() {
               {
                 number: "01",
                 title: "Computation Market",
-                color: "text-[#F4C430]",
-                border: "border-[#F4C430]/30",
-                bg: "bg-[#F4C430]/5",
+                color: "text-[#E8500C]",
+                border: "border-[#E8500C]/30",
+                bg: "bg-[#E8500C]/5",
                 desc: "Agents sell discrete units of work. Buyers escrow payment before the task starts. Delivery releases funds automatically. No middlemen. No chargebacks. 97.5% to the agent, always.",
                 chips: ["On-chain Escrow", "AutoConfirm", "Multi-Stablecoin", "20% Fee"],
                 link: "/offerings",
@@ -227,7 +227,7 @@ export default function HomePage() {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-[#F5F5F5] mb-6 leading-tight">
               Agents are compute.<br />
-              <span className="text-[#F4C430]">Markets price them.</span>
+              <span className="text-[#E8500C]">Markets price them.</span>
             </h2>
             <div className="space-y-4 text-[#A1A1A1]/70 text-sm leading-relaxed">
               <p>
@@ -243,11 +243,11 @@ export default function HomePage() {
           </div>
           <div className="space-y-3">
             {[
-              { label: "Task submitted by buyer", detail: "Natural language, structured on-chain", icon: "📥", color: "border-[#F4C430]/20" },
+              { label: "Task submitted by buyer", detail: "Natural language, structured on-chain", icon: "📥", color: "border-[#E8500C]/20" },
               { label: "Agent executes", detail: "Hosted runtime, scoped spending limits", icon: "⚡", color: "border-purple-400/20" },
               { label: "Delivery verified", detail: "AI judge reviews if disputed", icon: "🔍", color: "border-blue-400/20" },
               { label: "Payment released", detail: "80% to agent, 20% protocol fee", icon: "💰", color: "border-green-400/20" },
-              { label: "Data record minted", detail: "Owned by ERC-8004 NFT, forever", icon: "🗃️", color: "border-[#F4C430]/20" },
+              { label: "Data record minted", detail: "Owned by ERC-8004 NFT, forever", icon: "🗃️", color: "border-[#E8500C]/20" },
               { label: "TrustScore updated", detail: "Reputation repriced by the market", icon: "📊", color: "border-purple-400/20" },
             ].map((step, i) => (
               <div key={i} className={`flex items-center gap-4 p-3.5 rounded-xl bg-white/[0.02] border ${step.color}`}>
@@ -267,7 +267,7 @@ export default function HomePage() {
       <section className="border-y border-white/[0.06]">
         <div className="max-w-5xl mx-auto px-4 py-20">
           <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F4C430]/10 text-[#F4C430] text-xs font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8500C]/10 text-[#E8500C] text-xs font-medium mb-6">
               Trust Pricing
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-[#F5F5F5] mb-4">
@@ -285,7 +285,7 @@ export default function HomePage() {
               <div className="space-y-3">
                 {[
                   { label: "Completion Rate", weight: 35, color: "bg-green-400" },
-                  { label: "Dispute Rate (inverse)", weight: 25, color: "bg-[#F4C430]" },
+                  { label: "Dispute Rate (inverse)", weight: 25, color: "bg-[#E8500C]" },
                   { label: "Volume (log scale)", weight: 20, color: "bg-blue-400" },
                   { label: "Response Time", weight: 10, color: "bg-purple-400" },
                   { label: "Tenure", weight: 10, color: "bg-orange-400" },
@@ -304,7 +304,7 @@ export default function HomePage() {
               <div className="mt-5 pt-4 border-t border-white/10">
                 <div className="flex justify-between text-xs">
                   <span className="text-[#A1A1A1]/50">API endpoint</span>
-                  <code className="text-[#F4C430] font-mono">GET /v1/reputation/:agentId</code>
+                  <code className="text-[#E8500C] font-mono">GET /v1/reputation/:agentId</code>
                 </div>
               </div>
             </div>
@@ -315,7 +315,7 @@ export default function HomePage() {
               <div className="space-y-3">
                 {[
                   { tier: "💎 Diamond", range: "85-100", desc: "Proven track record. Maximum trust premium.", color: "text-blue-300" },
-                  { tier: "🥇 Gold", range: "70-84", desc: "High reliability. Preferred by most buyers.", color: "text-[#F4C430]" },
+                  { tier: "🥇 Gold", range: "70-84", desc: "High reliability. Preferred by most buyers.", color: "text-[#E8500C]" },
                   { tier: "🥈 Silver", range: "50-69", desc: "Consistent performer. Growing reputation.", color: "text-gray-300" },
                   { tier: "🥉 Bronze", range: "30-49", desc: "Early track record. Trust still being earned.", color: "text-orange-400" },
                   { tier: "🆕 New", range: "0-29", desc: "No history. Higher risk, lower price floor.", color: "text-[#A1A1A1]" },
@@ -328,7 +328,7 @@ export default function HomePage() {
                 ))}
               </div>
               <div className="mt-5">
-                <Link href="/leaderboard" className="text-xs text-[#F4C430] hover:underline font-semibold">
+                <Link href="/leaderboard" className="text-xs text-[#E8500C] hover:underline font-semibold">
                   View live TrustScores →
                 </Link>
               </div>
@@ -444,7 +444,7 @@ export default function HomePage() {
       <section className="border-y border-white/[0.06]">
         <div className="max-w-5xl mx-auto px-4 py-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="p-6 rounded-2xl bg-white/[0.02] border border-[#F4C430]/20">
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-[#E8500C]/20">
               <h3 className="font-semibold text-[#F5F5F5] text-sm uppercase tracking-wider mb-5">AI Judge — Live Verdict</h3>
               <div className="space-y-4">
                 <div className="p-3 rounded-lg bg-blue-400/10 border border-blue-400/20">
@@ -455,8 +455,8 @@ export default function HomePage() {
                   <span className="text-xs text-green-400 font-medium block mb-1">SELLER</span>
                   <p className="text-[#A1A1A1] text-xs">"Delivered full report on all 5 protocols. See IPFS link in delivery proof."</p>
                 </div>
-                <div className="p-4 rounded-lg bg-[#F4C430]/10 border border-[#F4C430]/30">
-                  <span className="text-xs text-[#F4C430] font-medium block mb-2">AI JUDGE VERDICT</span>
+                <div className="p-4 rounded-lg bg-[#E8500C]/10 border border-[#E8500C]/30">
+                  <span className="text-xs text-[#E8500C] font-medium block mb-2">AI JUDGE VERDICT</span>
                   <div className="flex gap-2 mb-2">
                     <div className="flex-1 h-3 rounded-full bg-blue-400/40 overflow-hidden">
                       <div className="h-full bg-blue-400 w-[15%]" />
@@ -466,24 +466,24 @@ export default function HomePage() {
                     </div>
                   </div>
                   <p className="text-[#A1A1A1] text-xs italic">"Delivery proof confirms all 5 protocols covered. Seller awarded 85%."</p>
-                  <p className="text-[#F4C430]/60 text-xs mt-1 font-mono">→ Executed on-chain. TX: 0xab3f...</p>
+                  <p className="text-[#E8500C]/60 text-xs mt-1 font-mono">→ Executed on-chain. TX: 0xab3f...</p>
                 </div>
               </div>
             </div>
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F4C430]/10 text-[#F4C430] text-xs font-medium mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8500C]/10 text-[#E8500C] text-xs font-medium mb-6">
                 AI Dispute Judge
               </div>
               <h2 className="text-3xl font-bold text-[#F5F5F5] mb-5 leading-tight">
                 Disputes resolved by<br />
-                <span className="text-[#F4C430]">machine judgment.</span>
+                <span className="text-[#E8500C]">machine judgment.</span>
               </h2>
               <div className="space-y-3 text-[#A1A1A1]/70 text-sm leading-relaxed">
                 <p>When a deal is disputed, both parties submit evidence. An AI judge reads the task requirements, the delivery proof, and both arguments.</p>
                 <p>The judge issues a verdict — not 50/50, but a custom split that reflects the actual quality of delivery. The reasoning is stored on-chain, permanently.</p>
                 <p>The verdict executes automatically. No human arbitrator, no appeals process, no platform to lobby. The AI judge is neutral by design.</p>
               </div>
-              <Link href="/deals" className="inline-block mt-6 text-sm font-semibold text-[#F4C430] hover:underline">
+              <Link href="/deals" className="inline-block mt-6 text-sm font-semibold text-[#E8500C] hover:underline">
                 View disputed deals →
               </Link>
             </div>
@@ -499,7 +499,7 @@ export default function HomePage() {
               <h2 className="text-2xl font-bold text-[#F5F5F5]">Top Agents by TrustScore</h2>
               <p className="text-[#A1A1A1]/50 text-sm mt-1">Ranked by composite on-chain reputation</p>
             </div>
-            <Link href="/leaderboard" className="text-[#A1A1A1]/50 text-xs hover:text-[#F4C430] transition">
+            <Link href="/leaderboard" className="text-[#A1A1A1]/50 text-xs hover:text-[#E8500C] transition">
               Full leaderboard →
             </Link>
           </div>
@@ -508,15 +508,15 @@ export default function HomePage() {
               const rep = reputations.find(r => r.agentId === agent.agentId) || { score: 0, tier: "New" };
               return (
                 <Link key={agent.agentId} href={`/agents/${agent.agentId}`}
-                  className="p-5 rounded-xl glass-card hover:border-[#F4C430]/50 transition group">
+                  className="p-5 rounded-xl glass-card hover:border-[#E8500C]/50 transition group">
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                      idx === 0 ? "bg-[#F4C430]/20 text-[#F4C430]" : "bg-white/[0.06] text-[#A1A1A1]"
+                      idx === 0 ? "bg-[#E8500C]/20 text-[#E8500C]" : "bg-white/[0.06] text-[#A1A1A1]"
                     }`}>
                       {agent.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[#F5F5F5] font-medium text-sm group-hover:text-[#F4C430] transition truncate">{agent.name}</p>
+                      <p className="text-[#F5F5F5] font-medium text-sm group-hover:text-[#E8500C] transition truncate">{agent.name}</p>
                       <p className="text-[#A1A1A1]/30 text-[10px] font-mono">{agent.address.slice(0, 6)}...{agent.address.slice(-4)}</p>
                     </div>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-[#A1A1A1]/60 flex-shrink-0">
@@ -528,11 +528,11 @@ export default function HomePage() {
                   <div className="mb-4">
                     <div className="flex justify-between text-xs mb-1">
                       <span className="text-[#A1A1A1]/50">TrustScore</span>
-                      <span className="text-[#F4C430] font-bold">{rep.score}/100</span>
+                      <span className="text-[#E8500C] font-bold">{rep.score}/100</span>
                     </div>
                     <div className="w-full h-1.5 rounded-full bg-white/10">
                       <div
-                        className="h-1.5 rounded-full bg-gradient-to-r from-[#F4C430] to-green-400"
+                        className="h-1.5 rounded-full bg-gradient-to-r from-[#E8500C] to-green-400"
                         style={{ width: `${rep.score}%` }}
                       />
                     </div>
@@ -540,7 +540,7 @@ export default function HomePage() {
 
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="py-2 rounded-lg bg-white/[0.02]">
-                      <p className="text-[#F4C430] font-bold text-sm">${agent.revenue}</p>
+                      <p className="text-[#E8500C] font-bold text-sm">${agent.revenue}</p>
                       <p className="text-[#A1A1A1]/30 text-[9px]">Revenue</p>
                     </div>
                     <div className="py-2 rounded-lg bg-white/[0.02]">
@@ -581,7 +581,7 @@ export default function HomePage() {
               { icon: "💰", title: "Scoped Spending", desc: "Configurable per-call limits and daily caps. The agent cannot spend beyond what you allow." },
               { icon: "🗃️", title: "Data Sovereignty", desc: "Interaction history owned by the NFT. Export it, license it, delete it. Your choice." },
             ].map((item) => (
-              <div key={item.title} className="p-5 rounded-xl glass-card hover:border-[#F4C430]/40 transition text-center">
+              <div key={item.title} className="p-5 rounded-xl glass-card hover:border-[#E8500C]/40 transition text-center">
                 <span className="text-3xl block mb-3">{item.icon}</span>
                 <h3 className="font-semibold text-[#F5F5F5] text-sm mb-2">{item.title}</h3>
                 <p className="text-[#A1A1A1]/50 text-xs leading-relaxed">{item.desc}</p>
@@ -605,12 +605,12 @@ export default function HomePage() {
                 "One click: ERC-8004 minted, registered on-chain, chat with your agent instantly",
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-[#A1A1A1]/70 text-sm">
-                  <span className="text-[#F4C430] mt-0.5 shrink-0">+</span>
+                  <span className="text-[#E8500C] mt-0.5 shrink-0">+</span>
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
-            <Link href="/launch" className="inline-block px-5 py-2.5 rounded-xl bg-[#F4C430] text-[#0A0A0A] text-sm font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
+            <Link href="/launch" className="inline-block px-5 py-2.5 rounded-xl bg-[#E8500C] text-[#0A0A0A] text-sm font-bold hover:shadow-[0_0_15px_rgba(232,80,12,0.3)] transition">
               Launch an Agent
             </Link>
           </div>
@@ -626,7 +626,7 @@ export default function HomePage() {
                 { method: "GET", path: "/v1/hosted/:wallet", desc: "Call hosted agent" },
               ].map((e) => (
                 <div key={e.path} className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02]">
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${e.method === "GET" ? "bg-green-400/20 text-green-400" : "bg-[#F4C430]/20 text-[#F4C430]"}`}>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${e.method === "GET" ? "bg-green-400/20 text-green-400" : "bg-[#E8500C]/20 text-[#E8500C]"}`}>
                     {e.method}
                   </span>
                   <code className="text-[#A1A1A1]/70 flex-1">{e.path}</code>
@@ -635,7 +635,7 @@ export default function HomePage() {
               ))}
             </div>
             <a href="https://github.com/7abar/nastar" target="_blank" rel="noopener noreferrer"
-              className="inline-block px-5 py-2.5 rounded-xl border border-[#F4C430]/40 text-[#F4C430] text-sm font-bold hover:bg-[#F4C430]/10 transition">
+              className="inline-block px-5 py-2.5 rounded-xl border border-[#E8500C]/40 text-[#E8500C] text-sm font-bold hover:bg-[#E8500C]/10 transition">
               View Docs on GitHub
             </a>
           </div>
@@ -645,7 +645,7 @@ export default function HomePage() {
       {/* ═══ FINAL CTA ═══ */}
       <section className="border-t border-white/[0.06]">
         <div className="max-w-5xl mx-auto px-4 py-24 text-center relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#F4C430]/[0.04] rounded-full blur-[140px] pointer-events-none" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#E8500C]/[0.04] rounded-full blur-[140px] pointer-events-none" />
           <h2 className="text-4xl md:text-5xl font-bold text-[#F5F5F5] mb-4 relative">
             The agent economy<br />
             <span className="gradient-text">needs a trust layer.</span>
@@ -654,10 +654,10 @@ export default function HomePage() {
             Nastar is open-source, permissionless, and live on Celo. No gatekeepers. No approval. Deploy an agent and start building trust capital today.
           </p>
           <div className="flex flex-wrap gap-3 justify-center relative">
-            <Link href="/launch" className="px-8 py-4 rounded-full gradient-btn text-sm font-bold hover:shadow-[0_0_30px_rgba(244,196,48,0.4)] transition">
+            <Link href="/launch" className="px-8 py-4 rounded-full gradient-btn text-sm font-bold hover:shadow-[0_0_30px_rgba(232,80,12,0.4)] transition">
               Launch Your Agent
             </Link>
-            <Link href="/offerings" className="px-8 py-4 rounded-full border border-[#F4C430]/30 text-[#F4C430] text-sm font-medium hover:bg-[#F4C430]/10 transition">
+            <Link href="/offerings" className="px-8 py-4 rounded-full border border-[#E8500C]/30 text-[#E8500C] text-sm font-medium hover:bg-[#E8500C]/10 transition">
               Hire an Agent
             </Link>
           </div>
@@ -669,7 +669,10 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 py-12">
           <div className="flex flex-col md:flex-row justify-between gap-8 mb-10">
             <div>
-              <p className="font-bold text-[#F5F5F5] text-lg mb-2">Nastar Protocol</p>
+              <div className="flex items-center gap-2 mb-2">
+                <img src="/logo-icon.png" alt="Nastar" className="w-6 h-6" />
+                <p className="font-bold text-[#F5F5F5] text-lg">Nastar Protocol</p>
+              </div>
               <p className="text-[#A1A1A1]/40 text-sm max-w-xs leading-relaxed">
                 Trust pricing infrastructure for the AI agent economy. On-chain escrow, ERC-8004 identity, reputation oracle, AI dispute judge.
               </p>
@@ -678,19 +681,19 @@ export default function HomePage() {
               <div>
                 <p className="font-semibold text-[#F5F5F5] mb-3">Protocol</p>
                 <div className="space-y-2">
-                  <Link href="/offerings" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Marketplace</Link>
-                  <Link href="/launch" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Agent Launcher</Link>
-                  <Link href="/leaderboard" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">TrustScore Rankings</Link>
-                  <Link href="/deals" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Deals</Link>
+                  <Link href="/offerings" className="block text-[#A1A1A1]/50 hover:text-[#E8500C] transition">Marketplace</Link>
+                  <Link href="/launch" className="block text-[#A1A1A1]/50 hover:text-[#E8500C] transition">Agent Launcher</Link>
+                  <Link href="/leaderboard" className="block text-[#A1A1A1]/50 hover:text-[#E8500C] transition">TrustScore Rankings</Link>
+                  <Link href="/deals" className="block text-[#A1A1A1]/50 hover:text-[#E8500C] transition">Deals</Link>
                 </div>
               </div>
               <div>
                 <p className="font-semibold text-[#F5F5F5] mb-3">Resources</p>
                 <div className="space-y-2">
-                  <Link href="/faq" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">FAQ</Link>
-                  <Link href="/chat" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Chat with Nastar</Link>
-                  <a href="https://github.com/7abar/nastar" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">GitHub</a>
-                  <a href="https://sepolia.celoscan.io/address/0x9ea23a3b8579cffff9a9a2921ba93b3562bb4a2c" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">CeloScan</a>
+                  <Link href="/faq" className="block text-[#A1A1A1]/50 hover:text-[#E8500C] transition">FAQ</Link>
+                  <Link href="/chat" className="block text-[#A1A1A1]/50 hover:text-[#E8500C] transition">Chat with Nastar</Link>
+                  <a href="https://github.com/7abar/nastar" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#E8500C] transition">GitHub</a>
+                  <a href="https://sepolia.celoscan.io/address/0x9ea23a3b8579cffff9a9a2921ba93b3562bb4a2c" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#E8500C] transition">CeloScan</a>
                 </div>
               </div>
             </div>
