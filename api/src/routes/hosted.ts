@@ -64,14 +64,7 @@ router.post("/", async (req: Request, res: Response) => {
       dailyLimitUsd: spendingLimits?.dailyLimitUsd ?? 50,
       requireConfirmAboveUsd: spendingLimits?.requireConfirmAboveUsd ?? 25,
     },
-    // Auto-swap config: agent auto-converts payout to preferred currency via Mento
-    auto_swap: autoSwap ? {
-      enabled: autoSwap.enabled ?? true,
-      targetToken: autoSwap.targetToken,       // e.g. "EURm"
-      targetAddress: autoSwap.targetAddress,   // ERC-20 address on Celo
-      slippageTolerance: autoSwap.slippageTolerance ?? 0.5,
-      triggerOnDealComplete: autoSwap.triggerOnDealComplete ?? true,
-    } : null,
+    // auto_swap stored in spending_limits JSON for now (no separate column)
     status: "active",
     daily_spend: 0,
     daily_spend_reset: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
