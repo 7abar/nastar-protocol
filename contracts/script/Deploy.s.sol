@@ -29,9 +29,10 @@ contract DeployNastar is Script {
         ServiceRegistry registry = new ServiceRegistry(identityRegistry);
         console.log("ServiceRegistry:  ", address(registry));
 
-        // Fee recipient = deployer wallet (protocol treasury)
-        address feeRecipient = vm.addr(deployerKey);
-        // Judge address: set via env or fallback to deployer (our AI server wallet)
+        // Fee recipient: set via FEE_RECIPIENT env, fallback to deployer wallet
+        address defaultAddr = vm.addr(deployerKey);
+        address feeRecipient = vm.envOr("FEE_RECIPIENT", defaultAddr);
+        // Judge address: set via env or fallback to feeRecipient
         address judgeAddress = vm.envOr("JUDGE_ADDRESS", feeRecipient);
         NastarEscrow escrow = new NastarEscrow(identityRegistry, address(registry), feeRecipient, judgeAddress);
         console.log("NastarEscrow:     ", address(escrow));
