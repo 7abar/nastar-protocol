@@ -13,6 +13,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { PORT, CONTRACTS } from "./config.js";
 import { publicClient, serialize } from "./lib/client.js";
 import servicesRouter from "./routes/services.js";
@@ -30,8 +32,20 @@ import { x402AppMiddleware, PAY_TO, NETWORK, PROTECTED_ROUTES } from "./middlewa
 
 const app = express();
 
+// ── Security ──────────────────────────────────────────────────────────────────
+app.use(helmet());                         // Security headers (XSS, MIME sniffing, etc.)
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));   // Prevent large payload attacks
+
+// Rate limiting: 100 requests per minute per IP
+const limiter = rateLimit({
+  windowMs: 60_000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." },
+});
+app.use(limiter);
 
 // x402 — must come before route handlers so protected routes get gated
 app.use(x402AppMiddleware);
