@@ -300,41 +300,6 @@ function SettingsPage() {
         {/* PROFILE TAB */}
         {tab === "profile" && (
           <div className="space-y-6">
-            {/* Avatar section */}
-            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-              <label className="block text-sm font-medium text-[#F5F5F5] mb-3">Profile Photo</label>
-              <div className="flex items-center gap-4">
-                <div className="relative group cursor-pointer flex-shrink-0" onClick={() => avatarInputRef.current?.click()}>
-                  {avatarPreview ? (
-                    <img src={avatarPreview} alt="avatar" className="w-20 h-20 rounded-full object-cover border-2 border-[#F4C430]/30" />
-                  ) : (
-                    <div className="w-20 h-20 rounded-full bg-[#F4C430] text-[#0A0A0A] text-2xl font-bold flex items-center justify-center border-2 border-[#F4C430]/30">
-                      {address ? address.slice(2, 4).toUpperCase() : "?"}
-                    </div>
-                  )}
-                  <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-0.5">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                    </svg>
-                    <span className="text-[10px] text-white">Upload</span>
-                  </div>
-                </div>
-                <div className="flex-1 space-y-2">
-                  <button onClick={() => avatarInputRef.current?.click()}
-                    className="px-4 py-2 rounded-lg border border-white/10 text-sm text-[#F5F5F5] hover:border-[#F4C430]/40 transition w-full text-left">
-                    Choose image file (max 2MB)
-                  </button>
-                  {avatarPreview && (
-                    <button onClick={() => { setAvatarPreview(""); setProfile(prev => ({ ...prev, avatar: "" })); }}
-                      className="px-4 py-2 rounded-lg border border-red-400/20 text-xs text-red-400 hover:bg-red-400/5 transition">
-                      Remove photo
-                    </button>
-                  )}
-                  <p className="text-[#A1A1A1]/30 text-[10px]">Stored locally in your browser. Shown on your public profile.</p>
-                </div>
-              </div>
-            </div>
-
             {/* Display Name + Bio */}
             <div className="space-y-4">
               <div>
