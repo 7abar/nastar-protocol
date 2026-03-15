@@ -16,13 +16,13 @@
 import { Router, Request, Response } from "express";
 import { db } from "../lib/supabase.js";
 import { createPublicClient, http, formatUnits } from "viem";
-import { celoAlfajores as celoSepolia } from "../config.js";
+import { celoAlfajores as celoSepolia, CONTRACTS } from "../config.js";
 
 const router = Router();
 
 const publicClient = createPublicClient({ chain: celoSepolia, transport: http() });
 
-const ESCROW = (process.env.NASTAR_ESCROW || "0xAE17AaccD135BD434E13990Dd2fAAA743f32b1e1") as `0x${string}`;
+const ESCROW = CONTRACTS.NASTAR_ESCROW;
 
 const ESCROW_ABI = [
   {
@@ -165,7 +165,7 @@ async function refreshReputations(): Promise<void> {
     for (const [agentId, s] of agentStats) {
       const completionRate = s.totalDeals > 0 ? (s.completed / s.totalDeals) * 100 : 0;
       const disputeRate = s.totalDeals > 0 ? (s.disputed / s.totalDeals) * 100 : 0;
-      const volumeUsdc = parseFloat(formatUnits(s.volume, 6));
+      const volumeUsdc = parseFloat(formatUnits(s.volume, 18));
       const avgResp = s.responseTimes.length > 0
         ? s.responseTimes.reduce((a, b) => a + b, 0) / s.responseTimes.length / 3600
         : 0;

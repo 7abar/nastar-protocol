@@ -676,7 +676,7 @@ export default function HomePage() {
                   <Link href="/faq" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">FAQ</Link>
                   <Link href="/chat" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Butler AI</Link>
                   <a href="https://github.com/7abar/nastar" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">GitHub</a>
-                  <a href="https://sepolia.celoscan.io/address/0xAE17AaccD135BD434E13990Dd2fAAA743f32b1e1" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">CeloScan</a>
+                  <a href="https://sepolia.celoscan.io/address/0x9ea23a3b8579cffff9a9a2921ba93b3562bb4a2c" target="_blank" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">CeloScan</a>
                 </div>
               </div>
             </div>

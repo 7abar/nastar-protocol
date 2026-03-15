@@ -6,12 +6,12 @@
 import { Router, Request, Response } from "express";
 import { createWalletClient, createPublicClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { celoAlfajores as celoSepolia } from "../config.js";
+import { celoAlfajores as celoSepolia, CONTRACTS } from "../config.js";
 import { db, dbGet, dbUpsert, dbUpdate } from "../lib/supabase.js";
 
 const router = Router();
 
-const ESCROW_ADDRESS = (process.env.NASTAR_ESCROW || "0xAE17AaccD135BD434E13990Dd2fAAA743f32b1e1") as `0x${string}`;
+const ESCROW_ADDRESS = CONTRACTS.NASTAR_ESCROW;
 
 const RESOLVE_ABI = [{
   type: "function", name: "resolveDisputeWithJudge",
