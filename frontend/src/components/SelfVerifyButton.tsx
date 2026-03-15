@@ -35,10 +35,10 @@ export default function SelfVerifyButton({ walletAddress, onVerified }: SelfVeri
     const app = new SelfAppBuilder({
       appName: "Nastar Protocol",
       scope: "nastar-proof-of-human",
-      endpoint: SELF_HUB_CELO_SEPOLIA,
+      endpoint: SELF_HUB_CELO_MAINNET,
       logoBase64: "",
       userId: walletAddress,
-      endpointType: "staging_celo",
+      endpointType: "celo",
       userIdType: "hex",
       disclosures: {
         minimumAge: 18,
