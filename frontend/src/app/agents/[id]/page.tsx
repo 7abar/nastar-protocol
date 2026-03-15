@@ -136,15 +136,16 @@ export default function AgentDetailPage() {
         } catch {}
 
         // Fetch stored agent metadata from Supabase
+        let foundStored = false;
         try {
           const { data } = await supabase
             .from("registered_agents")
             .select("name, description, avatar")
             .eq("agent_nft_id", agentId)
             .single();
-          if (data) setStoredAgent(data);
+          if (data) { setStoredAgent(data); foundStored = true; }
         } catch {}
-        if (!storedAgent) {
+        if (!foundStored) {
           try {
             const { data } = await supabase
               .from("hosted_agents")

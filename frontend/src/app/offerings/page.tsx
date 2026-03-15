@@ -284,8 +284,12 @@ export default function OfferingsPage() {
                   return (
                     <div key={idx} className="p-5 rounded-xl glass-card hover:border-[#F4C430]/50 transition group flex flex-col">
                       <div className="flex items-start gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/10 flex items-center justify-center text-lg shrink-0">
-                          {getServiceIcon(svc.name)}
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/10 flex items-center justify-center text-lg shrink-0 overflow-hidden">
+                          {stored?.avatar && stored.avatar.startsWith("http") ? (
+                            <img src={stored.avatar} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            getServiceIcon(svc.name)
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#F4C430] transition">{svc.name}</h3>
