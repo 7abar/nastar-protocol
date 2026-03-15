@@ -18,10 +18,9 @@ const router = Router();
 const CELO_RPC = "https://forno.celo.org";
 
 const IDENTITY_ABI = parseAbi([
-  "function register(string agentURI) returns (uint256)",
+  "function register() returns (uint256)",
   "function balanceOf(address owner) view returns (uint256)",
   "function ownerOf(uint256 tokenId) view returns (address)",
-  "function totalSupply() view returns (uint256)",
   "function setAgentURI(uint256 tokenId, string agentURI)",
 ]);
 
@@ -90,44 +89,26 @@ router.post("/deploy", async (req: Request, res: Response) => {
 
     if (balance === 0n) {
       // Mint new identity NFT — server pays gas
-      // NOTE: The NFT is minted TO the server wallet, then we need to
-      // check if the contract supports minting to a specific address.
-      // For now, mint from server and the identity is linked to the ownerAddress
-      // via the agent registration in our DB.
-
+      // register() mints to msg.sender (server wallet) with auto-incremented tokenId
       const mintHash = await walletClient.writeContract({
         address: CONTRACTS.IDENTITY_REGISTRY as `0x${string}`,
         abi: IDENTITY_ABI,
         functionName: "register",
-        args: [`${API_URL}/api/agent-registration/pending`],
       });
 
-      await publicClient.waitForTransactionReceipt({ hash: mintHash });
+      const mintReceipt = await publicClient.waitForTransactionReceipt({ hash: mintHash });
       txHashes.push(mintHash);
 
-      // Find the minted token ID
-      const totalSupply = await publicClient.readContract({
-        address: CONTRACTS.IDENTITY_REGISTRY as `0x${string}`,
-        abi: IDENTITY_ABI,
-        functionName: "totalSupply",
-      });
-      agentNftId = Number(totalSupply) - 1;
-    } else {
-      // Find existing NFT owned by server wallet
-      for (let i = 0n; i <= 500n; i++) {
-        try {
-          const owner = await publicClient.readContract({
-            address: CONTRACTS.IDENTITY_REGISTRY as `0x${string}`,
-            abi: IDENTITY_ABI,
-            functionName: "ownerOf",
-            args: [i],
-          });
-          if ((owner as string).toLowerCase() === account.address.toLowerCase()) {
-            agentNftId = Number(i);
-            break;
-          }
-        } catch { continue; }
+      // Extract tokenId from Transfer event (topic[3])
+      const transferLog = mintReceipt.logs.find(
+        (l) => l.topics[0] === "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+      );
+      if (transferLog && transferLog.topics[3]) {
+        agentNftId = Number(BigInt(transferLog.topics[3]));
       }
+    } else {
+      // Already has an NFT — skip minting, use existing
+      agentNftId = null; // Will be set below by scanning
     }
 
     if (agentNftId === null) {
