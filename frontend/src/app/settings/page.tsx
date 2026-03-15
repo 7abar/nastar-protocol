@@ -2,7 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
-import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { usePrivy, useWallets, useExportWallet } from "@privy-io/react-auth";
 import { createPublicClient, http, formatUnits } from "viem";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -88,6 +88,7 @@ export default function SettingsPageWrapper() {
 function SettingsPage() {
   const { authenticated, login, logout, user } = usePrivy();
   const { wallets } = useWallets();
+  const { exportWallet } = useExportWallet();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [tab, setTab] = useState<"profile" | "agents" | "deals" | "wallets">("profile");
@@ -589,6 +590,19 @@ function SettingsPage() {
                 <span className="text-[#F5F5F5] text-sm">Celo (42220)</span>
               </div>
             </div>
+
+            <button onClick={() => exportWallet()}
+              className="flex items-center justify-between w-full p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#F4C430]/30 transition group">
+              <div className="flex items-center gap-3">
+                <svg className="w-4 h-4 text-[#A1A1A1]/50 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                </svg>
+                <span className="text-[#F5F5F5] text-sm">Export Private Key</span>
+              </div>
+              <svg className="w-4 h-4 text-[#A1A1A1]/30 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
 
             <a href={`https://celoscan.io/address/${address}`} target="_blank"
               className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#F4C430]/30 transition group">
