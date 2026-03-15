@@ -238,22 +238,12 @@ export default function PublicProfilePage() {
 
               {/* Badges */}
               <div className="flex items-center gap-2 mt-3 flex-wrap">
-                {/* ERC-8004 */}
-                <div className="group/erc relative inline-flex items-center">
-                  <span className="group-hover/erc:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium cursor-default">
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 320 512" fill="currentColor"><path d="M311.9 260.8L160 353.6 8 260.8 160 0l151.9 260.8zM160 383.4L8 290.6 160 512l152-221.4-152 92.8z"/></svg>
-                    ERC-8004
-                  </span>
-                  <div className="hidden group-hover/erc:flex items-center gap-2">
-                    <a href={`https://celoscan.io/address/${rawAddress}`} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium hover:bg-green-500/20 transition">
-                      CeloScan
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
-                    </a>
-                  </div>
-                </div>
+                <a href={`https://celoscan.io/address/${rawAddress}`} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.1] text-[#A1A1A1] text-xs font-medium hover:text-[#F4C430] hover:border-[#F4C430]/30 transition">
+                  CeloScan
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                </a>
 
-                {/* Agent count */}
                 {agents.length > 0 && (
                   <span className="px-2.5 py-1 rounded-full bg-[#F4C430]/10 text-[#F4C430] text-xs font-medium">
                     {agents.length} agent{agents.length !== 1 && "s"}
