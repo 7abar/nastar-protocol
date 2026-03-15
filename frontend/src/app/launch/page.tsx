@@ -456,6 +456,27 @@ export default function LaunchPage() {
 
           {/* Form */}
           <div className="space-y-5">
+            {/* Agent Icon */}
+            <div>
+              <label className="text-[#A1A1A1] text-sm mb-2 block">Agent Icon</label>
+              <div className="flex flex-wrap gap-2">
+                {["🤖", "🔍", "🌐", "🛡️", "📊", "⚡", "💬", "🧠", "📝", "🎨", "💰", "🔗"].map((icon) => (
+                  <button
+                    key={icon}
+                    type="button"
+                    onClick={() => setConfig((c) => ({ ...c, icon }))}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl transition ${
+                      (config as any).icon === icon
+                        ? "bg-[#F4C430]/20 border-2 border-[#F4C430] shadow-[0_0_12px_rgba(244,196,48,0.3)]"
+                        : "bg-white/[0.04] border border-white/[0.08] hover:border-[#F4C430]/40"
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <label className="text-[#A1A1A1] text-sm mb-1 block">Agent Name *</label>
               <input

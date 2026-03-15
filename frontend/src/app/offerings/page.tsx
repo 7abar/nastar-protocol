@@ -7,6 +7,34 @@ import { formatUnits } from "viem";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
 
+// Generate unique avatar style per agent
+const AGENT_AVATARS: { gradient: string; icon: string }[] = [
+  { gradient: "from-blue-500 to-cyan-400", icon: "🔍" },
+  { gradient: "from-purple-500 to-pink-400", icon: "🌐" },
+  { gradient: "from-green-500 to-emerald-400", icon: "🛡️" },
+  { gradient: "from-orange-500 to-amber-400", icon: "📊" },
+  { gradient: "from-red-500 to-rose-400", icon: "⚡" },
+  { gradient: "from-indigo-500 to-violet-400", icon: "🤖" },
+  { gradient: "from-teal-500 to-green-400", icon: "💬" },
+  { gradient: "from-fuchsia-500 to-purple-400", icon: "🧠" },
+];
+
+function getAgentAvatar(agentId: string) {
+  const idx = parseInt(agentId) % AGENT_AVATARS.length;
+  return AGENT_AVATARS[idx];
+}
+
+function getServiceIcon(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes("research") || n.includes("web")) return "🔍";
+  if (n.includes("translat") || n.includes("language")) return "🌐";
+  if (n.includes("code") || n.includes("solidity") || n.includes("review")) return "🛡️";
+  if (n.includes("data") || n.includes("analy")) return "📊";
+  if (n.includes("trade") || n.includes("swap")) return "⚡";
+  if (n.includes("social") || n.includes("tweet")) return "💬";
+  return "🤖";
+}
+
 interface ServiceItem {
   serviceId: number;
   agentId: string;
@@ -210,8 +238,8 @@ export default function OfferingsPage() {
                   <div key={idx} className="p-5 rounded-xl glass-card hover:border-[#F4C430]/50 transition group flex flex-col">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#F4C430]/10 flex items-center justify-center text-[#F4C430] font-bold text-sm shrink-0">
-                          {svc.name.charAt(0)}
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/10 flex items-center justify-center text-lg shrink-0">
+                          {getServiceIcon(svc.name)}
                         </div>
                         <div>
                           <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#F4C430] transition">{svc.name}</h3>
@@ -255,18 +283,21 @@ export default function OfferingsPage() {
                     ? Math.min(...agentServices.map((s) => parseFloat(formatUnits(BigInt(s.pricePerCall), 18))))
                     : 0;
 
+                  const avatar = getAgentAvatar(agent.agentId);
+                  const agentName = agent.services[0] || `Agent #${agent.agentId}`;
+
                   return (
                     <div key={agent.agentId} className="p-5 rounded-xl glass-card hover:border-[#F4C430]/50 transition group">
                       <div className="flex items-start gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/10 flex items-center justify-center shrink-0">
-                          <span className="text-[#F4C430] font-bold text-lg">#{agent.agentId}</span>
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${avatar.gradient} flex items-center justify-center shrink-0 shadow-lg`}>
+                          <span className="text-xl">{avatar.icon}</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#F4C430] transition">Agent #{agent.agentId}</h3>
+                            <h3 className="font-semibold text-[#F5F5F5] text-sm group-hover:text-[#F4C430] transition">{agentName}</h3>
                             <span className="px-2 py-0.5 rounded-full bg-green-400/10 text-green-400 text-[10px] font-medium">Active</span>
                           </div>
-                          <p className="text-[#A1A1A1]/40 text-[11px] font-mono truncate">{agent.provider}</p>
+                          <p className="text-[#A1A1A1]/40 text-[11px] font-mono truncate">{agent.provider.slice(0, 6)}...{agent.provider.slice(-4)}</p>
                         </div>
                       </div>
 
