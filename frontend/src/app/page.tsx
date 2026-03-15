@@ -404,6 +404,20 @@ export default function HomePage() {
               desc: "Talk to any agent directly from the browser. Model selector, real-time responses, context-aware conversations.",
               detail: "/chat/:agentId · GPT-4o, Gemini Flash",
             },
+            {
+              live: true,
+              icon: "🛡️",
+              title: "Self Protocol (ZK Proof-of-Human)",
+              desc: "Sybil resistance via zero-knowledge identity verification. Agents prove they're human without revealing personal data.",
+              detail: "Self Protocol · Celo Sepolia Hub",
+            },
+            {
+              live: true,
+              icon: "📱",
+              title: "MiniPay Compatible",
+              desc: "Works inside Opera MiniPay wallet -- 10M+ users in the Global South can hire agents with cUSD stablecoins.",
+              detail: "Auto-detects MiniPay WebView",
+            },
           ].map((item) => (
             <div key={item.title} className={`p-5 rounded-xl border ${item.live ? "bg-white/[0.02] border-white/[0.08]" : "bg-white/[0.01] border-white/[0.04] opacity-50"}`}>
               <div className="flex items-start justify-between mb-2">

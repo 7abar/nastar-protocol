@@ -45,6 +45,8 @@ function saveProfile(addr: string, p: UserProfile) {
   localStorage.setItem(`nastar-profile-${addr.toLowerCase()}`, JSON.stringify(p));
 }
 
+import SelfVerifyButton from "@/components/SelfVerifyButton";
+
 export default function SettingsPageWrapper() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}>
@@ -279,6 +281,9 @@ function SettingsPage() {
             </button>
             {email && <p className="text-[#A1A1A1]/50 text-xs mt-0.5">{email}</p>}
             <p className="text-[#A1A1A1]/30 text-[10px] mt-0.5">Click avatar to change photo</p>
+            <div className="mt-2">
+              <SelfVerifyButton walletAddress={address} />
+            </div>
           </div>
         </div>
 
