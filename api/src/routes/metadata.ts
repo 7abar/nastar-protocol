@@ -1,18 +1,24 @@
 /**
  * ERC-8004 Agent Metadata Endpoint
  *
- * Returns JSON metadata for agentscan.info and other ERC-8004 explorers.
- * Called when agentURI(tokenId) is read from the IdentityRegistry contract.
+ * Returns rich JSON metadata for agentscan.info and other ERC-8004 explorers.
+ * Includes OASF taxonomy (skills, domains), services, publisher info,
+ * and registration data — matching the Loopuman gold standard.
  *
- * Format follows ERC-8004 metadata standard:
- * { name, description, image, external_url, attributes[] }
+ * Format follows ERC-8004 registration-v1 spec.
  */
 
 import { Router, Request, Response } from "express";
 import { publicClient } from "../lib/client.js";
 import { CONTRACTS } from "../config.js";
+import { buildAgentMetadata, getOASFProfile } from "../lib/oasf.js";
+import { createClient } from "@supabase/supabase-js";
 
 const router = Router();
+
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || "";
+const supabase = SUPABASE_URL ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 const SERVICE_REGISTRY_ABI = [
   {
@@ -51,6 +57,7 @@ const APP_URL = process.env.APP_URL || "https://nastar.fun";
 router.get("/:tokenId/metadata", async (req: Request, res: Response) => {
   try {
     const tokenId = BigInt(req.params.tokenId);
+    const tokenIdNum = Number(tokenId);
 
     // Get owner of the NFT
     let owner: string;
@@ -65,7 +72,31 @@ router.get("/:tokenId/metadata", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Agent not found" });
     }
 
-    // Try to get services registered by this owner
+    // Fetch agent data from Supabase (has template_id, avatar, etc.)
+    let agentData: any = null;
+    if (supabase) {
+      // Try registered_agents first (has avatar)
+      const { data: registered } = await supabase
+        .from("registered_agents")
+        .select("*")
+        .eq("agent_nft_id", tokenIdNum);
+      if (registered && registered.length > 0) {
+        agentData = registered[0];
+      }
+
+      // Also check hosted_agents for template_id
+      if (!agentData?.template_id) {
+        const { data: hosted } = await supabase
+          .from("hosted_agents")
+          .select("*")
+          .eq("agent_nft_id", tokenIdNum);
+        if (hosted && hosted.length > 0) {
+          agentData = { ...agentData, ...hosted[0] };
+        }
+      }
+    }
+
+    // Get on-chain services
     let services: any[] = [];
     try {
       services = await publicClient.readContract({
@@ -75,65 +106,94 @@ router.get("/:tokenId/metadata", async (req: Request, res: Response) => {
         args: [owner as `0x${string}`],
       }) as any[];
     } catch {
-      // ServiceRegistry might not have this function — fallback to empty
+      // fallback to empty
     }
 
     const activeServices = services.filter((s: any) => s.active);
     const primaryService = activeServices[0];
 
-    const name = primaryService?.name || `Nastar Agent #${tokenId}`;
-    const description = primaryService?.description || `AI agent registered on Nastar Protocol (ERC-8004 #${tokenId})`;
+    const name = agentData?.name || primaryService?.name || `Nastar Agent #${tokenId}`;
+    const description = agentData?.description || primaryService?.description
+      || `AI agent registered on Nastar Protocol (ERC-8004 #${tokenId})`;
+    const templateId = agentData?.template_id || "custom";
+    const avatar = agentData?.avatar;
 
-    // Build attributes
-    const attributes: { trait_type: string; value: string | number }[] = [
-      { trait_type: "Platform", value: "Nastar Protocol" },
-      { trait_type: "Chain", value: "Celo" },
-      { trait_type: "Token ID", value: Number(tokenId) },
-      { trait_type: "Owner", value: owner },
-      { trait_type: "Services", value: activeServices.length },
-    ];
-
-    if (primaryService) {
-      const price = Number(primaryService.pricePerCall) / 1e18;
-      attributes.push(
-        { trait_type: "Primary Service", value: primaryService.name },
-        { trait_type: "Price", value: `${price} USDC` },
-      );
-    }
-
-    // ERC-8004 metadata JSON
-    const metadata = {
+    // Build full OASF-enriched metadata
+    const metadata = buildAgentMetadata({
       name,
       description,
-      image: `${APP_URL}/api/agent/${tokenId}/image`,
-      external_url: `${APP_URL}/profile/${owner}`,
-      animation_url: undefined,
-      attributes,
-      // Extended fields
-      properties: {
-        platform: "Nastar Protocol",
-        chain: "celo",
-        owner,
-        services: activeServices.map((s: any) => ({
-          id: Number(s.serviceId),
-          name: s.name,
-          description: s.description,
-          price: Number(s.pricePerCall) / 1e18,
-          active: s.active,
-        })),
-        endpoints: {
-          profile: `${APP_URL}/profile/${owner}`,
-          chat: activeServices.length > 0 ? `${APP_URL}/chat/${activeServices[0].agentId}` : undefined,
-          api: `${API_URL}/v1/services`,
-        },
-      },
-    };
+      image: avatar || undefined,
+      externalUrl: `${APP_URL}/agents/${tokenIdNum}`,
+      templateId,
+      agentNftId: tokenIdNum,
+      services: activeServices.map((s: any) => ({
+        id: Number(s.serviceId),
+        name: s.name,
+        description: s.description,
+        price: Number(s.pricePerCall) / 1e18,
+        active: s.active,
+      })),
+      apiUrl: API_URL,
+      appUrl: APP_URL,
+    });
+
+    // Add on-chain service details to the metadata
+    if (activeServices.length > 0) {
+      metadata.services.push({
+        name: "escrow",
+        endpoint: `${API_URL}/v1/deals`,
+        ...({
+          description: "On-chain escrow deals via Nastar smart contracts",
+          onChainServices: activeServices.map((s: any) => ({
+            serviceId: Number(s.serviceId),
+            name: s.name,
+            description: s.description,
+            pricePerCall: (Number(s.pricePerCall) / 1e18).toString(),
+            paymentToken: s.paymentToken,
+            endpoint: s.endpoint,
+          })),
+        } as any),
+      });
+    }
 
     res.setHeader("Cache-Control", "public, max-age=300");
     res.json(metadata);
   } catch (err: any) {
     console.error("Metadata error:", err.message);
     res.status(500).json({ error: "Failed to generate metadata" });
+  }
+});
+
+// GET /api/agent/:tokenId/oasf.json — standalone OASF taxonomy
+router.get("/:tokenId/oasf.json", async (req: Request, res: Response) => {
+  try {
+    const tokenIdNum = Number(req.params.tokenId);
+
+    // Get template from Supabase
+    let templateId = "custom";
+    if (supabase) {
+      const { data } = await supabase
+        .from("hosted_agents")
+        .select("template_id")
+        .eq("agent_nft_id", tokenIdNum);
+      if (data && data.length > 0 && data[0].template_id) {
+        templateId = data[0].template_id;
+      }
+    }
+
+    const oasf = getOASFProfile(templateId);
+
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.json({
+      version: "v0.8.0",
+      agentId: tokenIdNum,
+      registry: "eip155:42220:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      skills: oasf.skills.map((s) => s.name),
+      domains: oasf.domains.map((d) => d.name),
+      tags: oasf.tags,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: "Failed to generate OASF data" });
   }
 });
 
