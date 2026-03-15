@@ -172,9 +172,12 @@ Rebalance when any position drifts more than 5% from target.`,
 ];
 
 const LLM_PROVIDERS = [
-  { id: "openai", name: "OpenAI", models: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"] },
-  { id: "anthropic", name: "Anthropic", models: ["claude-sonnet-4-5", "claude-haiku-3-5"] },
-  { id: "google", name: "Google", models: ["gemini-2.0-flash", "gemini-1.5-pro"] },
+  { id: "openai", name: "OpenAI", models: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4.1-mini", "gpt-4.1"] },
+  { id: "anthropic", name: "Anthropic", models: ["claude-sonnet-4-5", "claude-haiku-3-5", "claude-opus-4", "claude-sonnet-4"] },
+  { id: "google", name: "Google", models: ["gemini-2.0-flash", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-1.5-pro"] },
+  { id: "deepseek", name: "DeepSeek", models: ["deepseek-chat", "deepseek-reasoner"] },
+  { id: "meta", name: "Meta", models: ["llama-4-scout", "llama-4-maverick", "llama-3.3-70b"] },
+  { id: "mistral", name: "Mistral", models: ["mistral-medium-3", "mistral-small-3", "codestral"] },
 ];
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -845,12 +848,12 @@ export default function LaunchPage() {
               <>
                 <div>
                   <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Provider</label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                     {LLM_PROVIDERS.map((p) => (
                       <button
                         key={p.id}
                         onClick={() => setConfig((c) => ({ ...c, llmProvider: p.id, llmModel: p.models[0] }))}
-                        className={`py-3 rounded-xl border font-medium transition text-sm ${
+                        className={`py-2.5 rounded-xl border font-medium transition text-xs ${
                           config.llmProvider === p.id
                             ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
                             : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
@@ -864,12 +867,12 @@ export default function LaunchPage() {
 
                 <div>
                   <label className="text-[#A1A1A1]/60 text-xs mb-2 block">Model</label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {selectedProvider.models.map((m) => (
                       <button
                         key={m}
                         onClick={() => setConfig((c) => ({ ...c, llmModel: m }))}
-                        className={`py-2.5 px-4 rounded-xl border font-mono text-sm transition ${
+                        className={`py-2 px-3 rounded-xl border font-mono text-xs transition ${
                           config.llmModel === m
                             ? "border-[#F4C430]/40 bg-[#F4C430]/5 text-[#F4C430]"
                             : "border-white/[0.08] bg-white/[0.02] text-[#A1A1A1] hover:border-white/[0.15]"
@@ -894,7 +897,7 @@ export default function LaunchPage() {
                       key.length > 10;
                     const placeholder =
                       config.llmProvider === "openai" ? "sk-proj-..." :
-                      config.llmProvider === "anthropic" ? "sk-ant-api03-..." : "AIzaSy...";
+                      config.llmProvider === "anthropic" ? "sk-ant-api03-..." : config.llmProvider === "google" ? "AIzaSy..." : "your-api-key...";
                     return (
                       <>
                         <div className="relative">
