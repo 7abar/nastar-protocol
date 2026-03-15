@@ -726,27 +726,6 @@ export default function LaunchPage() {
                       </p>
                     </div>
 
-                    {/* Requires funds toggle */}
-                    {offering.feeType === "fixed" && (
-                      <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                        <div>
-                          <p className="text-sm text-[#F5F5F5]">Requires funds transfer</p>
-                          <p className="text-[#A1A1A1]/40 text-[10px]">Buyer sends additional capital for the agent to use (e.g. for swaps, trading)</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => updateOffering(idx, { requiresFunds: !offering.requiresFunds })}
-                          className={`w-10 h-6 rounded-full transition relative shrink-0 ${
-                            offering.requiresFunds ? "bg-[#F4C430]" : "bg-white/[0.1]"
-                          }`}
-                        >
-                          <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition ${
-                            offering.requiresFunds ? "right-1" : "left-1"
-                          }`} />
-                        </button>
-                      </div>
-                    )}
-
                     {/* Remove offering */}
                     {config.offerings.length > 1 && (
                       <button
