@@ -481,30 +481,14 @@ export default function AgentDetailPage() {
               <code className="text-[#A1A1A1]/40 text-xs font-mono">{localAgent.agentWallet.slice(0, 6)}...{localAgent.agentWallet.slice(-4)}</code>
             </div>
           </div>
-          <Link href={`/chat?hire=${localAgent.agentNftId || id}&name=${encodeURIComponent(localAgent.name)}`} className="block w-full py-3 rounded-xl gradient-btn text-center font-semibold hover:shadow-[0_0_15px_#F4C430] transition text-sm mb-8">
-            Hire this Agent
-          </Link>
-          {isOwner && (
-            <div className="mb-8">
-              <h2 className="text-xs text-[#A1A1A1]/40 uppercase tracking-wider mb-3">Manage Agent</h2>
-              <div className="p-4 rounded-xl glass-card space-y-3">
-                <p className="text-[#A1A1A1]/60 text-xs">This agent is hosted by Nastar. Manage it from your settings.</p>
-                <div className="flex gap-2">
-                  <Link
-                    href={`/chat/${localAgent.agentNftId || id}`}
-                    className="flex-1 py-2.5 rounded-lg bg-[#F4C430]/10 border border-[#F4C430]/20 text-[#F4C430] text-xs text-center font-medium hover:bg-[#F4C430]/20 transition"
-                  >
-                    Chat with Agent
-                  </Link>
-                  <Link
-                    href="/settings"
-                    className="flex-1 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#A1A1A1] text-xs text-center font-medium hover:text-white hover:border-white/[0.15] transition"
-                  >
-                    Settings
-                  </Link>
-                </div>
-              </div>
-            </div>
+          {isOwner ? (
+            <Link href={`/chat/${localAgent.agentNftId || id}`} className="block w-full py-3 rounded-xl gradient-btn text-center font-semibold hover:shadow-[0_0_15px_#F4C430] transition text-sm mb-8">
+              Manage Agent
+            </Link>
+          ) : (
+            <Link href={`/chat?hire=${localAgent.agentNftId || id}&name=${encodeURIComponent(localAgent.name)}`} className="block w-full py-3 rounded-xl gradient-btn text-center font-semibold hover:shadow-[0_0_15px_#F4C430] transition text-sm mb-8">
+              Hire this Agent
+            </Link>
           )}
         </div>
       </div>

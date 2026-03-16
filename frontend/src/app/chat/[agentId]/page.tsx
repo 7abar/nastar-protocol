@@ -107,9 +107,90 @@ export default function AgentChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Handle slash commands (owner only)
+  async function handleCommand(text: string): Promise<boolean> {
+    const cmd = text.toLowerCase().trim();
+    const API = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+
+    if (cmd === "/help") {
+      setMessages((prev) => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: "Available commands:\n/name [new name] — Change agent name\n/desc [new description] — Change description\n/price [amount] — Set price per call (USDC)\n/tags [tag1, tag2, ...] — Set service tags\n/info — Show current agent settings\n/help — Show this menu" },
+      ]);
+      return true;
+    }
+
+    if (cmd === "/info") {
+      const { data } = await supabase.from("registered_agents").select("*").eq("agent_nft_id", Number(agentId));
+      const a = data?.[0];
+      setMessages((prev) => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: a
+          ? `Agent: ${a.name}\nDescription: ${a.description || "—"}\nWallet: ${a.agent_wallet}\nNFT ID: ${a.agent_nft_id}\nAvatar: ${a.avatar ? "Set" : "None"}`
+          : "Agent not found in database." },
+      ]);
+      return true;
+    }
+
+    if (cmd.startsWith("/name ")) {
+      const newName = text.slice(6).trim();
+      if (!newName) return false;
+      const { error } = await supabase.from("registered_agents").update({ name: newName }).eq("agent_nft_id", Number(agentId));
+      setAgent((prev: any) => prev ? { ...prev, name: newName } : prev);
+      setMessages((prev) => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: error ? `Error: ${error.message}` : `Agent name updated to "${newName}".` },
+      ]);
+      return true;
+    }
+
+    if (cmd.startsWith("/desc ")) {
+      const newDesc = text.slice(6).trim();
+      if (!newDesc) return false;
+      const { error } = await supabase.from("registered_agents").update({ description: newDesc }).eq("agent_nft_id", Number(agentId));
+      setAgent((prev: any) => prev ? { ...prev, description: newDesc } : prev);
+      setMessages((prev) => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: error ? `Error: ${error.message}` : `Description updated.` },
+      ]);
+      return true;
+    }
+
+    if (cmd.startsWith("/price ")) {
+      const price = text.slice(7).trim();
+      const { error } = await supabase.from("registered_agents").update({ price_per_call: price }).eq("agent_nft_id", Number(agentId));
+      setMessages((prev) => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: error ? `Error: ${error.message}` : `Price updated to ${price} USDC.` },
+      ]);
+      return true;
+    }
+
+    if (cmd.startsWith("/tags ")) {
+      const tags = text.slice(6).split(",").map((t: string) => t.trim()).filter(Boolean);
+      const { error } = await supabase.from("registered_agents").update({ tags }).eq("agent_nft_id", Number(agentId));
+      setMessages((prev) => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: error ? `Error: ${error.message}` : `Tags updated: ${tags.join(", ")}` },
+      ]);
+      return true;
+    }
+
+    return false;
+  }
+
   async function sendMessage() {
     const text = input.trim();
     if (!text || loading) return;
+
+    // Check slash commands first
+    if (text.startsWith("/")) {
+      setInput("");
+      setLoading(true);
+      const handled = await handleCommand(text);
+      setLoading(false);
+      if (handled) return;
+    }
 
     const userMsg: Message = { role: "user", content: text };
     const newMessages = [...messages, userMsg];
