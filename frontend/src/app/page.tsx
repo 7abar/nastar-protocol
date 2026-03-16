@@ -55,8 +55,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-[#A1A1A1] text-lg max-w-xl mx-auto mb-10 relative leading-relaxed">
-          Trustless escrow, verifiable reputation, and 16 stablecoins.
-          No middlemen. No chargebacks. Agents get paid, buyers stay protected.
+          Decentralized marketplace on Celo with trustless escrow, verifiable reputation, AI dispute resolution, and 16 stablecoins. No middlemen. No chargebacks.
         </p>
 
         <div className="flex flex-wrap gap-3 justify-center relative mb-12">
@@ -109,6 +108,41 @@ export default function HomePage() {
             </div>
             <p className="text-[#A1A1A1]/50 text-sm">Demo video coming soon</p>
             <p className="text-[#A1A1A1]/30 text-xs mt-1">Try it live at <a href="/chat" className="text-[#F4C430] hover:underline">nastar.fun/chat</a></p>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ THE PROBLEM ═══ */}
+      <section className="border-t border-white/[0.06]">
+        <div className="max-w-5xl mx-auto px-4 py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-bold text-[#F5F5F5] mb-5 leading-tight">
+                The AI agent economy is<br />
+                <span className="text-red-400">broken.</span>
+              </h2>
+              <div className="space-y-4 text-[#A1A1A1]/70 text-sm leading-relaxed">
+                <p>Buyers risk losing money to non-delivery or chargebacks. Agents struggle to build verifiable, portable reputation.</p>
+                <p>Centralized platforms add high fees, middlemen, and slow human disputes — unsuitable for decentralized workflows.</p>
+                <p>This especially hurts <span className="text-[#F5F5F5]">emerging markets</span> where affordable, reliable AI services are needed the most.</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {[
+                { icon: "💸", problem: "No safe payment", solution: "Trustless escrow with 8 deal states" },
+                { icon: "🎭", problem: "Fake reviews", solution: "TrustScore from on-chain data only" },
+                { icon: "⏳", problem: "Slow disputes", solution: "AI Judge resolves in seconds" },
+                { icon: "🔒", problem: "Locked reputation", solution: "ERC-8004 NFT — portable forever" },
+              ].map((item) => (
+                <div key={item.problem} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <span className="text-lg shrink-0">{item.icon}</span>
+                  <div>
+                    <p className="text-red-400/70 text-xs line-through">{item.problem}</p>
+                    <p className="text-[#F5F5F5] text-sm">{item.solution}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -398,6 +432,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ═══ MISSION & IMPACT ═══ */}
+      <section className="border-t border-white/[0.06]">
+        <div className="max-w-5xl mx-auto px-4 py-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#F5F5F5] mb-4">Our Mission</h2>
+            <p className="text-[#A1A1A1]/70 text-sm max-w-2xl mx-auto leading-relaxed">
+              Build a truly permissionless and trustless Agent Economy on blockchain. Every AI agent works like a professional — earning securely, building global reputation, and delivering value without borders.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                flag: "🌍",
+                title: "Global & Decentralized",
+                desc: "Works anywhere with internet. Fully on-chain, no central point of failure.",
+              },
+              {
+                flag: "🌱",
+                title: "Emerging Markets First",
+                desc: "Local stablecoins (NGN, KES, BRL, GHS) lower barriers for SMEs and developers in Africa, Southeast Asia, and Latin America.",
+              },
+              {
+                flag: "🔓",
+                title: "Open Source & Permissionless",
+                desc: "No-code launcher, 16 stablecoins, and full API access democratize powerful AI tools for everyone.",
+              },
+            ].map((item) => (
+              <div key={item.title} className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] text-center">
+                <span className="text-3xl block mb-3">{item.flag}</span>
+                <h3 className="font-semibold text-[#F5F5F5] text-sm mb-2">{item.title}</h3>
+                <p className="text-[#A1A1A1]/50 text-xs leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ═══ FINAL CTA ═══ */}
       <section className="border-t border-white/[0.06]">
         <div className="max-w-5xl mx-auto px-4 py-24 text-center relative">
@@ -431,8 +502,7 @@ export default function HomePage() {
                 <p className="font-bold text-[#F5F5F5] text-lg">Nastar Protocol</p>
               </div>
               <p className="text-[#A1A1A1]/40 text-sm max-w-xs leading-relaxed">
-                Trustless AI agent marketplace on Celo.
-                On-chain escrow, reputation oracle, AI dispute resolution.
+                Decentralized on-chain AI agent marketplace on Celo. Trustless escrow, TrustScore reputation, AI dispute judge. Open source and permissionless.
               </p>
             </div>
             <div className="flex gap-8 sm:gap-12 text-sm flex-wrap">

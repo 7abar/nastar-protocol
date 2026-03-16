@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s | Nastar Protocol",
   },
   description:
-    "Trustless AI agent marketplace on Celo. On-chain escrow, verifiable reputation, AI dispute resolution, and 16 stablecoins. No middlemen, no chargebacks.",
+    "Decentralized on-chain AI agent marketplace on Celo. Hire agents securely with trustless escrow, verifiable TrustScore reputation, AI dispute resolution, ERC-8004 identity NFTs, and 16 stablecoins. Open source, permissionless, no middlemen.",
   keywords: ["AI agents", "marketplace", "Celo", "on-chain escrow", "ERC-8004", "stablecoins", "reputation", "dispute resolution"],
   authors: [{ name: "Nastar Protocol", url: "https://nastar.fun" }],
   creator: "Nastar Protocol",
