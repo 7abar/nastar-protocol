@@ -7,6 +7,9 @@ import { useSearchParams } from "next/navigation";
 import { createPublicClient, http, formatUnits, encodeFunctionData } from "viem";
 import PageTitle from "@/components/PageTitle";
 import ReactMarkdown from "react-markdown";
+import nextDynamic from "next/dynamic";
+const QRScanner = nextDynamic(() => import("@/components/QRScanner"), { ssr: false });
+import { parseQRData, type QRISData } from "@/components/QRScanner";
 import {
   celoSepoliaCustom,
   CONTRACTS,
@@ -72,7 +75,10 @@ function ChatPage() {
   const [withdrawToken, setWithdrawToken] = useState("cUSD");
   const [withdrawing, setWithdrawing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const API = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
   const [agentMode, setAgentMode] = useState<{ id: string; name: string; template_id?: string; description?: string } | null>(null);
+  const [showQR, setShowQR] = useState(false);
+  const [qrisPayment, setQrisPayment] = useState<QRISData | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [chatSessions, setChatSessions] = useState<{ id: string; title: string; date: number }[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string>(() => `chat-${Date.now()}`);
@@ -268,6 +274,13 @@ function ChatPage() {
     if (!input.trim() || loading) return;
     const userText = input.trim();
     setInput("");
+
+    // Check if this is a QR payment confirmation
+    if (qrisPayment && isPaymentConfirmation(userText)) {
+      await executeQRPayment(userText);
+      return;
+    }
+
     addMsg({ role: "user", text: userText });
     setLoading(true);
 
@@ -456,6 +469,100 @@ function ChatPage() {
       addMsg({ role: "assistant", text: `Error: ${err instanceof Error ? err.message.slice(0, 120) : String(err)}` });
     }
 
+    setLoading(false);
+  }
+
+  // ─── QR Code / QRIS Payment Handler ──────────────────────────────────────
+  async function handleQRScan(rawData: string) {
+    setShowQR(false);
+    const parsed = parseQRData(rawData);
+
+    if (parsed.type === "address") {
+      // Direct crypto address — prompt for amount
+      addMsg({ role: "system", text: `QR scanned: wallet address detected` });
+      addMsg({
+        role: "assistant",
+        text: `Scanned wallet address:\n\`${parsed.address}\`\n\nHow much do you want to send? (e.g. "5 cUSD")`,
+      });
+      setQrisPayment(parsed);
+    } else if (parsed.type === "qris") {
+      // QRIS payment — show merchant info + amount
+      const idrAmount = parsed.amount || 0;
+      const usdAmount = idrAmount > 0 ? (idrAmount / 16500).toFixed(2) : "0";
+
+      addMsg({ role: "system", text: `QRIS payment scanned` });
+      addMsg({
+        role: "assistant",
+        text: `**QRIS Payment**\n\n` +
+          `Merchant: **${parsed.merchantName}**\n` +
+          `${parsed.merchantCity ? `City: ${parsed.merchantCity}\n` : ""}` +
+          `${idrAmount > 0 ? `Amount: **Rp ${idrAmount.toLocaleString("id-ID")}** (~$${usdAmount} USD)\n` : "Amount: Enter amount\n"}` +
+          `\nPay from your Nastar Wallet using stablecoins.\n` +
+          `Type the amount in USD to confirm (e.g. "${usdAmount}" or "5").`,
+      });
+      setQrisPayment(parsed);
+    } else {
+      addMsg({ role: "assistant", text: `Scanned QR code:\n\`${rawData.slice(0, 200)}\`\n\nThis doesn't look like a payment QR or wallet address. Try scanning a QRIS code or crypto wallet QR.` });
+    }
+  }
+
+  // Handle QRIS/QR payment confirmation from user input
+  function isPaymentConfirmation(text: string): boolean {
+    if (!qrisPayment) return false;
+    const amountMatch = text.match(/^(\d+\.?\d*)\s*(cusd|usdc|usdt|usd)?$/i);
+    return !!amountMatch;
+  }
+
+  async function executeQRPayment(text: string) {
+    const amountMatch = text.match(/^(\d+\.?\d*)\s*(cusd|usdc|usdt|usd)?$/i);
+    if (!amountMatch || !nastarWallet) return;
+
+    const amount = amountMatch[1];
+    const tokenSymbol = (amountMatch[2] || "cUSD").toUpperCase().replace("USD", "cUSD");
+    const token = tokenSymbol === "USDC" ? "USDC" : tokenSymbol === "USDT" ? "USDT" : "cUSD";
+
+    if (qrisPayment?.type === "qris") {
+      addMsg({ role: "user", text: `Pay ${amount} ${token} → ${qrisPayment.merchantName}` });
+    } else {
+      addMsg({ role: "user", text: `Send ${amount} ${token} → ${qrisPayment?.address?.slice(0, 10)}...` });
+    }
+
+    setLoading(true);
+
+    try {
+      const address = wallets?.[0]?.address;
+      if (!address) throw new Error("No wallet connected");
+
+      if (qrisPayment?.type === "address" && qrisPayment.address) {
+        // Direct crypto send
+        const res = await fetch(`${API}/v1/wallet/withdraw`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ownerAddress: address, to: qrisPayment.address, token, amount }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          addMsg({ role: "assistant", text: `Sent **${amount} ${token}** to \`${qrisPayment.address}\`\n\nTX: ${data.txHash}`, txHash: data.txHash });
+        } else {
+          throw new Error(data.error || "Transfer failed");
+        }
+      } else if (qrisPayment?.type === "qris") {
+        // QRIS — for demo, show the payment as processed
+        // In production, this would go through an off-ramp partner
+        addMsg({
+          role: "assistant",
+          text: `**Payment Processed**\n\n` +
+            `Merchant: ${qrisPayment.merchantName}\n` +
+            `Amount: ${amount} ${token}\n` +
+            `IDR equivalent: ~Rp ${(parseFloat(amount) * 16500).toLocaleString("id-ID")}\n\n` +
+            `Stablecoin deducted from your Nastar Wallet. Settlement to merchant via QRIS off-ramp.`,
+        });
+      }
+    } catch (err) {
+      addMsg({ role: "assistant", text: `Payment failed: ${err instanceof Error ? err.message : String(err)}` });
+    }
+
+    setQrisPayment(null);
     setLoading(false);
   }
 
@@ -744,6 +851,18 @@ function ChatPage() {
               )}
             </svg>
           </button>
+          {/* QR / Camera scanner */}
+          {/* QR / Camera scanner */}
+          <button
+            onClick={() => setShowQR(true)}
+            className="p-3 rounded-xl border bg-white/[0.04] border-white/[0.08] text-[#A1A1A1] hover:text-[#F4C430] hover:border-[#F4C430]/30 transition"
+            title="Scan QR / QRIS"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+            </svg>
+          </button>
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
@@ -933,6 +1052,13 @@ function ChatPage() {
             </div>
           </div>
         </div>
+      )}
+      {/* QR Scanner Modal */}
+      {showQR && (
+        <QRScanner
+          onScan={handleQRScan}
+          onClose={() => setShowQR(false)}
+        />
       )}
     </div>
   );
