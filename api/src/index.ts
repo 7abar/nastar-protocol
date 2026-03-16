@@ -31,6 +31,7 @@ import sponsorRouter from "./routes/sponsor.js";
 import walletRouter from "./routes/wallet.js";
 import walletWithdrawRouter from "./routes/wallet-withdraw.js";
 import deliveryRouter from "./routes/delivery.js";
+import offrampRouter from "./routes/offramp.js";
 import { startIndexer } from "./lib/indexer.js";
 import { x402AppMiddleware, PAY_TO, NETWORK, PROTECTED_ROUTES } from "./middleware/x402.js";
 
@@ -157,6 +158,7 @@ app.use("/v1/sponsor", sponsorRouter);     // Gas-sponsored agent deployment
 app.use("/v1/wallet", walletRouter);       // User custodial wallets (ACP-style)
 app.use("/v1/wallet/withdraw", walletWithdrawRouter); // Withdraw from custodial wallet
 app.use("/v1/delivery", deliveryRouter);              // Delivery proof-of-work system
+app.use("/v1/offramp", offrampRouter);               // Crypto→IDR liquidation (QRIS)
 app.use("/v1/judge", judgeRouter);         // AI Dispute Judge
 app.use("/v1/reputation", reputationRouter); // Reputation Oracle
 app.use("/v1/swap", swapRouter);             // Mento multi-currency swap

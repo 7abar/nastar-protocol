@@ -473,25 +473,48 @@ function ChatPage() {
       });
       setQrisPayment(parsed);
     } else if (parsed.type === "qris") {
-      // QRIS payment — show merchant info + one-click pay button
+      // QRIS payment — fetch live rate from Indodax, then show pay button
       const idrAmount = parsed.amount || 0;
-      const usdAmount = idrAmount > 0 ? (idrAmount / 16500).toFixed(2) : "0";
 
-      addMsg({ role: "system", text: `QRIS payment scanned` });
+      addMsg({ role: "system", text: `QRIS scanned. Fetching live exchange rate...` });
 
-      if (idrAmount > 0) {
-        // Amount embedded in QR — show one-click pay button
-        addMsg({
-          role: "assistant",
-          text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\nAmount: **Rp ${idrAmount.toLocaleString("id-ID")}** (~$${usdAmount} USD)`,
-          qrisAction: { merchantName: parsed.merchantName || "Merchant", amountUsd: usdAmount, amountIdr: idrAmount, token: "cUSD" },
+      try {
+        // Get live USDC/IDR rate from Indodax
+        const quoteRes = await fetch(`${API}/v1/offramp/quote`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: idrAmount > 0 ? (idrAmount / 16500).toFixed(4) : "1", token: "USDC" }),
         });
-      } else {
-        // No amount in QR — ask user
-        addMsg({
-          role: "assistant",
-          text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\n\nNo amount in QR code. Type the amount in USD (e.g. "5").`,
-        });
+        const quote = await quoteRes.json();
+
+        const liveRate = quote.rate?.exchange || 16500;
+        const usdAmount = idrAmount > 0 ? (idrAmount / liveRate).toFixed(2) : "0";
+        const fee = quote.feeBps ? `${quote.feeBps / 100}%` : "1.5%";
+
+        if (idrAmount > 0) {
+          addMsg({
+            role: "assistant",
+            text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\nAmount: **Rp ${idrAmount.toLocaleString("id-ID")}**\n\nLive rate: 1 USDC = Rp ${liveRate.toLocaleString("id-ID")} (Indodax)\nYou pay: **${usdAmount} cUSD** (fee: ${fee})\n\nFlow: cUSD → sell on Indodax → IDR → QRIS merchant`,
+            qrisAction: { merchantName: parsed.merchantName || "Merchant", amountUsd: usdAmount, amountIdr: idrAmount, token: "cUSD" },
+          });
+        } else {
+          addMsg({
+            role: "assistant",
+            text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\nLive rate: 1 USDC = Rp ${liveRate.toLocaleString("id-ID")} (Indodax)\n\nNo amount in QR code. Type amount in IDR (e.g. "50000") or USD (e.g. "3").`,
+          });
+        }
+      } catch {
+        // Fallback to hardcoded rate if API fails
+        const usdAmount = idrAmount > 0 ? (idrAmount / 16500).toFixed(2) : "0";
+        if (idrAmount > 0) {
+          addMsg({
+            role: "assistant",
+            text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\nAmount: **Rp ${idrAmount.toLocaleString("id-ID")}** (~$${usdAmount} USD)`,
+            qrisAction: { merchantName: parsed.merchantName || "Merchant", amountUsd: usdAmount, amountIdr: idrAmount, token: "cUSD" },
+          });
+        } else {
+          addMsg({ role: "assistant", text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**\nType amount to pay.` });
+        }
       }
       setQrisPayment(parsed);
     } else {
@@ -782,22 +805,38 @@ function ChatPage() {
                       try {
                         const address = wallets?.[0]?.address;
                         if (!address) throw new Error("Connect wallet first");
+
+                        // Step 1: Deduct stablecoins from Nastar wallet → settlement
+                        addMsg({ role: "system", text: "Deducting from wallet..." });
                         const settlementAddress = "0xe94F48a8d268140108B86489A26afc4330D70666";
-                        const res = await fetch(`${API}/v1/wallet/withdraw`, {
+                        const withdrawRes = await fetch(`${API}/v1/wallet/withdraw`, {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ ownerAddress: address, to: settlementAddress, token: qa.token, amount: qa.amountUsd }),
                         });
-                        const data = await res.json();
-                        if (data.success) {
-                          addMsg({
-                            role: "assistant",
-                            text: `**Payment Processed**\n\nMerchant: ${qa.merchantName}\nAmount: ${qa.amountUsd} ${qa.token}\nIDR: ~Rp ${qa.amountIdr.toLocaleString("id-ID")}\n\n${qa.amountUsd} ${qa.token} deducted from your Nastar Wallet.`,
-                            txHash: data.txHash,
-                          });
-                        } else {
-                          throw new Error(data.error || "Payment failed");
-                        }
+                        const withdrawData = await withdrawRes.json();
+                        if (!withdrawData.success) throw new Error(withdrawData.error || "Withdraw failed");
+
+                        // Step 2: Trigger off-ramp liquidation (crypto → IDR → QRIS)
+                        addMsg({ role: "system", text: "Selling on Indodax..." });
+                        const offrampRes = await fetch(`${API}/v1/offramp/execute`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ amount: qa.amountUsd, token: "USDC", merchantName: qa.merchantName }),
+                        });
+                        const offrampData = await offrampRes.json();
+
+                        addMsg({
+                          role: "assistant",
+                          text: `**Payment Complete**\n\n` +
+                            `Merchant: **${qa.merchantName}**\n` +
+                            `Paid: ${qa.amountUsd} ${qa.token}\n` +
+                            `Received: **Rp ${qa.amountIdr.toLocaleString("id-ID")}**\n` +
+                            `Rate: 1 USDC = Rp ${offrampData.transaction?.rate?.toLocaleString("id-ID") || "16,500"}\n\n` +
+                            `${offrampData.settlement?.status === "auto_settled" ? "IDR sent to merchant via QRIS." : "IDR settlement in progress."}\n` +
+                            `Celo TX: \`${withdrawData.txHash?.slice(0, 18)}...\``,
+                          txHash: withdrawData.txHash,
+                        });
                       } catch (err) {
                         addMsg({ role: "assistant", text: `Payment failed: ${err instanceof Error ? err.message : String(err)}` });
                       }
@@ -807,7 +846,7 @@ function ChatPage() {
                     disabled={loading}
                     className="block mt-3 w-full py-2.5 rounded-xl bg-[#F4C430] text-[#0A0A0A] text-sm font-bold text-center hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-30 transition"
                   >
-                    Pay {msg.qrisAction.amountUsd} {msg.qrisAction.token} → {msg.qrisAction.merchantName}
+                    Pay {msg.qrisAction.amountUsd} cUSD → {msg.qrisAction.merchantName} (Rp {msg.qrisAction.amountIdr.toLocaleString("id-ID")})
                   </button>
                 )}
               </div>
