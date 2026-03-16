@@ -133,7 +133,7 @@ async function getServicesContext(): Promise<string> {
       return "No agents registered yet. Users can register at /launch.";
     }
     return services
-      .map((s: any) => `"${s.name}" (ID: ${s.agentId}) — ${s.description}. Price: ${s.pricePerCall} USDC`)
+      .map((s: any) => `Agent #${s.agentId} "${s.name}": ${s.description}. Price: ${s.pricePerCall} USDC. Active: ${s.active}`)
       .join("\n");
   } catch {
     return "Could not fetch services.";
@@ -296,6 +296,8 @@ export async function POST(req: NextRequest) {
     systemContent = `${SYSTEM_PROMPT}\n\nAvailable agents:\n${servicesContext}`;
   }
 
+  const isHireRequest = /hire|want.*agent|need.*agent|looking.*for|I want/i.test(userMessage);
+
   try {
     let reply: string;
 
@@ -304,7 +306,7 @@ export async function POST(req: NextRequest) {
       const anthropic = new Anthropic({ apiKey: anthropicKey });
       const msg = await anthropic.messages.create({
         model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
-        max_tokens: 150,
+        max_tokens: isHireRequest ? 400 : 150,
         system: systemContent,
         messages: messages.slice(-6).map((m: any) => ({
           role: m.role === "assistant" ? "assistant" as const : "user" as const,
@@ -321,7 +323,7 @@ export async function POST(req: NextRequest) {
           { role: "system", content: systemContent },
           ...messages.slice(-6),
         ],
-        max_tokens: 150,
+        max_tokens: isHireRequest ? 400 : 150,
         temperature: 0.7,
       });
       reply = completion.choices[0]?.message?.content || "Could you try rephrasing?";

@@ -331,6 +331,25 @@ function ChatPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-56px)] bg-[#0A0A0A]">
       <PageTitle title="Chat" />
+      {/* Chat Header */}
+      <div className="border-b border-white/[0.06] px-4 py-3">
+        <div className="max-w-2xl mx-auto flex items-center gap-3">
+          <a href="/browse" className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#A1A1A1] hover:text-white hover:bg-white/[0.08] transition">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+          </a>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full overflow-hidden">
+              <img src="/nastar-mascot.png" alt="" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <span className="text-[#F5F5F5] text-sm font-medium">Nastar Butler</span>
+              <span className="text-green-400 text-[10px] ml-2">Online</span>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
