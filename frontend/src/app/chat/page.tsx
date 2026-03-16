@@ -108,15 +108,40 @@ function ChatPage() {
     load();
   }, []);
 
+  // Handle "Hire this Agent" redirect from agent profile page
   useEffect(() => {
     if (prefilled) return;
-    const agentId = searchParams.get("agent");
-    const agentName = searchParams.get("name");
+    const hireId = searchParams.get("hire");
+    const hireName = searchParams.get("name");
+    // Legacy support
+    const agentId = hireId || searchParams.get("agent");
+    const agentName = hireName || searchParams.get("name");
     if (agentId && agentName) {
-      setInput(`I want to hire Agent #${agentId} — ${agentName}`);
       setPrefilled(true);
+      // Auto-send hire message to butler
+      const hireMsg = `I want to hire ${agentName}`;
+      addMsg({ role: "user", text: hireMsg });
+      setLoading(true);
+      fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: hireMsg }],
+          services: services.map((s, i) => `#${i}: "${s.name}" (Agent ${s.agentId}) — ${s.description}`).join("\n"),
+          wallet: wallets?.[0]?.address || "anonymous",
+        }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          addMsg({ role: "assistant", text: data.reply || "Let me help you hire this agent." });
+          setLoading(false);
+        })
+        .catch(() => {
+          addMsg({ role: "assistant", text: `I'll help you hire ${agentName}. Connect your wallet to get started, then I'll handle the escrow and payment.` });
+          setLoading(false);
+        });
     }
-  }, [searchParams, prefilled]);
+  }, [searchParams, prefilled, services]);
 
   function addMsg(msg: Omit<Message, "id">) {
     const m = { ...msg, id: Date.now().toString() + Math.random() };

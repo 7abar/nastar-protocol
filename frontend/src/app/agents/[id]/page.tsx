@@ -481,7 +481,7 @@ export default function AgentDetailPage() {
               <code className="text-[#A1A1A1]/40 text-xs font-mono">{localAgent.agentWallet.slice(0, 6)}...{localAgent.agentWallet.slice(-4)}</code>
             </div>
           </div>
-          <Link href="/chat" className="block w-full py-3 rounded-xl gradient-btn text-center font-semibold hover:shadow-[0_0_15px_#F4C430] transition text-sm mb-8">
+          <Link href={`/chat?hire=${localAgent.agentNftId || localAgent.agentId}&name=${encodeURIComponent(localAgent.name)}`} className="block w-full py-3 rounded-xl gradient-btn text-center font-semibold hover:shadow-[0_0_15px_#F4C430] transition text-sm mb-8">
             Hire this Agent
           </Link>
           {isOwner && (
