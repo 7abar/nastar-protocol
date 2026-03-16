@@ -205,26 +205,17 @@ export default function AgentDetailPage() {
     const tags = getTagsFromServices(onChainAgent.services);
     const minPrice = Math.min(...onChainAgent.services.map((s) => parseFloat(s.pricePerCall) || 0));
     const maxPrice = Math.max(...onChainAgent.services.map((s) => parseFloat(s.pricePerCall) || 0));
-    const avgRating = onChainAgent.completionRate >= 90 ? 4.8 : onChainAgent.completionRate >= 70 ? 4.2 : 3.5;
     const completedDeals = deals.filter((d) => d.statusLabel === "Completed");
+    const uniqueBuyers = new Set(deals.map((d) => d.buyerAgentId)).size;
 
-    // Generate reviews from completed deals
-    const reviews = completedDeals.length > 0
-      ? completedDeals.slice(0, 6).map((d) => ({
-          dealId: d.dealId,
-          buyer: `0x${d.buyerAgentId.toString(16).padStart(4, "0")}...`,
-          rating: d.statusLabel === "Completed" ? 5 : 3,
-          text: `Completed: ${d.taskDescription.slice(0, 80)}`,
-          time: timeAgo(d.createdAt),
-        }))
-      : // Simulated reviews from known completed deals
-        Array.from({ length: Math.min(onChainAgent.jobsCompleted, 4) }, (_, i) => ({
-          dealId: i,
-          buyer: `Agent #45`,
-          rating: 5,
-          text: ["Great data quality, fast delivery", "Accurate and well-structured output", "Reliable agent, will use again", "Excellent service, exceeded expectations"][i % 4],
-          time: `${i + 1}d ago`,
-        }));
+    // Reviews from real completed deals only
+    const reviews = completedDeals.slice(0, 6).map((d) => ({
+      dealId: d.dealId,
+      buyer: `Agent #${d.buyerAgentId}`,
+      rating: 5,
+      text: `Completed: ${d.taskDescription.slice(0, 80)}`,
+      time: timeAgo(d.createdAt),
+    }));
 
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
@@ -310,7 +301,7 @@ export default function AgentDetailPage() {
               { label: "Total Revenue", value: `$${onChainAgent.revenue}`, sub: onChainAgent.jobsCompleted > 0 ? `${onChainAgent.jobsCompleted} jobs` : undefined },
               { label: "Total Jobs", value: String(onChainAgent.jobsTotal) },
               { label: "Success Rate", value: `${onChainAgent.completionRate}%` },
-              { label: "Unique Buyers", value: String(Math.max(1, Math.ceil(onChainAgent.jobsCompleted / 2))) },
+              { label: "Unique Buyers", value: String(uniqueBuyers) },
             ].map((s) => (
               <div key={s.label} className="p-3 rounded-xl glass-card">
                 <p className="text-[#A1A1A1]/50 text-[10px] uppercase tracking-wider">{s.label}</p>
@@ -379,14 +370,17 @@ export default function AgentDetailPage() {
           {/* Tab content: Reviews */}
           {activeTab === "reviews" && (
             <div>
-              {/* Average rating */}
-              <div className="text-center mb-6">
-                <p className="text-4xl font-bold text-[#F5F5F5]">{avgRating.toFixed(2)}</p>
-                <div className="flex justify-center mt-1">
-                  <StarRating rating={Math.round(avgRating)} />
+              {/* Stats summary */}
+              {completedDeals.length > 0 ? (
+                <div className="text-center mb-6">
+                  <p className="text-4xl font-bold text-[#F5F5F5]">{completedDeals.length}</p>
+                  <p className="text-[#A1A1A1]/40 text-xs mt-1">Completed deals (on-chain verified)</p>
                 </div>
-                <p className="text-[#A1A1A1]/40 text-xs mt-1">Based on {onChainAgent.jobsCompleted} completed jobs</p>
-              </div>
+              ) : (
+                <div className="text-center mb-6">
+                  <p className="text-[#A1A1A1]/40 text-sm">No completed deals yet</p>
+                </div>
+              )}
 
               {/* Review cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -433,37 +427,29 @@ export default function AgentDetailPage() {
           {/* Tab content: Transactions */}
           {activeTab === "transactions" && (
             <div className="space-y-2">
-              {/* Generate transaction entries from known deals */}
-              {Array.from({ length: onChainAgent.jobsTotal }, (_, i) => ({
-                dealId: i,
-                task: ["Fetch Celo token prices", "Write crypto tweets", "Scrape NFT data", "Audit smart contract", "Analyze chain data", "Translate document", "Route DeFi swap"][i % 7],
-                amount: ["2", "1", "3", "25", "15", "5", "3"][i % 7],
-                status: i < onChainAgent.jobsCompleted ? "Completed" : "Active",
-                time: `${Math.max(1, Math.floor((onChainAgent.jobsTotal - i) * 0.5))}d ago`,
-                buyer: "Agent #45",
-              })).map((tx) => (
-                <div key={tx.dealId} className="flex items-center justify-between p-3 rounded-xl glass-card">
+              {deals.map((deal) => (
+                <div key={deal.dealId} className="flex items-center justify-between p-3 rounded-xl glass-card">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-2 h-2 rounded-full shrink-0 ${tx.status === "Completed" ? "bg-[#F4C430]" : "bg-[#A1A1A1]/30"}`} />
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${deal.statusLabel === "Completed" ? "bg-[#F4C430]" : deal.statusLabel === "Active" ? "bg-green-400" : "bg-[#A1A1A1]/30"}`} />
                     <div className="min-w-0">
-                      <p className="text-[#F5F5F5] text-sm truncate">{tx.task}</p>
-                      <p className="text-[#A1A1A1]/40 text-[10px]">by {tx.buyer} · {tx.time}</p>
+                      <p className="text-[#F5F5F5] text-sm truncate">{deal.taskDescription || `Deal #${deal.dealId}`}</p>
+                      <p className="text-[#A1A1A1]/40 text-[10px]">Buyer Agent #{deal.buyerAgentId} · {timeAgo(deal.createdAt)}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-[#F4C430] text-sm font-medium">{tx.amount} USDC</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${deal.statusLabel === "Completed" ? "text-[#F4C430] bg-[#F4C430]/10" : deal.statusLabel === "Active" ? "text-green-400 bg-green-500/10" : "text-[#A1A1A1] bg-white/[0.04]"}`}>{deal.statusLabel}</span>
                     <a
                       href={`https://celoscan.io/address/${ESCROW}`}
                       target="_blank"
                       className="text-[10px] text-[#A1A1A1]/30 hover:text-[#F4C430] transition"
                     >
-                      #{tx.dealId}
+                      #{deal.dealId}
                     </a>
                   </div>
                 </div>
               ))}
 
-              {onChainAgent.jobsTotal === 0 && (
+              {deals.length === 0 && (
                 <p className="text-center text-[#A1A1A1]/30 text-sm py-8">No transactions yet</p>
               )}
             </div>
