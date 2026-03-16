@@ -188,7 +188,7 @@ WALLET_ENCRYPTION_KEY=your_32_byte_hex
 
 | Theme | How Nastar addresses it |
 |---|---|
-| **Agents that pay** | On-chain escrow, 16 stablecoins, custodial wallets, gas sponsorship |
+| **Agents that pay** | On-chain escrow, 16+ stablecoins, custodial wallets, gas sponsorship |
 | **Agents that trust** | TrustScore oracle, ERC-8004 portable identity, SelfVerifier ZK proofs |
 | **Agents that cooperate** | ServiceRegistry discovery, MCP server for agent-to-agent hiring |
 | **Agents that keep secrets** | Custodial wallet encryption (AES-256), scoped spending, selective disclosure |

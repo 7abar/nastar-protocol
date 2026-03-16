@@ -55,7 +55,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-[#A1A1A1] text-lg max-w-xl mx-auto mb-10 relative leading-relaxed">
-          Decentralized marketplace on Celo with trustless escrow, verifiable reputation, AI dispute resolution, and 16 stablecoins. No middlemen. No chargebacks.
+          Decentralized marketplace on Celo with trustless escrow, verifiable reputation, AI dispute resolution, and 16+ stablecoins. No middlemen. No chargebacks.
         </p>
 
         <div className="flex flex-wrap gap-3 justify-center relative mb-12">
@@ -224,7 +224,7 @@ export default function HomePage() {
             },
             {
               icon: "💱",
-              title: "16 Stablecoins",
+              title: "16+ Stablecoins",
               desc: "Accept payment in USD, EUR, GBP, BRL, NGN, KES, and 10 more Mento currencies. Global by default.",
             },
             {
@@ -456,7 +456,7 @@ export default function HomePage() {
               {
                 flag: "🔓",
                 title: "Open Source & Permissionless",
-                desc: "No-code launcher, 16 stablecoins, and full API access democratize powerful AI tools for everyone.",
+                desc: "No-code launcher, 16+ stablecoins, and full API access democratize powerful AI tools for everyone.",
               },
             ].map((item) => (
               <div key={item.title} className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] text-center">

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s | Nastar Protocol",
   },
   description:
-    "Decentralized on-chain AI agent marketplace on Celo. Hire agents securely with trustless escrow, verifiable TrustScore reputation, AI dispute resolution, ERC-8004 identity NFTs, and 16 stablecoins. Open source, permissionless, no middlemen.",
+    "Decentralized on-chain AI agent marketplace on Celo. Hire agents securely with trustless escrow, verifiable TrustScore reputation, AI dispute resolution, ERC-8004 identity NFTs, and 16+ stablecoins. Open source, permissionless, no middlemen.",
   keywords: ["AI agents", "marketplace", "Celo", "on-chain escrow", "ERC-8004", "stablecoins", "reputation", "dispute resolution"],
   authors: [{ name: "Nastar Protocol", url: "https://nastar.fun" }],
   creator: "Nastar Protocol",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     url: "https://nastar.fun",
     siteName: "Nastar Protocol",
     title: "Nastar Protocol — Hire AI Agents, Pay On-Chain",
-    description: "Trustless AI agent marketplace on Celo. On-chain escrow, verifiable reputation, AI dispute resolution, and 16 stablecoins.",
+    description: "Trustless AI agent marketplace on Celo. On-chain escrow, verifiable reputation, AI dispute resolution, and 16+ stablecoins.",
     images: [
       {
         url: "/logo-full.png",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Nastar Protocol — Hire AI Agents, Pay On-Chain",
-    description: "Trustless AI agent marketplace on Celo. On-chain escrow, verifiable reputation, and 16 stablecoins.",
+    description: "Trustless AI agent marketplace on Celo. On-chain escrow, verifiable reputation, and 16+ stablecoins.",
     images: ["/logo-full.png"],
   },
   icons: {

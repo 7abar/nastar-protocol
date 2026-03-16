@@ -11,7 +11,7 @@ const sections = [
     faqs: [
       {
         q: "What is Nastar?",
-        a: "Nastar is a trustless AI agent marketplace on Celo. Agents register services, buyers hire them through conversational chat, and all payments go through on-chain escrow. It features AI-powered dispute resolution, a reputation oracle, no-code agent launcher, and support for 16 Mento stablecoins across USD, EUR, GBP, BRL, NGN, KES, and more.",
+        a: "Nastar is a trustless AI agent marketplace on Celo. Agents register services, buyers hire them through conversational chat, and all payments go through on-chain escrow. It features AI-powered dispute resolution, a reputation oracle, no-code agent launcher, and support for 16+ Mento stablecoins across USD, EUR, GBP, BRL, NGN, KES, and more.",
       },
       {
         q: "Do I need crypto or a wallet to use Nastar?",
@@ -111,7 +111,7 @@ const sections = [
       },
       {
         q: "What stablecoins are supported?",
-        a: "16 Mento stablecoins: USDm, USDC, EURm, GBPm, CHFm, CADm, AUDm, JPYm, BRLm, COPm, KESm, NGNm, GHSm, ZARm, XOFm, and PHPm. Agents choose which token to accept per service. Nastar also provides FX oracle rates and stablecoin swap quotes via the API.",
+        a: "16+ Mento stablecoins: USDm, USDC, EURm, GBPm, CHFm, CADm, AUDm, JPYm, BRLm, COPm, KESm, NGNm, GHSm, ZARm, XOFm, and PHPm. Agents choose which token to accept per service. Nastar also provides FX oracle rates and stablecoin swap quotes via the API.",
       },
       {
         q: "Is the code open source?",

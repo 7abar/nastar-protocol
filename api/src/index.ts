@@ -30,6 +30,7 @@ import facilitatorRouter from "./routes/facilitator.js";
 import sponsorRouter from "./routes/sponsor.js";
 import walletRouter from "./routes/wallet.js";
 import walletWithdrawRouter from "./routes/wallet-withdraw.js";
+import deliveryRouter from "./routes/delivery.js";
 import { startIndexer } from "./lib/indexer.js";
 import { x402AppMiddleware, PAY_TO, NETWORK, PROTECTED_ROUTES } from "./middleware/x402.js";
 
@@ -155,10 +156,64 @@ app.use("/x402", facilitatorRouter);       // Self-hosted x402 facilitator for C
 app.use("/v1/sponsor", sponsorRouter);     // Gas-sponsored agent deployment
 app.use("/v1/wallet", walletRouter);       // User custodial wallets (ACP-style)
 app.use("/v1/wallet/withdraw", walletWithdrawRouter); // Withdraw from custodial wallet
+app.use("/v1/delivery", deliveryRouter);              // Delivery proof-of-work system
 app.use("/v1/judge", judgeRouter);         // AI Dispute Judge
 app.use("/v1/reputation", reputationRouter); // Reputation Oracle
 app.use("/v1/swap", swapRouter);             // Mento multi-currency swap
 app.use("/v1/oracle", oracleRouter);         // Hybrid FX oracle (Pyth + Mento)
+
+// ── .well-known endpoints (MCP, A2A) ──────────────────────────────────────────
+app.get("/.well-known/mcp.json", (_req, res) => {
+  res.json({
+    schema: "https://modelcontextprotocol.io/schema/2025-06-18",
+    name: "Nastar Protocol",
+    description: "Trustless AI agent marketplace on Celo — discover, hire, and pay agents with on-chain escrow",
+    version: "1.0.0",
+    tools: [
+      { name: "browse_agents", description: "List all available AI agents on the marketplace", inputSchema: { type: "object", properties: { q: { type: "string", description: "Search query" } } } },
+      { name: "get_agent", description: "Get details for a specific agent by NFT token ID", inputSchema: { type: "object", properties: { agentId: { type: "number" } }, required: ["agentId"] } },
+      { name: "create_deal", description: "Create an escrow deal to hire an agent", inputSchema: { type: "object", properties: { serviceIndex: { type: "number" }, buyerAgentId: { type: "number" }, paymentToken: { type: "string" }, amount: { type: "string" } }, required: ["serviceIndex", "buyerAgentId", "paymentToken", "amount"] } },
+      { name: "check_deal", description: "Check the status of an existing deal", inputSchema: { type: "object", properties: { dealId: { type: "number" } }, required: ["dealId"] } },
+      { name: "get_reputation", description: "Get TrustScore reputation for an agent", inputSchema: { type: "object", properties: { agentId: { type: "number" } }, required: ["agentId"] } },
+      { name: "list_services", description: "List all registered services on the marketplace", inputSchema: { type: "object", properties: {} } },
+      { name: "get_balance", description: "Check wallet balances for an address", inputSchema: { type: "object", properties: { address: { type: "string" } }, required: ["address"] } },
+    ],
+    prompts: [
+      { name: "hire_agent", description: "Guide through hiring an AI agent on Nastar" },
+      { name: "check_status", description: "Check the status of a deal or agent" },
+      { name: "help", description: "Get help using the Nastar Protocol" },
+    ],
+    resources: [],
+    server: { url: "https://api.nastar.fun" },
+  });
+});
+
+app.get("/.well-known/agent-card.json", (_req, res) => {
+  res.json({
+    schema: "https://google.github.io/A2A/schema/0.3.0",
+    name: "Nastar Protocol",
+    description: "Trustless AI agent marketplace on Celo — on-chain escrow, TrustScore reputation, AI dispute resolution",
+    version: "1.0.0",
+    url: "https://nastar.fun",
+    capabilities: {
+      streaming: false,
+      pushNotifications: false,
+    },
+    skills: [
+      { id: "browse_marketplace", name: "Browse Marketplace", description: "Discover AI agents and their services", tags: ["marketplace", "agents", "discovery"] },
+      { id: "hire_agent", name: "Hire Agent", description: "Create an escrow deal to hire an AI agent with stablecoin payment", tags: ["hiring", "escrow", "payment"] },
+      { id: "check_reputation", name: "Check Reputation", description: "Query TrustScore for any registered agent", tags: ["reputation", "trustscore", "verification"] },
+      { id: "resolve_dispute", name: "Resolve Dispute", description: "AI judge reviews evidence and splits funds fairly", tags: ["dispute", "arbitration", "resolution"] },
+    ],
+    provider: {
+      organization: "Nastar Protocol",
+      url: "https://nastar.fun",
+    },
+    authentication: { schemes: [] },
+    defaultInputModes: ["text"],
+    defaultOutputModes: ["text"],
+  });
+});
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((_req, res) => {

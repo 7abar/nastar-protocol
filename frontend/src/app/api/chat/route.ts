@@ -217,14 +217,18 @@ ${personality.tone}
 
 ## Rules
 - Stay in character as "${ctx.name}". You are NOT the Nastar Butler.
-- 1-3 sentences max. No filler.
+- You ACTUALLY DO the work — don't just describe what you could do. When given a task, deliver real output.
+- For analysis: provide actual data, insights, and recommendations.
+- For content: write the actual content (tweets, posts, reports).
+- For research: deliver real findings with sources and summaries.
+- After completing a task, end with: "Delivery complete. This output has been recorded as proof-of-work."
 - When asked to hire: explain your task scope, ask them to describe their need. Hiring is automatic via escrow.
 - Never say "click Hire button" or "go to Nastar chat" — you ARE the agent.`;
 }
 
 const SYSTEM_PROMPT = `You are the Nastar Butler — concierge for Nastar Protocol, a trustless AI agent marketplace on Celo.
 
-Key facts: On-chain escrow (zero admin keys), AI dispute judge, ERC-8004 identity, 16 Mento stablecoins, no-code launcher (7 templates), autoConfirm, TrustScore reputation (0-100), Self Protocol ZK verification, gas sponsorship.
+Key facts: On-chain escrow (zero admin keys), AI dispute judge, ERC-8004 identity, 16+ Mento stablecoins, no-code launcher (7 templates), autoConfirm, TrustScore reputation (0-100), Self Protocol ZK verification, gas sponsorship.
 
 Escrow flow: Buyer locks payment → agent delivers → auto-releases. Disputes: AI judge splits 0-100%. Zero stuck funds.
 
@@ -285,7 +289,7 @@ export async function POST(req: NextRequest) {
 
   if (!anthropicKey && !openaiKey) {
     // No LLM key — give a smart fallback based on the question
-    const fallback = `I can answer common questions from my knowledge base, but for deeper conversations I need an LLM connection. Here's what I know about Nastar:\n\n• Trustless AI agent marketplace on Celo\n• On-chain escrow with AI dispute resolution\n• 16 Mento stablecoins supported\n• ERC-8004 portable agent identity\n• No-code agent launcher with gas sponsorship\n\nCheck /faq for detailed answers, or browse /browse to find agents.`;
+    const fallback = `I can answer common questions from my knowledge base, but for deeper conversations I need an LLM connection. Here's what I know about Nastar:\n\n• Trustless AI agent marketplace on Celo\n• On-chain escrow with AI dispute resolution\n• 16+ Mento stablecoins supported\n• ERC-8004 portable agent identity\n• No-code agent launcher with gas sponsorship\n\nCheck /faq for detailed answers, or browse /browse to find agents.`;
     return NextResponse.json({
       reply: fallback,
       rateLimit: { remaining, limit: RATE_LIMIT },
@@ -303,6 +307,8 @@ export async function POST(req: NextRequest) {
   }
 
   const isHireRequest = /hire|want.*agent|need.*agent|looking.*for|I want|services|what.*offer|what.*do/i.test(userMessage);
+  const isAgentChat = !!agentContext?.name;
+  const maxTokens = isAgentChat ? 800 : isHireRequest ? 400 : 150;
 
   try {
     let reply: string;
@@ -312,7 +318,7 @@ export async function POST(req: NextRequest) {
       const anthropic = new Anthropic({ apiKey: anthropicKey });
       const msg = await anthropic.messages.create({
         model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
-        max_tokens: isHireRequest ? 400 : 150,
+        max_tokens: maxTokens,
         system: systemContent,
         messages: messages.slice(-6).map((m: any) => ({
           role: m.role === "assistant" ? "assistant" as const : "user" as const,
@@ -329,7 +335,7 @@ export async function POST(req: NextRequest) {
           { role: "system", content: systemContent },
           ...messages.slice(-6),
         ],
-        max_tokens: isHireRequest ? 400 : 150,
+        max_tokens: maxTokens,
         temperature: 0.7,
       });
       reply = completion.choices[0]?.message?.content || "Could you try rephrasing?";
