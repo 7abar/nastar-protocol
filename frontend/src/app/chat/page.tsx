@@ -43,6 +43,7 @@ interface Message {
   services?: Service[];
   serviceIndex?: number;
   txHash?: string;
+  agentLink?: { id: string; name: string };
 }
 
 export default function ChatPageWrapper() {
@@ -71,6 +72,7 @@ function ChatPage() {
   const [withdrawToken, setWithdrawToken] = useState("cUSD");
   const [withdrawing, setWithdrawing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [agentMode, setAgentMode] = useState<{ id: string; name: string; template_id?: string; description?: string } | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [chatSessions, setChatSessions] = useState<{ id: string; title: string; date: number }[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string>(() => `chat-${Date.now()}`);
@@ -199,6 +201,19 @@ function ChatPage() {
     const hireName = searchParams.get("name");
     const agentId = hireId || searchParams.get("agent");
     const agentName = hireName || searchParams.get("name");
+    const mode = searchParams.get("mode");
+
+    // Agent work mode — direct chat with agent personality
+    if (mode === "work" && agentId && agentName) {
+      setPrefilled(true);
+      setAgentMode({ id: agentId, name: agentName });
+      addMsg({
+        role: "assistant",
+        text: `Hi! I'm **${agentName}**. Your deal is active and payment is secured in escrow.\n\nDescribe your task and I'll get to work. Once I deliver, you'll receive the output here with proof-of-work.`,
+      });
+      return;
+    }
+
     if (agentId && agentName) {
       setPrefilled(true);
 
@@ -271,7 +286,12 @@ function ChatPage() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: chatHistory, services: servicesContext, wallet }),
+        body: JSON.stringify({
+          messages: chatHistory,
+          services: servicesContext,
+          wallet,
+          ...(agentMode ? { agentContext: { name: agentMode.name, template_id: agentMode.template_id, description: agentMode.description } } : {}),
+        }),
       });
 
       const data = await res.json();
@@ -389,8 +409,9 @@ function ChatPage() {
 
       addMsg({
         role: "assistant",
-        text: `Done! "${service.name}" hired for ${formatUnits(amount, 18)} USDC. Payment is in escrow — auto-releases on delivery. You can dispute within 3 days.\n\nNo popups, no approvals. That's Nastar.`,
+        text: `Done! "${service.name}" hired for ${formatUnits(amount, 18)} ${payToken.symbol}. Payment is locked in escrow.\n\n**What happens next:**\n1. Chat with the agent to describe your task\n2. Agent delivers the work with proof\n3. Payment auto-releases after delivery\n4. You can dispute within 3 days if unsatisfied`,
         txHash: hireData.dealTxHash || "",
+        agentLink: { id: String(service.agentId), name: service.name },
       });
     } catch (err: unknown) {
       addMsg({ role: "assistant", text: `Error: ${err instanceof Error ? err.message.slice(0, 120) : String(err)}` });
@@ -428,8 +449,8 @@ function ChatPage() {
                 <img src="/nastar-mascot.png" alt="" className="w-full h-full object-cover" />
               </div>
               <div>
-                <span className="text-[#F5F5F5] text-sm font-medium">Nastar Butler</span>
-                <span className="text-green-400 text-[10px] ml-2">Online</span>
+                <span className="text-[#F5F5F5] text-sm font-medium">{agentMode ? agentMode.name : "Nastar Butler"}</span>
+                <span className="text-green-400 text-[10px] ml-2">{agentMode ? "Working" : "Online"}</span>
               </div>
             </div>
           </div>
@@ -595,6 +616,12 @@ function ChatPage() {
                   <a href={`https://celoscan.io/tx/${msg.txHash}`} target="_blank"
                     className="inline-block mt-2 text-xs text-[#F4C430] hover:underline">
                     View on CeloScan
+                  </a>
+                )}
+                {msg.agentLink && (
+                  <a href={`/chat?agent=${msg.agentLink.id}&name=${encodeURIComponent(msg.agentLink.name)}&mode=work`}
+                    className="block mt-3 w-full py-2.5 rounded-xl bg-[#F4C430] text-[#0A0A0A] text-sm font-bold text-center hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
+                    Chat with {msg.agentLink.name} to start your task
                   </a>
                 )}
               </div>
