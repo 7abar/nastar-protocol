@@ -254,7 +254,7 @@ export async function POST(req: NextRequest) {
       // Claude
       const anthropic = new Anthropic({ apiKey: anthropicKey });
       const msg = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
+        model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
         max_tokens: 250,
         system: systemContent,
         messages: messages.slice(-6).map((m: any) => ({
@@ -284,9 +284,16 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unknown error";
-    console.error("LLM error:", msg);
+    const status = (err as any)?.status || (err as any)?.statusCode || "";
+    console.error("LLM error:", msg, "status:", status);
+    
+    const userMsg = status === 401 ? "API key invalid. Check ANTHROPIC_API_KEY."
+      : status === 429 ? "Rate limit hit. Try again in a moment."
+      : status === 529 ? "Claude is overloaded. Try again shortly."
+      : `Something went wrong (${status || "unknown"}). Try again in a moment.`;
+    
     return NextResponse.json({
-      reply: "Something went wrong. Try again in a moment.",
+      reply: userMsg,
       rateLimit: { remaining, limit: RATE_LIMIT },
     });
   }
