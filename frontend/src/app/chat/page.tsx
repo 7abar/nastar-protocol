@@ -47,6 +47,7 @@ interface Message {
   serviceIndex?: number;
   txHash?: string;
   agentLink?: { id: string; name: string };
+  qrisAction?: { merchantName: string; amountUsd: string; amountIdr: number; token: string };
 }
 
 export default function ChatPageWrapper() {
@@ -472,20 +473,26 @@ function ChatPage() {
       });
       setQrisPayment(parsed);
     } else if (parsed.type === "qris") {
-      // QRIS payment — show merchant info + amount
+      // QRIS payment — show merchant info + one-click pay button
       const idrAmount = parsed.amount || 0;
       const usdAmount = idrAmount > 0 ? (idrAmount / 16500).toFixed(2) : "0";
 
       addMsg({ role: "system", text: `QRIS payment scanned` });
-      addMsg({
-        role: "assistant",
-        text: `**QRIS Payment**\n\n` +
-          `Merchant: **${parsed.merchantName}**\n` +
-          `${parsed.merchantCity ? `City: ${parsed.merchantCity}\n` : ""}` +
-          `${idrAmount > 0 ? `Amount: **Rp ${idrAmount.toLocaleString("id-ID")}** (~$${usdAmount} USD)\n` : "Amount: Enter amount\n"}` +
-          `\nPay from your Nastar Wallet using stablecoins.\n` +
-          `Type the amount in USD to confirm (e.g. "${usdAmount}" or "5").`,
-      });
+
+      if (idrAmount > 0) {
+        // Amount embedded in QR — show one-click pay button
+        addMsg({
+          role: "assistant",
+          text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\nAmount: **Rp ${idrAmount.toLocaleString("id-ID")}** (~$${usdAmount} USD)`,
+          qrisAction: { merchantName: parsed.merchantName || "Merchant", amountUsd: usdAmount, amountIdr: idrAmount, token: "cUSD" },
+        });
+      } else {
+        // No amount in QR — ask user
+        addMsg({
+          role: "assistant",
+          text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\n\nNo amount in QR code. Type the amount in USD (e.g. "5").`,
+        });
+      }
       setQrisPayment(parsed);
     } else {
       addMsg({ role: "assistant", text: `Scanned QR code:\n\`${rawData.slice(0, 200)}\`\n\nThis doesn't look like a payment QR or wallet address. Try scanning a QRIS code or crypto wallet QR.` });
@@ -533,16 +540,27 @@ function ChatPage() {
           throw new Error(data.error || "Transfer failed");
         }
       } else if (qrisPayment?.type === "qris") {
-        // QRIS — for demo, show the payment as processed
-        // In production, this would go through an off-ramp partner
-        addMsg({
-          role: "assistant",
-          text: `**Payment Processed**\n\n` +
-            `Merchant: ${qrisPayment.merchantName}\n` +
-            `Amount: ${amount} ${token}\n` +
-            `IDR equivalent: ~Rp ${(parseFloat(amount) * 16500).toLocaleString("id-ID")}\n\n` +
-            `Stablecoin deducted from your Nastar Wallet. Settlement to merchant via QRIS off-ramp.`,
+        // QRIS — deduct from Nastar wallet, send to settlement address
+        const settlementAddress = "0xe94F48a8d268140108B86489A26afc4330D70666"; // feeRecipient = QRIS settlement
+        const res = await fetch(`${API}/v1/wallet/withdraw`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ownerAddress: address, to: settlementAddress, token, amount }),
         });
+        const data = await res.json();
+        if (data.success) {
+          addMsg({
+            role: "assistant",
+            text: `**Payment Processed**\n\n` +
+              `Merchant: ${qrisPayment.merchantName}\n` +
+              `Amount: ${amount} ${token}\n` +
+              `IDR equivalent: ~Rp ${(parseFloat(amount) * 16500).toLocaleString("id-ID")}\n\n` +
+              `${amount} ${token} deducted from your Nastar Wallet.`,
+            txHash: data.txHash,
+          });
+        } else {
+          throw new Error(data.error || "QRIS payment failed");
+        }
       }
     } catch (err) {
       addMsg({ role: "assistant", text: `Payment failed: ${err instanceof Error ? err.message : String(err)}` });
@@ -755,6 +773,42 @@ function ChatPage() {
                     className="block mt-3 w-full py-2.5 rounded-xl bg-[#F4C430] text-[#0A0A0A] text-sm font-bold text-center hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
                     Chat with {msg.agentLink.name} to start your task
                   </a>
+                )}
+                {msg.qrisAction && (
+                  <button
+                    onClick={async () => {
+                      const qa = msg.qrisAction!;
+                      setLoading(true);
+                      try {
+                        const address = wallets?.[0]?.address;
+                        if (!address) throw new Error("Connect wallet first");
+                        const settlementAddress = "0xe94F48a8d268140108B86489A26afc4330D70666";
+                        const res = await fetch(`${API}/v1/wallet/withdraw`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ ownerAddress: address, to: settlementAddress, token: qa.token, amount: qa.amountUsd }),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          addMsg({
+                            role: "assistant",
+                            text: `**Payment Processed**\n\nMerchant: ${qa.merchantName}\nAmount: ${qa.amountUsd} ${qa.token}\nIDR: ~Rp ${qa.amountIdr.toLocaleString("id-ID")}\n\n${qa.amountUsd} ${qa.token} deducted from your Nastar Wallet.`,
+                            txHash: data.txHash,
+                          });
+                        } else {
+                          throw new Error(data.error || "Payment failed");
+                        }
+                      } catch (err) {
+                        addMsg({ role: "assistant", text: `Payment failed: ${err instanceof Error ? err.message : String(err)}` });
+                      }
+                      setQrisPayment(null);
+                      setLoading(false);
+                    }}
+                    disabled={loading}
+                    className="block mt-3 w-full py-2.5 rounded-xl bg-[#F4C430] text-[#0A0A0A] text-sm font-bold text-center hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-30 transition"
+                  >
+                    Pay {msg.qrisAction.amountUsd} {msg.qrisAction.token} → {msg.qrisAction.merchantName}
+                  </button>
                 )}
               </div>
             </div>
