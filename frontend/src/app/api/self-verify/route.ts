@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       const verifier = new SelfBackendVerifier(
         "nastar-agent-verify",
         "https://nastar.fun/api/self-verify",
-        true, // mockPassport = testnet/staging
+        false, // mockPassport = false for mainnet
         AllIds as any,
         new DefaultConfigStore({
           minimumAge: 18,

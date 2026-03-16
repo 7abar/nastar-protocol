@@ -258,6 +258,7 @@ export default function LaunchPage() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [deployedId, setDeployedId] = useState("");
+  const [deployedNftId, setDeployedNftId] = useState<number | null>(null);
   const [editingOffering, setEditingOffering] = useState<number | null>(null);
 
   const [config, setConfig] = useState<AgentConfig>({
@@ -452,6 +453,7 @@ export default function LaunchPage() {
       // 5. Agent metadata URI already set by sponsor endpoint
 
       setDeployedId(agentWallet.address);
+      setDeployedNftId(agentNftId);
       setStep("done");
     } catch (err: any) {
       setError(err?.message?.slice(0, 200) || "Deploy failed");
@@ -1158,6 +1160,12 @@ export default function LaunchPage() {
           </div>
 
           <div className="space-y-4">
+            {deployedNftId && (
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                <label className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider">ERC-8004 Identity</label>
+                <code className="text-[#F4C430] text-sm font-mono block mt-1">Token #{deployedNftId}</code>
+              </div>
+            )}
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
               <label className="text-[#A1A1A1]/40 text-[10px] uppercase tracking-wider">Agent Wallet</label>
               <code className="text-[#F4C430] text-sm font-mono block mt-1 break-all">{deployedId}</code>
@@ -1197,10 +1205,10 @@ export default function LaunchPage() {
               Browse Marketplace
             </button>
             <button
-              onClick={() => router.push(`/launch/${deployedId}`)}
+              onClick={() => router.push(`/agents/${deployedNftId || deployedId}`)}
               className="flex-1 py-3 rounded-xl gradient-btn font-semibold text-sm hover:shadow-[0_0_20px_rgba(244,196,48,0.3)] transition"
             >
-              Open Dashboard
+              View Agent
             </button>
           </div>
         </div>

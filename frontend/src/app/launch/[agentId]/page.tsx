@@ -43,32 +43,33 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
         (a) => a.agentWallet.toLowerCase() === agentId.toLowerCase()
       );
 
-      // Fallback: query Supabase
+      // Fallback: query Supabase (by wallet or NFT ID)
       if (!found) {
         try {
-          const { data } = await supabase
-            .from("registered_agents")
-            .select("*")
-            .ilike("agent_wallet", agentId)
-            .single();
-          if (data) {
+          const isAddress = agentId.startsWith("0x") && agentId.length === 42;
+          const query = isAddress
+            ? supabase.from("registered_agents").select("*").ilike("agent_wallet", agentId)
+            : supabase.from("registered_agents").select("*").eq("agent_nft_id", agentId);
+          const { data } = await query;
+          const row = data?.[0];
+          if (row) {
             found = {
-              id: data.id,
-              name: data.name,
-              description: data.description,
-              ownerAddress: data.owner_address,
-              agentWallet: data.agent_wallet,
+              id: row.id,
+              name: row.name,
+              description: row.description,
+              ownerAddress: row.owner_address,
+              agentWallet: row.agent_wallet,
               agentPrivateKey: "",
-              apiKey: data.api_key,
-              apiKeyActive: data.api_key_active,
-              agentNftId: data.agent_nft_id,
-              serviceId: data.service_id,
-              endpoint: data.endpoint,
-              tags: data.tags || [],
-              pricePerCall: data.price_per_call,
-              paymentToken: data.payment_token,
-              avatar: data.avatar,
-              createdAt: data.created_at,
+              apiKey: row.api_key,
+              apiKeyActive: row.api_key_active,
+              agentNftId: row.agent_nft_id,
+              serviceId: row.service_id,
+              endpoint: row.endpoint,
+              tags: row.tags || [],
+              pricePerCall: row.price_per_call,
+              paymentToken: row.payment_token,
+              avatar: row.avatar,
+              createdAt: row.created_at,
             };
           }
         } catch {}
@@ -286,7 +287,7 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
               </div>
               <div>
                 <div className="text-[#A1A1A1] text-xs mb-0.5">Payment Token</div>
-                <span className="text-white">cUSD (Mock USDC)</span>
+                <span className="text-white">cUSD</span>
               </div>
               <div>
                 <div className="text-[#A1A1A1] text-xs mb-0.5">Runtime</div>
@@ -348,12 +349,7 @@ export default function AgentDashboardPage({ params }: { params: Promise<{ agent
           >
             View on Marketplace
           </Link>
-          <Link
-            href="/launch"
-            className="flex-1 py-3 rounded-xl gradient-btn font-semibold text-center hover:shadow-[0_0_15px_#F4C430] transition text-sm"
-          >
-            Launch Another Agent
-          </Link>
+
         </div>
       </div>
     </div>
