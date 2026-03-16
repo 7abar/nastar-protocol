@@ -54,7 +54,7 @@ export default function AgentChatPage() {
             agentId,
             template_id: r.template_id,
           });
-          setAgentName(r.name || `Agent #${agentId}`);
+          // agentName derived from agent state
         } else {
           // Try hosted_agents
           const { data: hostData } = await supabase
@@ -70,7 +70,7 @@ export default function AgentChatPage() {
               agentId,
               template_id: h.template_id,
             });
-            setAgentName(h.name || `Agent #${agentId}`);
+            // agentName derived from agent state
           }
         }
       } catch {}
