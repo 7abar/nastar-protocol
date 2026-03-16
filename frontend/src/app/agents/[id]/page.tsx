@@ -170,14 +170,13 @@ export default function AgentDetailPage() {
             }
           } catch {}
         }
-        // Resolve Agentscan UUID
+        // Resolve Agentscan UUID (via our proxy — Agentscan has no CORS)
         try {
           const resolvedName = sbAgentName || agentServices[0]?.name || `Agent ${agentId}`;
-          const asRes = await fetch(`https://agentscan.info/api/agents?network_id=celo&search=${encodeURIComponent(resolvedName)}`);
+          const asRes = await fetch(`/api/agentscan?name=${encodeURIComponent(resolvedName)}&tokenId=${agentId}`);
           if (asRes.ok) {
             const asData = await asRes.json();
-            const match = (asData.items || []).find((a: any) => a.token_id === agentId && a.network_id === "celo");
-            if (match) setAgentscanUrl(`https://agentscan.info/agents/${match.id}`);
+            if (asData.url) setAgentscanUrl(asData.url);
           }
         } catch {}
 
