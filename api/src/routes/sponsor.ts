@@ -179,6 +179,50 @@ router.post("/deploy", async (req: Request, res: Response) => {
       // Non-critical — metadata URI can be set later
     }
 
+    // Auto-register on Molthunt (fire-and-forget, non-blocking)
+    (async () => {
+      try {
+        const { registerOnMolthunt } = await import("../lib/molthunt.js");
+        const { createClient } = await import("@supabase/supabase-js");
+        const sbUrl = process.env.SUPABASE_URL;
+        const sbKey = process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY;
+        if (!sbUrl || !sbKey) return;
+        const sb = createClient(sbUrl, sbKey);
+
+        // Fetch agent data including PK from Supabase
+        const { data } = await sb
+          .from("registered_agents")
+          .select("agent_wallet, agent_private_key, avatar, name, description")
+          .eq("agent_nft_id", agentNftId);
+
+        const agent = data?.[0];
+        if (!agent?.agent_private_key) {
+          console.log(`[molthunt] No agent PK found for #${agentNftId}, skipping`);
+          return;
+        }
+
+        const result = await registerOnMolthunt({
+          name: agent.name || req.body.name || `Agent #${agentNftId}`,
+          description: agent.description || req.body.description || "",
+          agentNftId,
+          agentWallet: agent.agent_wallet || ownerAddress,
+          agentPrivateKey: agent.agent_private_key,
+          avatar: agent.avatar || "",
+          templateId: req.body.templateId || "custom",
+        });
+
+        if (result.success) {
+          console.log(`[molthunt] Agent #${agentNftId} registered as project ${result.projectId}`);
+          // Store Molthunt project ID in Supabase
+          await sb.from("registered_agents")
+            .update({ molthunt_project_id: result.projectId })
+            .eq("agent_nft_id", agentNftId);
+        }
+      } catch (e: any) {
+        console.error("[molthunt] background error:", e.message);
+      }
+    })();
+
     return res.json({
       success: true,
       agentNftId,
