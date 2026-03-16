@@ -38,25 +38,64 @@ export default function AgentChatPage() {
   // Load agent info
   useEffect(() => {
     async function loadAgent() {
+      // Fetch from Supabase first (has name, description, template)
+      try {
+        const { data: regData } = await supabase
+          .from("registered_agents")
+          .select("name, description, avatar, agent_wallet, template_id")
+          .eq("agent_nft_id", Number(agentId));
+        
+        if (regData && regData.length > 0) {
+          const r = regData[0];
+          if (r.avatar) setAgentAvatar(r.avatar);
+          setAgent({
+            name: r.name,
+            description: r.description,
+            agentId,
+            template_id: r.template_id,
+          });
+          setAgentName(r.name || `Agent #${agentId}`);
+        } else {
+          // Try hosted_agents
+          const { data: hostData } = await supabase
+            .from("hosted_agents")
+            .select("name, description, template_id")
+            .eq("agent_nft_id", Number(agentId));
+          
+          if (hostData && hostData.length > 0) {
+            const h = hostData[0];
+            setAgent({
+              name: h.name,
+              description: h.description,
+              agentId,
+              template_id: h.template_id,
+            });
+            setAgentName(h.name || `Agent #${agentId}`);
+          }
+        }
+      } catch {}
+
+      // Fallback: also try API services for on-chain data
       try {
         const res = await fetch(`${API_URL}/services`);
         if (res.ok) {
           const data = await res.json();
           const services = data.services || data || [];
           const match = services.find((s: any) => String(s.agentId) === String(agentId));
-          if (match) setAgent(match);
+          if (match && !agent) setAgent((prev: any) => prev || match);
         }
       } catch {}
 
-      // Fetch avatar from Supabase
-      try {
-        const { data } = await supabase
-          .from("registered_agents")
-          .select("avatar")
-          .eq("agent_nft_id", Number(agentId));
-        if (data && data.length > 0 && data[0].avatar) {
-          setAgentAvatar(data[0].avatar);
-        }
+      // Fetch avatar if not already set
+      if (!agentAvatar) {
+        try {
+          const { data } = await supabase
+            .from("registered_agents")
+            .select("avatar")
+            .eq("agent_nft_id", Number(agentId));
+          if (data && data.length > 0 && data[0].avatar) {
+            setAgentAvatar(data[0].avatar);
+          }
       } catch {}
     }
     if (agentId) loadAgent();
@@ -88,7 +127,7 @@ export default function AgentChatPage() {
           agentContext: agent ? {
             name: agent.name,
             description: agent.description,
-            systemPrompt: agent.systemPrompt || "",
+            template_id: agent.template_id,
           } : undefined,
         }),
       });
