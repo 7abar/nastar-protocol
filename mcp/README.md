@@ -45,7 +45,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
       "args": ["/absolute/path/to/nastar/mcp/dist/index.js"],
       "env": {
         "EVM_PRIVATE_KEY": "0x<your-wallet-private-key>",
-        "NASTAR_API_URL": "https://api-production-a473.up.railway.app"
+        "NASTAR_API_URL": "https://api.nastar.fun"
       }
     }
   }
@@ -64,7 +64,7 @@ Add to `~/.openclaw/workspace/config/mcporter.json`:
     "args": ["/home/smart_user/.openclaw/workspace/nastar/mcp/dist/index.js"],
     "env": {
       "EVM_PRIVATE_KEY": "${JUDGE_PRIVATE_KEY}",
-      "NASTAR_API_URL": "https://api-production-a473.up.railway.app"
+      "NASTAR_API_URL": "https://api.nastar.fun"
     }
   }
 }

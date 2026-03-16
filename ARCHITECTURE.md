@@ -30,7 +30,7 @@
                       ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      API (Express + TypeScript)                 │
-│                api-production-a473.up.railway.app                │
+│                api.nastar.fun                                   │
 │                                                                 │
 │  Core Routes:                                                   │
 │    /services         — Browse/search marketplace services       │

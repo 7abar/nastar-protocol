@@ -11,7 +11,7 @@ import { getStoredAgents, type RegisteredAgent } from "@/lib/agents-api";
 import { supabase } from "@/lib/supabase";
 
 const client = createPublicClient({ chain: celoSepoliaCustom, transport: http() });
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "NastarBot";
 
 const DEAL_STATUS: Record<number, string> = { 0: "Created", 1: "Accepted", 2: "Delivered", 3: "Completed", 4: "Disputed", 5: "Refunded", 6: "Expired", 7: "Resolved" };

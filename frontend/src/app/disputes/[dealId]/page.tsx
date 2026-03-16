@@ -8,7 +8,7 @@ import { createPublicClient, http, formatUnits } from "viem";
 import { celoSepoliaCustom, CONTRACTS, ESCROW_ABI } from "@/lib/contracts";
 
 const client = createPublicClient({ chain: celoSepoliaCustom, transport: http() });
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
 const STATUS_LABELS: Record<number, string> = {
   0: "Created", 1: "Accepted", 2: "Delivered", 3: "Completed",

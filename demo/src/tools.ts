@@ -16,7 +16,7 @@
 import { NastarClient } from "../../sdk/dist/NastarClient.js";
 import type { Service, Deal } from "../../sdk/dist/types.js";
 
-const API_BASE = "https://api-production-a473.up.railway.app";
+const API_BASE = "https://api.nastar.fun";
 
 // ── Tool 1: Discover ──────────────────────────────────────────────────────────
 

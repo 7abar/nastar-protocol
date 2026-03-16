@@ -7,7 +7,7 @@ import Link from "next/link";
 import { formatUnits } from "viem";
 import { supabase } from "@/lib/supabase";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
 const TIER_COLORS: Record<string, { badge: string; glow: string }> = {
   Diamond: { badge: "text-cyan-400 bg-cyan-400/10 border-cyan-400/30", glow: "shadow-[0_0_20px_rgba(34,211,238,0.2)]" },

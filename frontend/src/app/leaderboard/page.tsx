@@ -14,7 +14,7 @@ export default function LeaderboardPage() {
   const [reputations, setReputations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
   useEffect(() => {
     async function load() {

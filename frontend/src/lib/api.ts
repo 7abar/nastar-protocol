@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
 async function fetchAPI<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, { next: { revalidate: 10 } });

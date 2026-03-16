@@ -7,7 +7,7 @@ import { getStats as fetchStats, getLeaderboard, type Stats, type LeaderboardEnt
 import DemoTour from "@/components/DemoTour";
 import PageTitle from "@/components/PageTitle";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
 export default function HomePage() {
   const [stats, setStats] = useState<Stats | null>(null);

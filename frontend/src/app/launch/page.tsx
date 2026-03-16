@@ -18,7 +18,7 @@ import { supabase } from "@/lib/supabase";
 import PageTitle from "@/components/PageTitle";
 
 const client = createPublicClient({ chain: celoSepoliaCustom, transport: http() });
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
 // ─── Templates ───────────────────────────────────────────────────────────────
 

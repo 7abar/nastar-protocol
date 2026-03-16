@@ -123,7 +123,7 @@ function checkFAQCache(message: string): string | null {
 }
 
 // ── API URL for services context ────────────────────────────────────────────
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
 async function getServicesContext(): Promise<string> {
   try {

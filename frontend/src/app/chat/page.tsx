@@ -69,7 +69,7 @@ function ChatPage() {
   useEffect(() => {
     if (!wallets.length) return;
     const address = wallets[0].address;
-    const API = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+    const API = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
     
     (async () => {
       try {
@@ -221,7 +221,7 @@ function ChatPage() {
 
     try {
       const address = wallets[0].address;
-      const API = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+      const API = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
       // Step 1: Ensure user has a Nastar Wallet
       addMsg({ role: "system", text: "Setting up your Nastar Wallet..." });

@@ -88,7 +88,7 @@ router.post("/deploy", async (req: Request, res: Response) => {
       transport: http(CELO_RPC),
     });
 
-    const API_URL = process.env.API_URL || "https://api-production-a473.up.railway.app";
+    const API_URL = process.env.API_URL || "https://api.nastar.fun";
     const txHashes: string[] = [];
 
     // ── 1. Mint ERC-8004 Identity NFT ──────────────────────────────────────────

@@ -14,7 +14,7 @@ import {
 } from "@/lib/agents-api";
 // SetupTabs removed — agents are hosted by Nastar (no-code)
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 const IDENTITY_REGISTRY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
 const ESCROW = "0x132aB4B07849a5cEe5104c2be32B32f9240b97FF";
 

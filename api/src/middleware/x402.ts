@@ -40,7 +40,7 @@ let _x402Middleware: ReturnType<typeof paymentMiddleware> | null = null;
 function getX402Middleware() {
   if (!_x402Middleware) {
     _x402Middleware = paymentMiddleware(PAY_TO, PROTECTED_ROUTES, {
-      url: (process.env.X402_FACILITATOR_URL || "https://api-production-a473.up.railway.app/x402") as `https://${string}`,
+      url: (process.env.X402_FACILITATOR_URL || "https://api.nastar.fun/x402") as `https://${string}`,
     });
   }
   return _x402Middleware;

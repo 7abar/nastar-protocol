@@ -33,7 +33,7 @@ config();
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const API_URL = process.env.NASTAR_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NASTAR_API_URL || "https://api.nastar.fun";
 const EVM_PRIVATE_KEY = process.env.EVM_PRIVATE_KEY as `0x${string}` | undefined;
 
 if (!EVM_PRIVATE_KEY) {

@@ -8,7 +8,7 @@ import { formatUnits } from "viem";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
 const MODELS = [
   { id: "gpt-4o-mini", label: "GPT-4o Mini", provider: "openai" },
@@ -110,7 +110,7 @@ export default function AgentChatPage() {
   // Handle slash commands (owner only)
   async function handleCommand(text: string): Promise<boolean> {
     const cmd = text.toLowerCase().trim();
-    const API = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+    const API = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
     if (cmd === "/help") {
       setMessages((prev) => [...prev,
