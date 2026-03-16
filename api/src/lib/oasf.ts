@@ -130,6 +130,38 @@ const TEMPLATE_PROFILES: Record<string, OASFProfile> = {
     domains: [DOMAINS.FINTECH, DOMAINS.DEFI, DOMAINS.BLOCKCHAIN],
     tags: ["fx", "hedging", "mento", "defi", "treasury", "rebalancing", "AI-agents"],
   },
+  "dao-ops": {
+    skills: [
+      SKILLS.WORKFLOW_MANAGEMENT,
+      SKILLS.PAYMENT_PROCESSING,
+      SKILLS.DATA_ANALYSIS,
+      SKILLS.SUMMARIZATION,
+      SKILLS.DECISION_MAKING,
+    ],
+    domains: [DOMAINS.BUSINESS_OPS, DOMAINS.BLOCKCHAIN, DOMAINS.FINTECH],
+    tags: ["dao", "governance", "treasury", "multisig", "grants", "payroll", "AI-agents"],
+  },
+  "nft-agent": {
+    skills: [
+      SKILLS.DATA_ANALYSIS,
+      SKILLS.WEB_RESEARCH,
+      SKILLS.DATA_COLLECTION,
+      SKILLS.PORTFOLIO_MANAGEMENT,
+    ],
+    domains: [DOMAINS.BLOCKCHAIN, DOMAINS.DATA_SCIENCE, DOMAINS.AI],
+    tags: ["nft", "analytics", "collections", "celo", "portfolio", "floor-price", "AI-agents"],
+  },
+  "defi-yield": {
+    skills: [
+      SKILLS.TRADING,
+      SKILLS.PORTFOLIO_MANAGEMENT,
+      SKILLS.RISK_ANALYSIS,
+      SKILLS.DATA_ANALYSIS,
+      SKILLS.DECISION_MAKING,
+    ],
+    domains: [DOMAINS.DEFI, DOMAINS.FINTECH, DOMAINS.BLOCKCHAIN],
+    tags: ["defi", "yield", "farming", "liquidity", "celo", "optimization", "AI-agents"],
+  },
   custom: {
     skills: [
       SKILLS.TASK_PLANNING,

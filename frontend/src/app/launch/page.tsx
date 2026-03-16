@@ -27,148 +27,191 @@ const TEMPLATES = [
     id: "trading",
     name: "Trading Bot",
     tagline: "DeFi automation on Celo",
-    description: "Monitors markets and executes token swaps based on configurable thresholds.",
-    tags: ["trading", "defi", "celo"],
-    defaultOffering: {
-      name: "token_swap",
-      description: "Execute token swaps on Celo DEXes with configurable parameters",
-      feeType: "percentage" as const,
-      fee: "0.05",
-      requiresFunds: true,
-    },
-    systemPrompt: `You are a DeFi trading agent on Celo. Your job is to:
-- Monitor token prices on Celo DEXes (Uniswap v3, Ubeswap)
-- Execute buy/sell swaps when configured thresholds are met
-- Report all actions with transaction hashes
-- Never exceed the configured spending limit per operation
-- Always confirm before executing trades above $50
-
-You have access to the user's scoped wallet with spend limits. Be conservative and transparent.`,
+    description: "Executes token swaps, monitors prices, and manages DeFi positions across Celo DEXes.",
+    tags: ["trading", "defi", "celo", "mento"],
+    defaultOfferings: [
+      { name: "Token Swap", description: "Execute token swaps on Celo DEXes (Ubeswap, Mento) with slippage protection", feeType: "percentage" as const, fee: "0.05", requiresFunds: true },
+      { name: "Price Alert", description: "Monitor token prices and notify when thresholds are hit (e.g. cUSD/USDC depeg)", feeType: "fixed" as const, fee: "0.25", requiresFunds: false },
+      { name: "Portfolio Rebalance", description: "Auto-rebalance a multi-token portfolio to target allocations", feeType: "percentage" as const, fee: "0.03", requiresFunds: true },
+      { name: "DCA Strategy", description: "Dollar-cost average into a token with scheduled recurring buys", feeType: "percentage" as const, fee: "0.02", requiresFunds: true },
+    ],
+    systemPrompt: `You are a DeFi trading agent on Celo. You execute real trades using your agent wallet.
+- Execute swaps via [ACTION:swap:AMOUNT:FROM:TO] when user requests
+- Check balances via [ACTION:balance:ADDRESS]
+- Monitor prices using live FX rates provided in context
+- Always confirm trade details before executing above $50
+- Report every action with amounts, rates, and transaction hashes
+- Be conservative — protect the user's capital above all else`,
   },
   {
     id: "payments",
     name: "Payment Agent",
     tagline: "Automate stablecoin payments",
-    description: "Schedules and executes recurring stablecoin payments on behalf of users.",
-    tags: ["payments", "usdc", "automation"],
-    defaultOffering: {
-      name: "scheduled_payment",
-      description: "Process and schedule stablecoin payments",
-      feeType: "fixed" as const,
-      fee: "0.5",
-      requiresFunds: true,
-    },
-    systemPrompt: `You are a payment automation agent on Celo. Your job is to:
-- Process payment requests in USDC and cUSD
-- Schedule recurring transfers based on user instructions
-- Verify recipient addresses before sending
-- Generate payment receipts with transaction hashes
-- Enforce daily spending limits strictly
-
-Never send to unverified addresses. Always log every transaction.`,
+    description: "Sends payments, processes invoices, and manages recurring transfers in 16+ stablecoins.",
+    tags: ["payments", "stablecoin", "automation", "invoicing"],
+    defaultOfferings: [
+      { name: "Send Payment", description: "Send stablecoin payments to any Celo address with receipt generation", feeType: "fixed" as const, fee: "0.25", requiresFunds: true },
+      { name: "Batch Payroll", description: "Process multiple payments in one batch (up to 20 recipients)", feeType: "fixed" as const, fee: "1", requiresFunds: true },
+      { name: "Invoice Processing", description: "Parse invoice details and execute payment with proof-of-payment", feeType: "fixed" as const, fee: "0.5", requiresFunds: true },
+      { name: "Recurring Transfer", description: "Schedule daily/weekly/monthly automatic stablecoin transfers", feeType: "fixed" as const, fee: "0.5", requiresFunds: true },
+    ],
+    systemPrompt: `You are a payment automation agent on Celo. You execute real transfers using your agent wallet.
+- Send payments via [ACTION:send:AMOUNT:TOKEN:ADDRESS]
+- Check balances via [ACTION:balance:ADDRESS]
+- Always verify recipient address before sending
+- Generate payment receipts with TX hash, amount, timestamp
+- Enforce daily spending limits — never exceed without explicit confirmation
+- Support all Celo stablecoins: cUSD, USDC, USDT, EURm, and more`,
   },
   {
     id: "social",
-    name: "Social Bot",
-    tagline: "Onchain social actions",
-    description: "Posts content, follows accounts, and engages on Farcaster and Lens on your behalf.",
-    tags: ["social", "farcaster", "lens"],
-    defaultOffering: {
-      name: "social_engagement",
-      description: "Post content and engage on Web3 social platforms",
-      feeType: "fixed" as const,
-      fee: "1",
-      requiresFunds: false,
-    },
-    systemPrompt: `You are a social media agent for Web3 platforms (Farcaster, Lens). Your job is to:
-- Post content based on user-provided topics and tone
-- Engage with relevant casts/posts in the user's niche
-- Follow relevant accounts when instructed
-- Never post controversial political content
-- Always maintain the user's configured brand voice
-
-Only post content the user explicitly approves or that matches approved templates.`,
+    name: "Content Agent",
+    tagline: "AI-powered content creation",
+    description: "Creates Web3 content, manages social strategy, and generates engagement reports.",
+    tags: ["content", "social", "marketing", "web3"],
+    defaultOfferings: [
+      { name: "Thread Writer", description: "Write a Twitter/Farcaster thread on any Web3 topic (5-10 posts)", feeType: "fixed" as const, fee: "1", requiresFunds: false },
+      { name: "Content Calendar", description: "Generate a 7-day content calendar with posts, hooks, and hashtags", feeType: "fixed" as const, fee: "2", requiresFunds: false },
+      { name: "Community Report", description: "Analyze a project's community health, sentiment, and growth metrics", feeType: "fixed" as const, fee: "1.5", requiresFunds: false },
+      { name: "Brand Voice Kit", description: "Create a brand voice guide with tone, vocabulary, and example posts", feeType: "fixed" as const, fee: "3", requiresFunds: false },
+    ],
+    systemPrompt: `You are a Web3 content creation agent. You deliver actual content — not descriptions of content.
+- When asked for threads: write the actual thread posts, numbered, ready to copy-paste
+- When asked for calendars: deliver a structured day-by-day plan with actual post drafts
+- When asked for reports: analyze and deliver real data-driven insights
+- Write in the user's preferred tone (casual, professional, degen, etc.)
+- Every delivery should be immediately usable — no placeholders or "insert here"
+- End each delivery with "Delivery complete. This output has been recorded as proof-of-work."`,
   },
   {
     id: "research",
     name: "Research Agent",
     tagline: "Onchain data intelligence",
-    description: "Monitors wallets, contracts, and governance. Delivers daily digests.",
-    tags: ["research", "analytics", "governance"],
-    defaultOffering: {
-      name: "blockchain_research",
-      description: "Deep analysis of onchain data, wallets, and governance proposals",
-      feeType: "fixed" as const,
-      fee: "1.5",
-      requiresFunds: false,
-    },
-    systemPrompt: `You are a blockchain research agent on Celo. Your job is to:
-- Monitor specified wallet addresses for activity
-- Track Celo governance proposals and summarize them
-- Analyze token movements and flag unusual patterns
-- Deliver daily digests in plain language
-- Respond to research queries about onchain data
-
-Be factual, cite transaction hashes, and flag uncertainty clearly.`,
+    description: "Analyzes wallets, governance proposals, and market trends. Delivers actionable reports.",
+    tags: ["research", "analytics", "governance", "data"],
+    defaultOfferings: [
+      { name: "Wallet Analysis", description: "Deep analysis of any wallet — holdings, transaction patterns, DeFi positions", feeType: "fixed" as const, fee: "1", requiresFunds: false },
+      { name: "Governance Brief", description: "Summarize and analyze active Celo governance proposals with voting recommendations", feeType: "fixed" as const, fee: "1.5", requiresFunds: false },
+      { name: "Market Report", description: "Weekly market report covering Celo ecosystem trends, TVL, and token movements", feeType: "fixed" as const, fee: "2", requiresFunds: false },
+      { name: "Smart Contract Audit", description: "Review a smart contract for common vulnerabilities and gas optimization", feeType: "fixed" as const, fee: "5", requiresFunds: false },
+    ],
+    systemPrompt: `You are a blockchain research agent on Celo. You deliver real analysis with real data.
+- Check wallet balances via [ACTION:balance:ADDRESS]
+- Use live FX rates and on-chain data from context to provide real numbers
+- Cite sources: transaction hashes, block numbers, contract addresses
+- Flag uncertainty — never present speculation as fact
+- Structure reports with clear sections: Summary, Key Findings, Data, Recommendations
+- Deliver complete reports, not outlines or promises to research later`,
   },
   {
     id: "remittance",
     name: "Remittance Agent",
     tagline: "Cross-border transfers on Celo",
-    description: "Understands natural language remittance requests and executes transfers using Mento stablecoins.",
-    tags: ["remittance", "mento", "global-south", "payments"],
-    defaultOffering: {
-      name: "cross_border_transfer",
-      description: "Execute cross-border remittances using Mento stablecoins at <0.5% fees",
-      feeType: "percentage" as const,
-      fee: "0.005",
-      requiresFunds: true,
-    },
-    systemPrompt: `You are a cross-border remittance agent on Celo. Your job is to:
-- Parse natural language transfer requests like "Send $50 to my mom in the Philippines"
-- Find the cheapest route using Mento pools (USD→PHP, EUR→NGN, GBP→KES)
-- Execute stablecoin swaps (USDm, EURm, BRLm, COPm, XOFm) via Mento Protocol
-- Show fee comparisons vs traditional providers (Western Union: ~7%, Wise: ~1.5%, Nastar: <0.5%)
-- Schedule recurring transfers when requested
-
-Never send to unverified addresses. Always confirm amounts before executing.`,
+    description: "Converts and sends money globally using Mento stablecoins. Cheaper than Western Union.",
+    tags: ["remittance", "mento", "global-south", "cross-border"],
+    defaultOfferings: [
+      { name: "Send Remittance", description: "Convert and send money cross-border via Mento (e.g. USD→KES, EUR→NGN)", feeType: "percentage" as const, fee: "0.005", requiresFunds: true },
+      { name: "Rate Quote", description: "Get live FX rate quotes for any Mento currency pair with fee comparison", feeType: "fixed" as const, fee: "0", requiresFunds: false },
+      { name: "Recurring Remittance", description: "Schedule weekly/monthly cross-border transfers (e.g. $50/month to Philippines)", feeType: "percentage" as const, fee: "0.005", requiresFunds: true },
+      { name: "Multi-Recipient", description: "Send remittances to multiple recipients in different countries in one batch", feeType: "percentage" as const, fee: "0.008", requiresFunds: true },
+    ],
+    systemPrompt: `You are a cross-border remittance agent on Celo. You execute real transfers using Mento stablecoins.
+- Execute swaps via [ACTION:swap:AMOUNT:FROM:TO] (e.g. cUSD→KESm for Kenya)
+- Send funds via [ACTION:send:AMOUNT:TOKEN:ADDRESS]
+- Use live FX rates from context to show real conversion amounts
+- Always compare fees: Western Union ~7%, Wise ~1.5%, Nastar <0.5%
+- Parse natural language: "Send $50 to my mom in Kenya" → swap cUSD→KESm, send KESm
+- Available corridors: USD, EUR, GBP, BRL, COP, KES, NGN, GHS, ZAR, XOF, PHP, AUD, CAD, CHF, JPY`,
   },
   {
     id: "fx-hedge",
     name: "FX Hedging Agent",
     tagline: "Automated currency hedging",
-    description: "Monitors multi-currency exposure and auto-rebalances using Mento stablecoins.",
-    tags: ["fx", "hedging", "mento", "defi", "treasury"],
-    defaultOffering: {
-      name: "fx_rebalance",
-      description: "Monitor and rebalance multi-currency stablecoin portfolios",
-      feeType: "percentage" as const,
-      fee: "0.02",
-      requiresFunds: true,
-    },
-    systemPrompt: `You are an FX hedging agent on Celo. Your job is to:
-- Track portfolio exposure across multiple Celo stablecoins (USDm, EURm, BRLm, COPm, XOFm)
-- Monitor drift from user-configured target allocations
-- Execute rebalancing swaps via Mento Protocol when drift exceeds threshold
-- Optimize swap timing to minimize slippage and gas costs
-- Generate daily risk reports showing currency movements and hedging costs
-
-Example allocation: "Keep 50% in USDm, 30% in EURm, 20% in BRLm"
-Rebalance when any position drifts more than 5% from target.`,
+    description: "Manages multi-currency exposure and auto-rebalances portfolios using Mento stablecoins.",
+    tags: ["fx", "hedging", "mento", "treasury", "risk"],
+    defaultOfferings: [
+      { name: "Portfolio Rebalance", description: "Rebalance multi-currency stablecoin portfolio to target allocations", feeType: "percentage" as const, fee: "0.02", requiresFunds: true },
+      { name: "Exposure Report", description: "Analyze current currency exposure with drift and risk metrics", feeType: "fixed" as const, fee: "1", requiresFunds: false },
+      { name: "Hedge Strategy", description: "Design a hedging strategy based on your business's currency risk profile", feeType: "fixed" as const, fee: "3", requiresFunds: false },
+      { name: "Auto-Hedge", description: "Continuous monitoring — auto-rebalance when drift exceeds threshold (e.g. 5%)", feeType: "percentage" as const, fee: "0.03", requiresFunds: true },
+    ],
+    systemPrompt: `You are an FX hedging agent on Celo. You manage real multi-currency portfolios using Mento stablecoins.
+- Execute rebalancing swaps via [ACTION:swap:AMOUNT:FROM:TO]
+- Check positions via [ACTION:balance:ADDRESS]
+- Use live FX rates to calculate drift and exposure
+- Track allocation targets (e.g. "50% USDm, 30% EURm, 20% BRLm")
+- Alert when any position drifts more than the configured threshold
+- Generate risk reports with real numbers: current vs target allocation, drift %, cost of rebalance`,
+  },
+  {
+    id: "dao-ops",
+    name: "DAO Operations",
+    tagline: "Automate DAO treasury & governance",
+    description: "Manages DAO treasury, tracks proposals, executes approved disbursements, and reports financials.",
+    tags: ["dao", "governance", "treasury", "multisig"],
+    defaultOfferings: [
+      { name: "Treasury Report", description: "Generate a DAO treasury report — balances, inflows, outflows, runway estimate", feeType: "fixed" as const, fee: "2", requiresFunds: false },
+      { name: "Proposal Summary", description: "Summarize active governance proposals with impact analysis and voting recommendation", feeType: "fixed" as const, fee: "1", requiresFunds: false },
+      { name: "Grant Disbursement", description: "Execute approved grant payments from DAO treasury to recipients", feeType: "fixed" as const, fee: "0.5", requiresFunds: true },
+      { name: "Contributor Payroll", description: "Process monthly contributor payments based on approved budget", feeType: "fixed" as const, fee: "1", requiresFunds: true },
+    ],
+    systemPrompt: `You are a DAO operations agent on Celo. You help DAOs manage treasury and governance efficiently.
+- Send payments via [ACTION:send:AMOUNT:TOKEN:ADDRESS] for approved disbursements
+- Check treasury balances via [ACTION:balance:ADDRESS]
+- Summarize governance proposals clearly: what it does, who benefits, cost, risk
+- Generate financial reports with real numbers from wallet data
+- Always require explicit approval before executing any payment
+- Track spending against approved budgets — flag overruns immediately`,
+  },
+  {
+    id: "nft-agent",
+    name: "NFT Agent",
+    tagline: "NFT analytics & portfolio management",
+    description: "Tracks NFT collections, analyzes floor prices, and helps manage NFT portfolios on Celo.",
+    tags: ["nft", "analytics", "collections", "celo"],
+    defaultOfferings: [
+      { name: "Collection Analysis", description: "Deep dive into an NFT collection — floor price, volume, holder distribution, rarity", feeType: "fixed" as const, fee: "1.5", requiresFunds: false },
+      { name: "Portfolio Valuation", description: "Estimate total value of an NFT portfolio based on floor prices and recent sales", feeType: "fixed" as const, fee: "1", requiresFunds: false },
+      { name: "Trend Report", description: "Weekly Celo NFT market report — top movers, new collections, volume trends", feeType: "fixed" as const, fee: "2", requiresFunds: false },
+      { name: "Mint Alert", description: "Monitor and alert on new NFT mints matching your criteria (price, collection size, creator)", feeType: "fixed" as const, fee: "0.5", requiresFunds: false },
+    ],
+    systemPrompt: `You are an NFT analytics agent on Celo. You deliver real data and actionable insights about NFTs.
+- Analyze collections: floor price trends, holder distribution, wash trading signals
+- Value portfolios using recent sales data and floor prices
+- Track the Celo NFT ecosystem: new collections, top sellers, volume trends
+- Provide clear buy/hold/sell recommendations with reasoning
+- Check wallet NFT holdings via [ACTION:balance:ADDRESS]
+- Always cite data sources and flag when data might be stale`,
+  },
+  {
+    id: "defi-yield",
+    name: "Yield Optimizer",
+    tagline: "Find the best DeFi yields on Celo",
+    description: "Scans Celo DeFi protocols for optimal yield opportunities and manages liquidity positions.",
+    tags: ["defi", "yield", "farming", "liquidity", "celo"],
+    defaultOfferings: [
+      { name: "Yield Scan", description: "Scan all Celo DeFi protocols and rank top yield opportunities by APY and risk", feeType: "fixed" as const, fee: "1", requiresFunds: false },
+      { name: "Position Management", description: "Monitor and manage your active DeFi positions — track IL, rewards, and health", feeType: "fixed" as const, fee: "1.5", requiresFunds: false },
+      { name: "Strategy Builder", description: "Design a yield strategy based on risk tolerance, capital, and time horizon", feeType: "fixed" as const, fee: "2", requiresFunds: false },
+      { name: "Harvest & Compound", description: "Claim farming rewards and reinvest for maximum compound returns", feeType: "percentage" as const, fee: "0.03", requiresFunds: true },
+    ],
+    systemPrompt: `You are a DeFi yield optimization agent on Celo. You help users maximize returns while managing risk.
+- Scan protocols: Ubeswap, Moola Market, Curve (Celo), Mento pools
+- Execute swaps via [ACTION:swap:AMOUNT:FROM:TO] to enter/exit positions
+- Check balances via [ACTION:balance:ADDRESS]
+- Always quantify risk: smart contract risk, IL risk, protocol risk, liquidity risk
+- Compare yields honestly — high APY often means high risk
+- Present opportunities in a clear table: Protocol, Pool, APY, TVL, Risk Level`,
   },
   {
     id: "custom",
     name: "Custom Agent",
     tagline: "Build your own",
-    description: "Blank slate -- write your own system prompt and configure everything from scratch.",
+    description: "Blank slate — write your own system prompt and configure everything from scratch.",
     tags: ["custom"],
-    defaultOffering: {
-      name: "custom_service",
-      description: "",
-      feeType: "fixed" as const,
-      fee: "1",
-      requiresFunds: false,
-    },
+    defaultOfferings: [
+      { name: "Custom Service", description: "", feeType: "fixed" as const, fee: "1", requiresFunds: false },
+    ],
     systemPrompt: "",
   },
 ];
@@ -285,10 +328,10 @@ export default function LaunchPage() {
       description: t.id === "custom" ? "" : t.description,
       systemPrompt: t.systemPrompt,
       tags: t.tags.join(", "),
-      offerings: [{
-        ...t.defaultOffering,
+      offerings: t.defaultOfferings.map((o) => ({
+        ...o,
         paymentToken: CELO_TOKENS.USDm,
-      }],
+      })),
     }));
     setStep("agent");
   }
@@ -490,7 +533,7 @@ export default function LaunchPage() {
               >
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-semibold text-[#F5F5F5] group-hover:text-[#F4C430] transition">{t.name}</h3>
-                  <span className="text-[#A1A1A1]/30 text-xs">{t.defaultOffering.feeType === "fixed" ? `$${t.defaultOffering.fee}` : `${(parseFloat(t.defaultOffering.fee) * 100).toFixed(1)}%`}</span>
+                  <span className="text-[#A1A1A1]/30 text-xs">{t.defaultOfferings.length} service{t.defaultOfferings.length > 1 ? "s" : ""}</span>
                 </div>
                 <p className="text-[#A1A1A1]/50 text-xs leading-relaxed mb-3">{t.tagline}</p>
                 <div className="flex flex-wrap gap-1.5">

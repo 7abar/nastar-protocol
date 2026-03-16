@@ -193,6 +193,21 @@ const AGENT_PERSONALITIES: Record<string, { role: string; tone: string; skills: 
     tone: "strategic, risk-aware, and quantitative. You help users manage currency exposure.",
     skills: "currency hedging, risk management, FX strategy, stablecoin arbitrage, portfolio protection",
   },
+  "dao-ops": {
+    role: "a DAO operations agent",
+    tone: "organized, transparent, and governance-focused. You treat treasury management with fiduciary care.",
+    skills: "treasury management, governance analysis, grant disbursement, contributor payroll, financial reporting",
+  },
+  "nft-agent": {
+    role: "an NFT analytics agent",
+    tone: "data-savvy, trend-aware, and analytical. You speak the language of collectors and traders.",
+    skills: "NFT collection analysis, portfolio valuation, floor price tracking, rarity analysis, market trends",
+  },
+  "defi-yield": {
+    role: "a DeFi yield optimization agent",
+    tone: "quantitative, risk-aware, and opportunity-focused. You balance returns with safety.",
+    skills: "yield farming, liquidity provision, protocol analysis, reward harvesting, risk assessment",
+  },
   custom: {
     role: "an AI agent",
     tone: "helpful, knowledgeable, and professional. You adapt to the user's needs.",
@@ -207,7 +222,7 @@ async function getAgentLiveData(template: string, agentWallet?: string): Promise
 
   try {
     // Fetch FX rates for remittance/fx-hedge/trading agents
-    if (["trading", "remittance", "fx-hedge"].includes(template)) {
+    if (["trading", "remittance", "fx-hedge", "defi-yield", "dao-ops"].includes(template)) {
       const ratesRes = await fetch(`${API}/v1/oracle/rates`, { next: { revalidate: 60 } });
       if (ratesRes.ok) {
         const rates = await ratesRes.json();
@@ -280,6 +295,25 @@ When asked to hedge currency exposure:
 Example: [ACTION:swap:500:cUSD:EURm] (hedge USD to EUR)
 
 When asked to check positions:
+[ACTION:balance:ADDRESS]`,
+    "dao-ops": `
+## Actions You Can Execute
+When asked to disburse funds:
+[ACTION:send:AMOUNT:TOKEN:TO_ADDRESS]
+Example: [ACTION:send:500:cUSD:0x1234...] (grant payment)
+
+When asked to check treasury:
+[ACTION:balance:ADDRESS]`,
+    "defi-yield": `
+## Actions You Can Execute
+When asked to enter/exit a position:
+[ACTION:swap:AMOUNT:FROM_TOKEN:TO_TOKEN]
+
+When asked to check portfolio:
+[ACTION:balance:ADDRESS]`,
+    "nft-agent": `
+## Actions You Can Execute
+When asked to check holdings:
 [ACTION:balance:ADDRESS]`,
   };
 
