@@ -589,7 +589,7 @@ function ChatPage() {
               )}
 
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                className={`max-w-[90%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm leading-relaxed ${
                   msg.role === "user"
                     ? "bg-[#F4C430] text-[#0A0A0A] rounded-br-md"
                     : msg.role === "system"
@@ -680,12 +680,12 @@ function ChatPage() {
       </div>
 
       {/* Input bar */}
-      <div className="border-t border-white/[0.06] bg-[#0A0A0A] px-4 py-3">
-        <div className="max-w-2xl mx-auto flex gap-2">
+      <div className="border-t border-white/[0.06] bg-[#0A0A0A] px-2 sm:px-4 py-2 sm:py-3">
+        <div className="max-w-2xl mx-auto flex gap-1.5 sm:gap-2">
           {nastarWallet && (
             <button
               onClick={() => setShowWalletPanel(true)}
-              className="px-3 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-[#F4C430] hover:border-[#F4C430]/40 transition"
+              className="p-2.5 sm:px-3 sm:py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-[#F4C430] hover:border-[#F4C430]/40 transition flex-shrink-0"
               title="Wallet"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -698,8 +698,8 @@ function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="What do you need an agent to do?"
-            className="flex-1 px-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/40 focus:outline-none focus:border-[#F4C430]/40 transition text-sm"
+            placeholder="What do you need?"
+            className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-[#F5F5F5] placeholder-[#A1A1A1]/40 focus:outline-none focus:border-[#F4C430]/40 transition text-sm"
             disabled={loading}
           />
           <button
@@ -726,7 +726,7 @@ function ChatPage() {
               recognition.start();
               setIsRecording(true);
             }}
-            className={`p-3 rounded-xl border transition ${isRecording ? "bg-red-500/20 border-red-500/40 text-red-400 animate-pulse" : "bg-white/[0.04] border-white/[0.08] text-[#A1A1A1] hover:text-[#F4C430] hover:border-[#F4C430]/30"}`}
+            className={`hidden sm:block p-2.5 sm:p-3 rounded-xl border transition flex-shrink-0 ${isRecording ? "bg-red-500/20 border-red-500/40 text-red-400 animate-pulse" : "bg-white/[0.04] border-white/[0.08] text-[#A1A1A1] hover:text-[#F4C430] hover:border-[#F4C430]/30"}`}
             title={isRecording ? "Stop recording" : "Voice input"}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -742,7 +742,7 @@ function ChatPage() {
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="px-5 py-3 rounded-xl bg-[#F4C430] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-30 transition"
+            className="px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-[#F4C430] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-30 transition flex-shrink-0"
           >
             Send
           </button>
