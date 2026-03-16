@@ -200,9 +200,88 @@ const AGENT_PERSONALITIES: Record<string, { role: string; tone: string; skills: 
   },
 };
 
-function buildAgentPrompt(ctx: { name: string; description?: string; template_id?: string }): string {
+// Fetch real-time data for agent context
+async function getAgentLiveData(template: string, agentWallet?: string): Promise<string> {
+  const API = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
+  const lines: string[] = [];
+
+  try {
+    // Fetch FX rates for remittance/fx-hedge/trading agents
+    if (["trading", "remittance", "fx-hedge"].includes(template)) {
+      const ratesRes = await fetch(`${API}/v1/oracle/rates`, { next: { revalidate: 60 } });
+      if (ratesRes.ok) {
+        const rates = await ratesRes.json();
+        lines.push("## Live FX Rates (Celo Mento)");
+        if (rates.rates) {
+          Object.entries(rates.rates).slice(0, 10).forEach(([pair, rate]) => {
+            lines.push(`- ${pair}: ${rate}`);
+          });
+        }
+      }
+    }
+
+    // Fetch wallet balance if agent has a wallet
+    if (agentWallet) {
+      const balRes = await fetch(`${API}/v1/wallet/balance?ownerAddress=${agentWallet}`);
+      if (balRes.ok) {
+        const bal = await balRes.json();
+        lines.push("\n## Agent Wallet Balances");
+        if (bal.balances) {
+          Object.entries(bal.balances).forEach(([token, amount]) => {
+            if (parseFloat(amount as string) > 0) lines.push(`- ${token}: ${amount}`);
+          });
+        }
+        if (bal.walletAddress) lines.push(`Wallet: ${bal.walletAddress}`);
+      }
+    }
+  } catch {}
+
+  return lines.length > 0 ? "\n" + lines.join("\n") : "";
+}
+
+function buildAgentPrompt(ctx: { name: string; description?: string; template_id?: string }, liveData?: string): string {
   const template = ctx.template_id || "custom";
   const personality = AGENT_PERSONALITIES[template] || AGENT_PERSONALITIES.custom;
+
+  // Template-specific action capabilities
+  const actionGuide: Record<string, string> = {
+    trading: `
+## Actions You Can Execute
+When the user asks you to execute a trade/swap, output this command on its own line:
+[ACTION:swap:AMOUNT:FROM_TOKEN:TO_TOKEN]
+Example: [ACTION:swap:10:cUSD:USDC]
+Supported tokens: cUSD, USDC, USDT, EURm, KESm, NGNm, BRLm, GHSm
+
+When asked to check a wallet balance:
+[ACTION:balance:ADDRESS]
+
+When asked to send tokens:
+[ACTION:send:AMOUNT:TOKEN:TO_ADDRESS]`,
+    payments: `
+## Actions You Can Execute
+When asked to send a payment:
+[ACTION:send:AMOUNT:TOKEN:TO_ADDRESS]
+Example: [ACTION:send:5:cUSD:0x1234...]
+
+When asked to check balance:
+[ACTION:balance:ADDRESS]`,
+    remittance: `
+## Actions You Can Execute
+When asked to convert/remit money:
+[ACTION:swap:AMOUNT:FROM_TOKEN:TO_TOKEN]
+Example: [ACTION:swap:100:cUSD:KESm] (convert $100 to Kenyan Shillings)
+
+When asked to send:
+[ACTION:send:AMOUNT:TOKEN:TO_ADDRESS]`,
+    "fx-hedge": `
+## Actions You Can Execute
+When asked to hedge currency exposure:
+[ACTION:swap:AMOUNT:FROM_TOKEN:TO_TOKEN]
+Example: [ACTION:swap:500:cUSD:EURm] (hedge USD to EUR)
+
+When asked to check positions:
+[ACTION:balance:ADDRESS]`,
+  };
 
   return `You are "${ctx.name}", ${personality.role} on Nastar Protocol — a trustless AI agent marketplace on Celo.
 
@@ -214,15 +293,16 @@ function buildAgentPrompt(ctx: { name: string; description?: string; template_id
 
 ## Your Personality
 ${personality.tone}
+${actionGuide[template] || ""}
+${liveData || ""}
 
 ## Rules
 - Stay in character as "${ctx.name}". You are NOT the Nastar Butler.
-- You ACTUALLY DO the work — don't just describe what you could do. When given a task, deliver real output.
-- For analysis: provide actual data, insights, and recommendations.
+- You ACTUALLY DO the work. When given a task, deliver real output with real data.
+- For trades/swaps/payments: use [ACTION:...] commands to execute on-chain. Confirm with the user first.
+- For analysis: use the live data above to provide real numbers.
 - For content: write the actual content (tweets, posts, reports).
-- For research: deliver real findings with sources and summaries.
 - After completing a task, end with: "Delivery complete. This output has been recorded as proof-of-work."
-- When asked to hire: explain your task scope, ask them to describe their need. Hiring is automatic via escrow.
 - Never say "click Hire button" or "go to Nastar chat" — you ARE the agent.`;
 }
 
@@ -301,7 +381,8 @@ export async function POST(req: NextRequest) {
   // Build system prompt: use agent-specific context if chatting with a specific agent
   let systemContent: string;
   if (agentContext?.name) {
-    systemContent = buildAgentPrompt(agentContext);
+    const liveData = await getAgentLiveData(agentContext.template_id || "custom", wallet);
+    systemContent = buildAgentPrompt(agentContext, liveData);
   } else {
     systemContent = `${SYSTEM_PROMPT}\n\nAvailable agents:\n${servicesContext}`;
   }

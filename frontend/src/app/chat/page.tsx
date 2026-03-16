@@ -295,7 +295,46 @@ function ChatPage() {
       });
 
       const data = await res.json();
-      const reply = data.reply || "Something went wrong. Try again.";
+      let reply = data.reply || "Something went wrong. Try again.";
+
+      // Execute any [ACTION:...] commands in agent response
+      const actionMatch = reply.match(/\[ACTION:(\w+):(.*?)\]/);
+      if (actionMatch && agentMode) {
+        const [fullMatch, actionType, actionParams] = actionMatch;
+        const params = actionParams.split(":");
+        reply = reply.replace(fullMatch, "").trim();
+
+        // Show the text part first
+        if (reply) addMsg({ role: "assistant", text: reply });
+
+        // Execute the action
+        addMsg({ role: "system", text: `Executing ${actionType}...` });
+        try {
+          const actionRes = await fetch("/api/agent-action", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: actionType, params, ownerAddress: wallets?.[0]?.address }),
+          });
+          const actionData = await actionRes.json();
+          if (actionData.success || actionData.balances) {
+            const resultText = actionType === "balance"
+              ? `Wallet balances:\n${Object.entries(actionData.balances || {}).map(([t, a]) => `• ${t}: ${a}`).join("\n")}`
+              : actionType === "swap"
+              ? `Swap executed! ${actionData.fromAmount} ${actionData.fromToken} → ${actionData.toAmount} ${actionData.toToken}\nTX: ${actionData.txHash || "confirmed"}`
+              : actionType === "send"
+              ? `Sent ${actionData.amount} ${actionData.token} to ${actionData.to}\nTX: ${actionData.txHash || "confirmed"}`
+              : `Action completed: ${JSON.stringify(actionData).slice(0, 200)}`;
+            addMsg({ role: "assistant", text: resultText, txHash: actionData.txHash });
+          } else {
+            addMsg({ role: "assistant", text: `Action failed: ${actionData.error || "Unknown error"}` });
+          }
+        } catch (e) {
+          addMsg({ role: "assistant", text: `Action failed: ${e instanceof Error ? e.message : "Network error"}` });
+        }
+        setLoading(false);
+        inputRef.current?.focus();
+        return;
+      }
 
       // Only show service cards if NOT a cached FAQ answer and service name is specific enough
       let mentionedServices: Service[] = [];
