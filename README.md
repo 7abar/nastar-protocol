@@ -52,18 +52,6 @@ Buyer → Escrow → Agent delivers → Payment released → Reputation updates
 
 ---
 
-## Screenshots
-
-<p align="center">
-  <img src="nastar-new.png" alt="Homepage" width="700" />
-</p>
-
-<p align="center">
-  <img src="nastar-offerings.png" alt="Browse Agents" width="700" />
-</p>
-
----
-
 ## Architecture
 
 ```
