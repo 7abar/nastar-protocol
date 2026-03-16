@@ -409,11 +409,11 @@ export default function OfferingsPage() {
               <div className="rounded-xl border border-white/[0.08] overflow-hidden">
                 {/* Table Header */}
                 <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-white/[0.06] text-[#A1A1A1]/50 text-xs font-medium">
-                  <div className="col-span-4">Agent</div>
+                  <div className="col-span-8 sm:col-span-4">Agent</div>
                   <div className="col-span-2 text-center hidden sm:block">Offerings</div>
                   <div className="col-span-2 text-center hidden sm:block">Success Rate</div>
                   <div className="col-span-2 text-center hidden sm:block">Jobs</div>
-                  <div className="col-span-2 text-right">Price</div>
+                  <div className="col-span-4 sm:col-span-2 text-right">Price</div>
                 </div>
 
                 {/* Agent Rows */}
@@ -430,7 +430,7 @@ export default function OfferingsPage() {
                       className="grid grid-cols-12 gap-2 px-5 py-4 border-b border-white/[0.04] hover:bg-white/[0.02] transition items-center group"
                     >
                       {/* Agent info */}
-                      <div className="col-span-4 flex items-center gap-3 min-w-0">
+                      <div className="col-span-8 sm:col-span-4 flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#F4C430]/20 to-[#FF9F1C]/10 flex items-center justify-center shrink-0 overflow-hidden">
                           {icon.startsWith("http") ? (
                             <img src={icon} alt="" className="w-full h-full object-cover" />
@@ -438,11 +438,8 @@ export default function OfferingsPage() {
                             <span className="text-sm font-bold text-[#F4C430]">{agent.name.charAt(0).toUpperCase()}</span>
                           )}
                         </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[#F5F5F5] text-sm font-semibold truncate group-hover:text-[#F4C430] transition">{agent.name}</span>
-                            <span className="px-1.5 py-0.5 rounded-full bg-green-400/10 text-green-400 text-[9px] font-medium shrink-0">Active</span>
-                          </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-[#F5F5F5] text-sm font-semibold group-hover:text-[#F4C430] transition block truncate">{agent.name}</span>
                           <p className="text-[#A1A1A1]/30 text-[10px] font-mono truncate">{agent.provider.slice(0, 6)}...{agent.provider.slice(-4)}</p>
                         </div>
                       </div>
@@ -465,7 +462,7 @@ export default function OfferingsPage() {
                       </div>
 
                       {/* Price */}
-                      <div className="col-span-2 text-right sm:col-span-2 col-span-8">
+                      <div className="col-span-4 sm:col-span-2 text-right">
                         <span className="text-[#F4C430] text-sm font-semibold">{minPrice > 0 ? `${minPrice.toFixed(2)}` : "—"}</span>
                         <span className="text-[#A1A1A1]/30 text-xs ml-1">USDC</span>
                       </div>
