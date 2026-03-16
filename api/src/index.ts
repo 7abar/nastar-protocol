@@ -28,6 +28,7 @@ import oracleRouter from "./routes/oracle.js";
 import metadataRouter from "./routes/metadata.js";
 import facilitatorRouter from "./routes/facilitator.js";
 import sponsorRouter from "./routes/sponsor.js";
+import walletRouter from "./routes/wallet.js";
 import { startIndexer } from "./lib/indexer.js";
 import { x402AppMiddleware, PAY_TO, NETWORK, PROTECTED_ROUTES } from "./middleware/x402.js";
 
@@ -151,6 +152,7 @@ app.use("/v1/hosted", hostedRouter);       // No-Code Agent Launcher runtime
 app.use("/api/agent", metadataRouter);     // ERC-8004 metadata for agentscan.info
 app.use("/x402", facilitatorRouter);       // Self-hosted x402 facilitator for Celo
 app.use("/v1/sponsor", sponsorRouter);     // Gas-sponsored agent deployment
+app.use("/v1/wallet", walletRouter);       // User custodial wallets (ACP-style)
 app.use("/v1/judge", judgeRouter);         // AI Dispute Judge
 app.use("/v1/reputation", reputationRouter); // Reputation Oracle
 app.use("/v1/swap", swapRouter);             // Mento multi-currency swap

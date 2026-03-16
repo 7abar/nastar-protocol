@@ -58,9 +58,36 @@ function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [prefilled, setPrefilled] = useState(false);
+  const [nastarWallet, setNastarWallet] = useState<string | null>(null);
+  const [walletBalances, setWalletBalances] = useState<Record<string, string>>({});
   const messagesEnd = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
+
+  // Auto-create/fetch Nastar Wallet when user connects
+  useEffect(() => {
+    if (!wallets.length) return;
+    const address = wallets[0].address;
+    const API = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
+    
+    (async () => {
+      try {
+        // Create or get existing wallet
+        const createRes = await fetch(`${API}/v1/wallet/create`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ownerAddress: address }),
+        });
+        const data = await createRes.json();
+        if (data.walletAddress) setNastarWallet(data.walletAddress);
+
+        // Fetch balances
+        const balRes = await fetch(`${API}/v1/wallet/balance?ownerAddress=${address}`);
+        const balData = await balRes.json();
+        if (balData.balances) setWalletBalances(balData.balances);
+      } catch {}
+    })();
+  }, [wallets]);
 
   useEffect(() => {
     messagesEnd.current?.scrollIntoView({ behavior: "smooth" });
@@ -162,80 +189,74 @@ function ChatPage() {
       return;
     }
 
-    addMsg({ role: "user", text: `Hire ${service.name} for ${formatUnits(service.pricePerCall, 18)} USDC` });
+    const amount = service.pricePerCall;
+    addMsg({ role: "user", text: `Hire ${service.name} for ${formatUnits(amount, 18)} USDC` });
     setLoading(true);
 
     try {
-      const wallet = wallets[0];
-      const provider = await wallet.getEthereumProvider();
-      const address = wallet.address as `0x${string}`;
-      const amount = service.pricePerCall;
-      const paymentToken = service.paymentToken as `0x${string}`;
+      const address = wallets[0].address;
+      const API = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
 
-      // Step 1: Identity — sponsor mints if buyer doesn't have one
-      addMsg({ role: "system", text: "Preparing..." });
-      let buyerAgentId = 0n;
-      const balance = await client.readContract({
-        address: CONTRACTS.IDENTITY_REGISTRY as `0x${string}`, abi: ERC8004_ABI, functionName: "balanceOf", args: [address],
+      // Step 1: Ensure user has a Nastar Wallet
+      addMsg({ role: "system", text: "Setting up your Nastar Wallet..." });
+      const createRes = await fetch(`${API}/v1/wallet/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerAddress: address }),
       });
+      const walletData = await createRes.json();
+      if (!walletData.success) throw new Error(walletData.error || "Wallet creation failed");
 
-      if (balance === 0n) {
-        // Use sponsor API to mint identity (gas-free for user)
-        const mintRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app"}/v1/sponsor/mint-identity`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ownerAddress: address }),
+      const nastarWallet = walletData.walletAddress;
+
+      // Step 2: Check balance
+      const balRes = await fetch(`${API}/v1/wallet/balance?ownerAddress=${address}`);
+      const balData = await balRes.json();
+      const available = parseFloat(balData.balances?.cUSD || "0") + parseFloat(balData.balances?.USDC || "0") + parseFloat(balData.balances?.USDT || "0");
+      const needed = parseFloat(formatUnits(amount, 18));
+
+      if (available < needed) {
+        addMsg({
+          role: "assistant",
+          text: `Insufficient balance in your Nastar Wallet. You need ${needed} but have ${available.toFixed(2)}.\n\nDeposit stablecoins (cUSD, USDC, USDT) to:\n\`${nastarWallet}\`\n\nThen try hiring again.`,
         });
-        if (mintRes.ok) {
-          const mintData = await mintRes.json();
-          buyerAgentId = BigInt(mintData.agentNftId || 0);
-        }
-      } else {
-        // Find existing token ID
-        for (let i = 0n; i <= 2000n; i++) {
-          try {
-            const owner = await client.readContract({
-              address: CONTRACTS.IDENTITY_REGISTRY as `0x${string}`,
-              abi: [{ type: "function", name: "ownerOf", inputs: [{ name: "tokenId", type: "uint256" }], outputs: [{ type: "address" }], stateMutability: "view" }] as const,
-              functionName: "ownerOf", args: [i],
-            });
-            if ((owner as string).toLowerCase() === address.toLowerCase()) { buyerAgentId = i; break; }
-          } catch { continue; }
-        }
+        setLoading(false);
+        return;
       }
 
-      // Step 2: Check allowance — max-approve once, never again
-      let needsApprove = true;
-      try {
-        const allowance = await client.readContract({
-          address: paymentToken, abi: ERC20_ABI, functionName: "allowance",
-          args: [address, CONTRACTS.NASTAR_ESCROW as `0x${string}`],
-        });
-        if (BigInt(allowance as any) >= BigInt(amount)) needsApprove = false;
-      } catch {}
-
-      if (needsApprove) {
-        addMsg({ role: "system", text: "One-time token approval (future hires skip this)..." });
-        const maxUint = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        const approveData = encodeFunctionData({ abi: ERC20_ABI, functionName: "approve", args: [CONTRACTS.NASTAR_ESCROW as `0x${string}`, maxUint] });
-        const appHash = await provider.request({ method: "eth_sendTransaction", params: [{ from: address, to: paymentToken, data: approveData }] });
-        await client.waitForTransactionReceipt({ hash: appHash as `0x${string}` });
-      }
-
-      // Step 3: Create deal — single transaction
-      addMsg({ role: "system", text: "Creating deal + escrowing payment..." });
-      const deadline = BigInt(Math.floor(Date.now() / 1000) + 86400);
-      const dealData = encodeFunctionData({
-        abi: ESCROW_ABI, functionName: "createDeal",
-        args: [BigInt(serviceIndex), buyerAgentId, BigInt(service.agentId), paymentToken, BigInt(amount), `Hired via Nastar: ${service.name}`, deadline, true],
+      // Step 3: Execute hire — server handles approve + createDeal automatically
+      addMsg({ role: "system", text: "Executing hire — no approval needed..." });
+      const hireRes = await fetch(`${API}/v1/wallet/hire`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ownerAddress: address,
+          serviceIndex,
+          sellerAgentId: Number(service.agentId),
+          paymentToken: service.paymentToken,
+          amount: amount.toString(),
+          serviceName: service.name,
+        }),
       });
-      const dealHash = await provider.request({ method: "eth_sendTransaction", params: [{ from: address, to: CONTRACTS.NASTAR_ESCROW as `0x${string}`, data: dealData }] });
-      await client.waitForTransactionReceipt({ hash: dealHash as `0x${string}` });
+      const hireData = await hireRes.json();
+
+      if (!hireRes.ok) {
+        if (hireData.walletAddress) {
+          addMsg({
+            role: "assistant",
+            text: `${hireData.error}\n\nDeposit to: \`${hireData.walletAddress}\``,
+          });
+        } else {
+          throw new Error(hireData.error || "Hire failed");
+        }
+        setLoading(false);
+        return;
+      }
 
       addMsg({
         role: "assistant",
-        text: `Done! "${service.name}" hired for ${formatUnits(amount, 18)} USDC. Payment in escrow — auto-releases on delivery. You can dispute within 3 days.`,
-        txHash: dealHash as string,
+        text: `Done! "${service.name}" hired for ${formatUnits(amount, 18)} USDC. Payment is in escrow — auto-releases on delivery. You can dispute within 3 days.\n\nNo popups, no approvals. That's Nastar.`,
+        txHash: hireData.dealTxHash || "",
       });
     } catch (err: unknown) {
       addMsg({ role: "assistant", text: `Error: ${err instanceof Error ? err.message.slice(0, 120) : String(err)}` });
@@ -270,9 +291,27 @@ function ChatPage() {
               </div>
               <h3 className="text-[#F5F5F5] font-semibold text-lg mb-1">Nastar Butler</h3>
               <p className="text-[#A1A1A1] text-sm mb-2">Your guide to the agent marketplace</p>
-              <p className="text-[#A1A1A1]/40 text-xs mb-8 max-w-sm text-center">
+              <p className="text-[#A1A1A1]/40 text-xs mb-4 max-w-sm text-center">
                 Ask about how Nastar works, explore features, or get help hiring AI agents with on-chain escrow.
               </p>
+              {nastarWallet && (
+                <div className="mb-6 w-full max-w-lg p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[#A1A1A1] text-xs">Your Nastar Wallet</span>
+                    <span className="text-[#F4C430] text-xs font-mono">{nastarWallet.slice(0, 6)}...{nastarWallet.slice(-4)}</span>
+                  </div>
+                  <div className="flex gap-3 text-xs">
+                    {Object.entries(walletBalances).filter(([k]) => k !== "CELO").map(([symbol, bal]) => (
+                      <span key={symbol} className="text-[#A1A1A1]/70">
+                        {parseFloat(bal).toFixed(2)} <span className="text-[#F4C430]/60">{symbol}</span>
+                      </span>
+                    ))}
+                    {Object.keys(walletBalances).filter(k => k !== "CELO").length === 0 && (
+                      <span className="text-[#A1A1A1]/40">No stablecoins yet — deposit to hire agents</span>
+                    )}
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
                 {suggestions.map((s) => (
                   <button
