@@ -14,6 +14,8 @@ import {
   ESCROW_ABI,
   ERC20_ABI,
   ERC8004_ABI,
+  CELO_TOKENS,
+  getTokenByAddress,
 } from "@/lib/contracts";
 
 const client = createPublicClient({
@@ -69,6 +71,12 @@ function ChatPage() {
   const [withdrawToken, setWithdrawToken] = useState("cUSD");
   const [withdrawing, setWithdrawing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [selectedPayToken, setSelectedPayToken] = useState(CELO_TOKENS.USDm); // default cUSD
+  const PAY_TOKENS = [
+    { symbol: "cUSD", address: CELO_TOKENS.USDm, decimals: 18, logo: "/tokens/cusd.svg" },
+    { symbol: "USDC", address: CELO_TOKENS.USDC, decimals: 6, logo: "/tokens/usdc.svg" },
+    { symbol: "USDT", address: CELO_TOKENS.USDT, decimals: 6, logo: "/tokens/usdt.svg" },
+  ];
   const recognitionRef = useRef<any>(null);
   const messagesEnd = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -211,6 +219,14 @@ function ChatPage() {
           const pattern = new RegExp(`\\b${s.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, "i");
           return pattern.test(reply);
         });
+        // Deduplicate by agentId
+        const seen = new Set<string>();
+        mentionedServices = mentionedServices.filter((s) => {
+          const key = String(s.agentId);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
       }
 
       addMsg({
@@ -241,7 +257,8 @@ function ChatPage() {
     }
 
     const amount = service.pricePerCall;
-    addMsg({ role: "user", text: `Hire ${service.name} for ${formatUnits(amount, 18)} USDC` });
+    const payToken = PAY_TOKENS.find(t => t.address.toLowerCase() === selectedPayToken.toLowerCase()) || PAY_TOKENS[0];
+    addMsg({ role: "user", text: `Hire ${service.name} for ${formatUnits(amount, 18)} ${payToken.symbol}` });
     setLoading(true);
 
     try {
@@ -284,7 +301,7 @@ function ChatPage() {
           ownerAddress: address,
           serviceIndex,
           sellerAgentId: Number(service.agentId),
-          paymentToken: service.paymentToken,
+          paymentToken: selectedPayToken,
           amount: amount.toString(),
           serviceName: service.name,
         }),
@@ -426,22 +443,42 @@ function ChatPage() {
                 {/* Service cards */}
                 {msg.services && (
                   <div className="mt-3 space-y-2">
-                    {msg.services.map((svc, i) => (
-                      <div key={i} className="p-3 rounded-xl bg-[#0A0A0A]/50 border border-[#F4C430]/20">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-[#F5F5F5] text-sm">{svc.name}</span>
-                          <span className="text-[#F4C430] text-xs font-medium">{formatUnits(svc.pricePerCall, 18)} USDC</span>
+                    {msg.services.map((svc, i) => {
+                      const selToken = PAY_TOKENS.find(t => t.address.toLowerCase() === selectedPayToken.toLowerCase()) || PAY_TOKENS[0];
+                      return (
+                        <div key={i} className="p-3 rounded-xl bg-[#0A0A0A]/50 border border-[#F4C430]/20">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-semibold text-[#F5F5F5] text-sm">{svc.name}</span>
+                            <span className="text-[#F4C430] text-xs font-medium">{formatUnits(svc.pricePerCall, 18)} USD</span>
+                          </div>
+                          <p className="text-[#A1A1A1] text-xs mb-2 line-clamp-2">{svc.description}</p>
+                          {/* Token selector */}
+                          <div className="flex gap-1.5 mb-2">
+                            {PAY_TOKENS.map((tk) => (
+                              <button
+                                key={tk.symbol}
+                                onClick={() => setSelectedPayToken(tk.address)}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium border transition ${
+                                  selectedPayToken.toLowerCase() === tk.address.toLowerCase()
+                                    ? "bg-[#F4C430]/20 border-[#F4C430]/50 text-[#F4C430]"
+                                    : "bg-white/[0.03] border-white/[0.08] text-[#A1A1A1] hover:border-white/[0.15]"
+                                }`}
+                              >
+                                <img src={tk.logo} alt={tk.symbol} className="w-3.5 h-3.5" />
+                                {tk.symbol}
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => handleHire(svc, i)}
+                            disabled={loading}
+                            className="w-full py-1.5 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-50 transition"
+                          >
+                            Hire — {formatUnits(svc.pricePerCall, 18)} {selToken.symbol}
+                          </button>
                         </div>
-                        <p className="text-[#A1A1A1] text-xs mb-2 line-clamp-2">{svc.description}</p>
-                        <button
-                          onClick={() => handleHire(svc, i)}
-                          disabled={loading}
-                          className="w-full py-1.5 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-50 transition"
-                        >
-                          Hire — {formatUnits(svc.pricePerCall, 18)} USDC
-                        </button>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
 
