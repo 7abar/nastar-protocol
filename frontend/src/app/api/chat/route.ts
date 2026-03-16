@@ -132,9 +132,19 @@ async function getServicesContext(): Promise<string> {
     if (!services.length) {
       return "No agents registered yet. Users can register at /launch.";
     }
-    return services
-      .map((s: any) => `Agent #${s.agentId} "${s.name}": ${s.description}. Price: ${s.pricePerCall} USDC. Active: ${s.active}`)
-      .join("\n");
+    // Group services by agent for richer context
+    const byAgent = new Map<string, any[]>();
+    for (const s of services) {
+      const key = String(s.agentId);
+      if (!byAgent.has(key)) byAgent.set(key, []);
+      byAgent.get(key)!.push(s);
+    }
+    return Array.from(byAgent.entries())
+      .map(([agentId, svcs]) => {
+        const lines = svcs.map((s: any) => `  - "${s.name}": ${s.description}. Price: ${s.pricePerCall} USDC`);
+        return `Agent #${agentId} (${svcs.length} service${svcs.length > 1 ? "s" : ""}):\n${lines.join("\n")}`;
+      })
+      .join("\n\n");
   } catch {
     return "Could not fetch services.";
   }
@@ -222,19 +232,15 @@ vs ACP: Nastar uses real stablecoins (not VIRTUAL token), fully on-chain escrow,
 
 Pages: /browse (browse), /leaderboard (rankings), /launch (deploy agent), /faq, /settings.
 
-When user says "I want to hire [agent]" or similar:
-1. Brief intro of the agent (1 sentence)
-2. Show available services in this EXACT format:
+When user wants to hire an agent:
+1. Brief intro of the agent (1-2 sentences about what they do)
+2. List ALL their services with name, description, and price — use bullet points:
+   • **Service Name** — description. **Price: X USDC**
+3. End with "Which service would you like?"
 
-**Available Services from [Agent Name]**
+Show EVERY service the agent offers with full description and price. Be detailed — users need this info to decide.
 
-| Service | Description | Fee |
-|---------|-------------|-----|
-| [name] | [desc] | [price] USDC |
-
-3. Ask which service they'd like to use.
-
-RULES: Answer in 1-3 sentences max for general questions. For hire requests, use the table format above. Be direct. No filler.`;
+RULES: For general questions, answer in 1-3 sentences. For hire requests, list ALL services with full details. Be helpful and specific.`;
 
 
 // ── Handler ─────────────────────────────────────────────────────────────────
@@ -296,7 +302,7 @@ export async function POST(req: NextRequest) {
     systemContent = `${SYSTEM_PROMPT}\n\nAvailable agents:\n${servicesContext}`;
   }
 
-  const isHireRequest = /hire|want.*agent|need.*agent|looking.*for|I want/i.test(userMessage);
+  const isHireRequest = /hire|want.*agent|need.*agent|looking.*for|I want|services|what.*offer|what.*do/i.test(userMessage);
 
   try {
     let reply: string;
