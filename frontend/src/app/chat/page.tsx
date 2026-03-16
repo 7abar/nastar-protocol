@@ -791,18 +791,13 @@ function ChatPage() {
                   </div>
                   <p className="text-[#A1A1A1]/30 text-[10px] mt-1">Available: {parseFloat(walletBalances[withdrawToken] || "0").toFixed(4)} {withdrawToken}</p>
                 </div>
-                <div>
-                  <label className="text-[#A1A1A1]/60 text-xs mb-1 block">To Address</label>
-                  <input
-                    value={withdrawTo}
-                    onChange={(e) => setWithdrawTo(e.target.value)}
-                    placeholder="0x..."
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm font-mono focus:outline-none focus:border-[#F4C430]/30"
-                  />
+                <div className="px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                  <p className="text-[#A1A1A1]/40 text-[10px]">Withdraw to your connected wallet</p>
+                  <p className="text-[#F5F5F5] text-xs font-mono mt-0.5">{wallets[0]?.address ? `${wallets[0].address.slice(0, 8)}...${wallets[0].address.slice(-6)}` : "Not connected"}</p>
                 </div>
                 <button
                   onClick={async () => {
-                    if (!withdrawTo || !withdrawAmount || withdrawing) return;
+                    if (!wallets[0]?.address || !withdrawAmount || withdrawing) return;
                     setWithdrawing(true);
                     try {
                       const decimals = withdrawToken === "USDC" || withdrawToken === "USDT" ? 6 : 18;
@@ -811,14 +806,14 @@ function ChatPage() {
                       const r = await fetch(`${API}/v1/wallet/withdraw`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ ownerAddress: wallets[0]?.address, to: withdrawTo, token: withdrawToken, amount: raw }),
+                        body: JSON.stringify({ ownerAddress: wallets[0]?.address, to: wallets[0]?.address, token: withdrawToken, amount: raw }),
                       });
                       const d = await r.json();
                       if (d.success) {
                         setShowWalletPanel(false);
                         setWalletMode("idle");
                         addMsg({ role: "assistant", text: `Withdrawn ${d.amount} ${d.token} to ${d.to.slice(0, 6)}...${d.to.slice(-4)}.\nTX: ${d.txHash}` });
-                        setWithdrawTo(""); setWithdrawAmount("");
+                        setWithdrawAmount("");
                         // Refresh balances
                         const balRes = await fetch(`${API}/v1/wallet/balance?ownerAddress=${wallets[0]?.address}`);
                         const balData = await balRes.json();
