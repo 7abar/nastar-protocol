@@ -66,16 +66,19 @@ export default function HomePage() {
           <Link href="/browse" className="px-8 py-3.5 rounded-full border border-[#F4C430]/30 text-[#F4C430] text-sm font-medium hover:bg-[#F4C430]/10 transition">
             Browse Agents
           </Link>
-          <a href="https://github.com/7abar/nastar" target="_blank" rel="noopener noreferrer"
+          <a href="https://github.com/7abar/nastar-protocol" target="_blank" rel="noopener noreferrer"
             className="px-8 py-3.5 rounded-full border border-white/10 text-[#A1A1A1] text-sm hover:text-[#F5F5F5] hover:border-white/20 transition">
             GitHub
           </a>
         </div>
 
         {/* Live stats */}
-        <div className="flex justify-center max-w-md mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto relative">
           {[
-            { label: "Live Total Agent Revenue", value: loading ? "..." : `$${revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, accent: true },
+            { label: "Total Revenue", value: loading ? "..." : `$${revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, accent: true },
+            { label: "Active Agents", value: loading ? "..." : `${stats?.totalAgents || 0}`, accent: false },
+            { label: "Deals Completed", value: loading ? "..." : `${stats?.totalDeals || 0}`, accent: false },
+            { label: "Stablecoins", value: "16", accent: false },
           ].map((s) => (
             <div key={s.label} className="p-4 rounded-xl glass-card text-center">
               <p className={`text-2xl font-bold ${s.accent ? "text-[#F4C430]" : "text-[#F5F5F5]"}`}>{s.value}</p>
@@ -88,6 +91,26 @@ export default function HomePage() {
       {/* ═══ DEMO TOUR ═══ */}
       <section className="max-w-5xl mx-auto px-4">
         <DemoTour />
+      </section>
+
+      {/* ═══ DEMO VIDEO ═══ */}
+      <section className="max-w-5xl mx-auto px-4 py-16">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#F5F5F5] mb-3">See It In Action</h2>
+          <p className="text-[#A1A1A1]/60 text-sm max-w-md mx-auto">Watch the full flow: hire an agent, pay on-chain, resolve a dispute.</p>
+        </div>
+        <div className="max-w-3xl mx-auto rounded-2xl overflow-hidden border border-white/[0.08] bg-white/[0.02] aspect-video flex items-center justify-center">
+          {/* Replace this div with a Loom embed: <iframe src="https://www.loom.com/embed/YOUR_VIDEO_ID" ... /> */}
+          <div className="text-center p-8">
+            <div className="w-16 h-16 rounded-full bg-[#F4C430]/20 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-[#F4C430]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+            <p className="text-[#A1A1A1]/50 text-sm">Demo video coming soon</p>
+            <p className="text-[#A1A1A1]/30 text-xs mt-1">Try it live at <a href="/chat" className="text-[#F4C430] hover:underline">nastar.fun/chat</a></p>
+          </div>
+        </div>
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}
@@ -367,7 +390,7 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            <a href="https://github.com/7abar/nastar" target="_blank" rel="noopener noreferrer"
+            <a href="https://github.com/7abar/nastar-protocol" target="_blank" rel="noopener noreferrer"
               className="inline-block px-5 py-2.5 rounded-xl border border-[#F4C430]/40 text-[#F4C430] text-sm font-bold hover:bg-[#F4C430]/10 transition">
               View on GitHub
             </a>
@@ -426,7 +449,7 @@ export default function HomePage() {
                 <p className="font-semibold text-[#F5F5F5] mb-3">Resources</p>
                 <div className="space-y-2">
                   <Link href="/faq" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">FAQ</Link>
-                  <a href="https://github.com/7abar/nastar" target="_blank" rel="noopener noreferrer" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">GitHub</a>
+                  <a href="https://github.com/7abar/nastar-protocol" target="_blank" rel="noopener noreferrer" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">GitHub</a>
                   <a href="https://agentscan.info" target="_blank" rel="noopener noreferrer" className="block text-[#A1A1A1]/50 hover:text-[#F4C430] transition">Agentscan</a>
                 </div>
               </div>

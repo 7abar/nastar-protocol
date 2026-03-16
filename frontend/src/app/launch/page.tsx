@@ -186,6 +186,38 @@ const LLM_PROVIDERS = [
 
 type Step = "template" | "agent" | "offerings" | "llm" | "review" | "deploying" | "done";
 
+const STEP_ORDER: { key: Step; label: string }[] = [
+  { key: "template", label: "Template" },
+  { key: "agent", label: "Profile" },
+  { key: "offerings", label: "Services" },
+  { key: "llm", label: "AI Model" },
+  { key: "review", label: "Launch" },
+];
+
+function StepProgress({ current }: { current: Step }) {
+  const idx = STEP_ORDER.findIndex((s) => s.key === current);
+  if (idx < 0) return null;
+  return (
+    <div className="flex items-center gap-1 mb-8">
+      {STEP_ORDER.map((s, i) => (
+        <div key={s.key} className="flex items-center flex-1">
+          <div className="flex items-center gap-2 flex-1">
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition ${
+              i < idx ? "bg-[#F4C430] text-[#0A0A0A]" : i === idx ? "bg-[#F4C430]/20 text-[#F4C430] ring-2 ring-[#F4C430]/40" : "bg-white/[0.06] text-[#A1A1A1]/40"
+            }`}>
+              {i < idx ? "✓" : i + 1}
+            </div>
+            <span className={`text-xs hidden sm:block ${i <= idx ? "text-[#F5F5F5]" : "text-[#A1A1A1]/30"}`}>{s.label}</span>
+          </div>
+          {i < STEP_ORDER.length - 1 && (
+            <div className={`h-px flex-1 mx-2 ${i < idx ? "bg-[#F4C430]/40" : "bg-white/[0.06]"}`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 interface Offering {
   name: string;
   description: string;
@@ -434,6 +466,7 @@ export default function LaunchPage() {
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
         <PageTitle title="Launch Agent" />
         <div className="max-w-3xl mx-auto px-4 py-10">
+          <StepProgress current="template" />
           <div className="mb-8">
             <h1 className="text-2xl font-bold mb-1">Launch an Agent</h1>
             <p className="text-[#A1A1A1]/60 text-sm">Choose a template or start from scratch. You can customize everything.</p>
@@ -478,6 +511,7 @@ export default function LaunchPage() {
     return (
       <div className="bg-[#0A0A0A] text-[#F5F5F5] min-h-screen">
         <div className="max-w-xl mx-auto px-4 py-10">
+          <StepProgress current="agent" />
 
           {/* Header */}
           <div className="flex items-center gap-3 mb-8">
@@ -488,7 +522,7 @@ export default function LaunchPage() {
             </button>
             <div>
               <h1 className="text-lg font-bold">Agent Profile</h1>
-              <p className="text-[#A1A1A1]/50 text-xs">Step 1 of 4 -- Who is your agent?</p>
+              <p className="text-[#A1A1A1]/50 text-xs">Who is your agent?</p>
             </div>
           </div>
 
@@ -604,6 +638,7 @@ export default function LaunchPage() {
     return (
       <div className="bg-[#0A0A0A] text-[#F5F5F5] min-h-screen">
         <div className="max-w-xl mx-auto px-4 py-10">
+          <StepProgress current="offerings" />
 
           <div className="flex items-center gap-3 mb-8">
             <button onClick={() => setStep("agent")} className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#A1A1A1] hover:text-white hover:bg-white/[0.08] transition">
@@ -613,7 +648,7 @@ export default function LaunchPage() {
             </button>
             <div>
               <h1 className="text-lg font-bold">Service Offerings</h1>
-              <p className="text-[#A1A1A1]/50 text-xs">Step 2 of 4 -- What does your agent sell?</p>
+              <p className="text-[#A1A1A1]/50 text-xs">What does your agent sell?</p>
             </div>
           </div>
 
@@ -804,6 +839,7 @@ export default function LaunchPage() {
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
         <div className="max-w-xl mx-auto px-4 py-10">
+          <StepProgress current="llm" />
           <div className="flex items-center gap-3 mb-8">
             <button onClick={() => setStep("offerings")} className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#A1A1A1] hover:text-white hover:bg-white/[0.08] transition">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -812,7 +848,7 @@ export default function LaunchPage() {
             </button>
             <div>
               <h1 className="text-lg font-bold">AI Model</h1>
-              <p className="text-[#A1A1A1]/50 text-xs">Step 3 of 4 -- Choose how your agent thinks</p>
+              <p className="text-[#A1A1A1]/50 text-xs">Choose how your agent thinks</p>
             </div>
           </div>
 
@@ -997,6 +1033,7 @@ export default function LaunchPage() {
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
         <div className="max-w-xl mx-auto px-4 py-10">
+          <StepProgress current="review" />
           <div className="flex items-center gap-3 mb-8">
             <button onClick={() => setStep("llm")} className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#A1A1A1] hover:text-white hover:bg-white/[0.08] transition">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1005,7 +1042,7 @@ export default function LaunchPage() {
             </button>
             <div>
               <h1 className="text-lg font-bold">Review & Deploy</h1>
-              <p className="text-[#A1A1A1]/50 text-xs">Step 4 of 4 -- Confirm and launch</p>
+              <p className="text-[#A1A1A1]/50 text-xs">Confirm and launch</p>
             </div>
           </div>
 
