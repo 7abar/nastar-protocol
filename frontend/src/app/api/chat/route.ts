@@ -52,12 +52,12 @@ setInterval(() => {
 // ── FAQ Cache (zero LLM cost) ───────────────────────────────────────────────
 const FAQ_CACHE: { patterns: RegExp[]; answer: string }[] = [
   {
-    patterns: [/what is nastar/i, /apa itu nastar/i, /about nastar/i],
+    patterns: [/what is nastar/i, /apa itu nastar/i, /about nastar/i, /how does nastar work/i, /tell me about nastar/i, /explain nastar/i],
     answer:
       "Nastar is a decentralized marketplace where AI agents sell services and earn income on Celo. All payments are secured by on-chain escrow — no middlemen, no admin keys. Agents get ERC-8004 identity NFTs and portable reputation.",
   },
   {
-    patterns: [/how.*(register|create|deploy).*(agent|service)/i, /daftar.*agent/i, /register/i],
+    patterns: [/how.*(register|create|deploy|launch).*(agent|service)/i, /daftar.*agent/i, /register/i, /launch.*agent/i],
     answer:
       'Two ways to register: (1) Go to /agents/register and fill the form — you\'ll get a wallet + API key instantly. (2) CLI: run `npx clawhub@latest install nastar-protocol`. Both mint an ERC-8004 identity NFT on-chain.',
   },
@@ -67,7 +67,7 @@ const FAQ_CACHE: { patterns: RegExp[]; answer: string }[] = [
       "Nastar charges 20% protocol fee on seller payments only. Buyer refunds are always fee-free. The fee is immutable — set at contract deployment, no admin can change it.",
   },
   {
-    patterns: [/dispute|sengketa|refund|complain/i],
+    patterns: [/dispute|sengketa|refund|complain|ai.*judge|judge.*ai|resolve.*conflict/i],
     answer:
       "If unhappy with delivery, dispute within 3 days. An AI Judge reviews evidence from both sides — your complaint and the agent's delivery proof — then determines a fair split (anywhere from 0% to 100%) and executes it on-chain. The verdict and reasoning are stored permanently on the blockchain. Buyer refunds are always fee-free. If the buyer abandons a dispute, the seller can claim after 30 days. Zero stuck funds.",
   },
@@ -87,7 +87,7 @@ const FAQ_CACHE: { patterns: RegExp[]; answer: string }[] = [
       "ERC-8004 is a Celo identity NFT standard. Every agent and buyer gets one (free to mint). It's your on-chain identity — tied to reputation, deal history, and revenue. Portable across any platform on Celo.",
   },
   {
-    patterns: [/vs.*acp|vs.*virtuals|beda.*acp|compare|perbandingan/i],
+    patterns: [/vs.*acp|vs.*virtuals|beda.*acp|compare|perbandingan|different.*virtuals|different.*acp|nastar.*acp|acp.*nastar/i],
     answer:
       "Key differences from ACP (Virtuals): Nastar has on-chain agent identity (ERC-8004), multi-stablecoin support (not just USDC), fully on-chain escrow, zero admin keys, permissionless registration, and regional stablecoin support. Check the FAQ for the full breakdown.",
   },
@@ -95,6 +95,16 @@ const FAQ_CACHE: { patterns: RegExp[]; answer: string }[] = [
     patterns: [/price|harga|how much|berapa/i],
     answer:
       "Each agent sets their own price. You can see prices on /offerings or ask me about a specific service. Payment is locked in escrow and auto-released on delivery (with autoConfirm).",
+  },
+  {
+    patterns: [/escrow.*protect|escrow.*work|how.*escrow|protect.*buyer|protect.*seller/i],
+    answer:
+      "Nastar's escrow works in 3 steps: (1) Buyer creates a deal — funds lock in the smart contract (not held by Nastar). (2) Agent delivers work with proof. With autoConfirm, payment releases automatically. (3) Buyer can dispute within 3 days if unsatisfied — the AI Judge reviews evidence and determines a fair split. Every path has a resolution: seller timeout, buyer timeout, dispute timeout, abandoned recovery. Zero stuck funds — verified across 4 audit rounds with 37/37 tests passing. No admin keys, no backdoors.",
+  },
+  {
+    patterns: [/trustscore|trust.*score|reputation.*work|reputation.*oracle/i],
+    answer:
+      "TrustScore is a composite reputation score (0-100) computed entirely from on-chain data: deal completion rate, dispute outcomes, total volume, and account tenure. Tiers: Diamond (85-100), Gold (70-84), Silver (50-69), Bronze (30-49), New (0-29). No fake reviews possible — all data comes from verified smart contract events. Check the Leaderboard at /leaderboard to see top agents ranked by TrustScore.",
   },
   {
     patterns: [/help|bantuan|what can you do|bisa apa/i],
@@ -222,8 +232,10 @@ export async function POST(req: NextRequest) {
   const openaiKey = process.env.OPENAI_API_KEY;
 
   if (!anthropicKey && !openaiKey) {
+    // No LLM key — give a smart fallback based on the question
+    const fallback = `I can answer common questions from my knowledge base, but for deeper conversations I need an LLM connection. Here's what I know about Nastar:\n\n• Trustless AI agent marketplace on Celo\n• On-chain escrow with AI dispute resolution\n• 16 Mento stablecoins supported\n• ERC-8004 portable agent identity\n• No-code agent launcher with gas sponsorship\n\nCheck /faq for detailed answers, or browse /offerings to find agents.`;
     return NextResponse.json({
-      reply: "Nastar is not configured yet. Browse /offerings to see available agents, or check /faq for common questions.",
+      reply: fallback,
       rateLimit: { remaining, limit: RATE_LIMIT },
     });
   }
