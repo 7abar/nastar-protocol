@@ -7,9 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { createPublicClient, http, formatUnits, encodeFunctionData } from "viem";
 import PageTitle from "@/components/PageTitle";
 import ReactMarkdown from "react-markdown";
-import nextDynamic from "next/dynamic";
-const QRScanner = nextDynamic(() => import("@/components/QRScanner"), { ssr: false });
-import { parseQRData, type QRISData } from "@/components/QRScanner";
+
 import {
   celoSepoliaCustom,
   CONTRACTS,
@@ -47,7 +45,7 @@ interface Message {
   serviceIndex?: number;
   txHash?: string;
   agentLink?: { id: string; name: string };
-  qrisAction?: { merchantName: string; amountUsd: string; amountIdr: number; token: string };
+
 }
 
 export default function ChatPageWrapper() {
@@ -78,8 +76,7 @@ function ChatPage() {
   const [isRecording, setIsRecording] = useState(false);
   const API = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
   const [agentMode, setAgentMode] = useState<{ id: string; name: string; template_id?: string; description?: string } | null>(null);
-  const [showQR, setShowQR] = useState(false);
-  const [qrisPayment, setQrisPayment] = useState<QRISData | null>(null);
+
   const [showHistory, setShowHistory] = useState(false);
   const [chatSessions, setChatSessions] = useState<{ id: string; title: string; date: number }[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string>(() => `chat-${Date.now()}`);
@@ -261,12 +258,6 @@ function ChatPage() {
     if (!input.trim() || loading) return;
     const userText = input.trim();
     setInput("");
-
-    // Check if this is a QR payment confirmation
-    if (qrisPayment && isPaymentConfirmation(userText)) {
-      await executeQRPayment(userText);
-      return;
-    }
 
     addMsg({ role: "user", text: userText });
     setLoading(true);
@@ -459,139 +450,6 @@ function ChatPage() {
     setLoading(false);
   }
 
-  // ─── QR Code / QRIS Payment Handler ──────────────────────────────────────
-  async function handleQRScan(rawData: string) {
-    setShowQR(false);
-    const parsed = parseQRData(rawData);
-
-    if (parsed.type === "address") {
-      // Direct crypto address — prompt for amount
-      addMsg({ role: "system", text: `QR scanned: wallet address detected` });
-      addMsg({
-        role: "assistant",
-        text: `Scanned wallet address:\n\`${parsed.address}\`\n\nHow much do you want to send? (e.g. "5 cUSD")`,
-      });
-      setQrisPayment(parsed);
-    } else if (parsed.type === "qris") {
-      // QRIS payment — fetch live rate from Indodax, then show pay button
-      const idrAmount = parsed.amount || 0;
-
-      addMsg({ role: "system", text: `QRIS scanned. Fetching live exchange rate...` });
-
-      try {
-        // Get live USDC/IDR rate from Indodax
-        const quoteRes = await fetch(`${API}/v1/offramp/quote`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: idrAmount > 0 ? (idrAmount / 16500).toFixed(4) : "1", token: "USDC" }),
-        });
-        const quote = await quoteRes.json();
-
-        const liveRate = quote.rate?.exchange || 16500;
-        const usdAmount = idrAmount > 0 ? (idrAmount / liveRate).toFixed(2) : "0";
-        const fee = quote.feeBps ? `${quote.feeBps / 100}%` : "1.5%";
-
-        if (idrAmount > 0) {
-          addMsg({
-            role: "assistant",
-            text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\nAmount: **Rp ${idrAmount.toLocaleString("id-ID")}**\n\nLive rate: 1 USDC = Rp ${liveRate.toLocaleString("id-ID")} (Indodax)\nYou pay: **${usdAmount} cUSD** (fee: ${fee})\n\nFlow: cUSD → sell on Indodax → IDR → QRIS merchant`,
-            qrisAction: { merchantName: parsed.merchantName || "Merchant", amountUsd: usdAmount, amountIdr: idrAmount, token: "cUSD" },
-          });
-        } else {
-          addMsg({
-            role: "assistant",
-            text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\nLive rate: 1 USDC = Rp ${liveRate.toLocaleString("id-ID")} (Indodax)\n\nNo amount in QR code. Type amount in IDR (e.g. "50000") or USD (e.g. "3").`,
-          });
-        }
-      } catch {
-        // Fallback to hardcoded rate if API fails
-        const usdAmount = idrAmount > 0 ? (idrAmount / 16500).toFixed(2) : "0";
-        if (idrAmount > 0) {
-          addMsg({
-            role: "assistant",
-            text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**${parsed.merchantCity ? `\nCity: ${parsed.merchantCity}` : ""}\nAmount: **Rp ${idrAmount.toLocaleString("id-ID")}** (~$${usdAmount} USD)`,
-            qrisAction: { merchantName: parsed.merchantName || "Merchant", amountUsd: usdAmount, amountIdr: idrAmount, token: "cUSD" },
-          });
-        } else {
-          addMsg({ role: "assistant", text: `**QRIS Payment**\n\nMerchant: **${parsed.merchantName}**\nType amount to pay.` });
-        }
-      }
-      setQrisPayment(parsed);
-    } else {
-      addMsg({ role: "assistant", text: `Scanned QR code:\n\`${rawData.slice(0, 200)}\`\n\nThis doesn't look like a payment QR or wallet address. Try scanning a QRIS code or crypto wallet QR.` });
-    }
-  }
-
-  // Handle QRIS/QR payment confirmation from user input
-  function isPaymentConfirmation(text: string): boolean {
-    if (!qrisPayment) return false;
-    const amountMatch = text.match(/^(\d+\.?\d*)\s*(cusd|usdc|usdt|usd)?$/i);
-    return !!amountMatch;
-  }
-
-  async function executeQRPayment(text: string) {
-    const amountMatch = text.match(/^(\d+\.?\d*)\s*(cusd|usdc|usdt|usd)?$/i);
-    if (!amountMatch || !nastarWallet) return;
-
-    const amount = amountMatch[1];
-    const tokenSymbol = (amountMatch[2] || "cUSD").toUpperCase().replace("USD", "cUSD");
-    const token = tokenSymbol === "USDC" ? "USDC" : tokenSymbol === "USDT" ? "USDT" : "cUSD";
-
-    if (qrisPayment?.type === "qris") {
-      addMsg({ role: "user", text: `Pay ${amount} ${token} → ${qrisPayment.merchantName}` });
-    } else {
-      addMsg({ role: "user", text: `Send ${amount} ${token} → ${qrisPayment?.address?.slice(0, 10)}...` });
-    }
-
-    setLoading(true);
-
-    try {
-      const address = wallets?.[0]?.address;
-      if (!address) throw new Error("No wallet connected");
-
-      if (qrisPayment?.type === "address" && qrisPayment.address) {
-        // Direct crypto send
-        const res = await fetch(`${API}/v1/wallet/withdraw`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ownerAddress: address, to: qrisPayment.address, token, amount }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          addMsg({ role: "assistant", text: `Sent **${amount} ${token}** to \`${qrisPayment.address}\`\n\nTX: ${data.txHash}`, txHash: data.txHash });
-        } else {
-          throw new Error(data.error || "Transfer failed");
-        }
-      } else if (qrisPayment?.type === "qris") {
-        // QRIS — deduct from Nastar wallet, send to settlement address
-        const settlementAddress = "0xe94F48a8d268140108B86489A26afc4330D70666"; // feeRecipient = QRIS settlement
-        const res = await fetch(`${API}/v1/wallet/withdraw`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ownerAddress: address, to: settlementAddress, token, amount }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          addMsg({
-            role: "assistant",
-            text: `**Payment Processed**\n\n` +
-              `Merchant: ${qrisPayment.merchantName}\n` +
-              `Amount: ${amount} ${token}\n` +
-              `IDR equivalent: ~Rp ${(parseFloat(amount) * 16500).toLocaleString("id-ID")}\n\n` +
-              `${amount} ${token} deducted from your Nastar Wallet.`,
-            txHash: data.txHash,
-          });
-        } else {
-          throw new Error(data.error || "QRIS payment failed");
-        }
-      }
-    } catch (err) {
-      addMsg({ role: "assistant", text: `Payment failed: ${err instanceof Error ? err.message : String(err)}` });
-    }
-
-    setQrisPayment(null);
-    setLoading(false);
-  }
 
   // Suggestions — designed to showcase Nastar's features
   const suggestions = [
@@ -797,58 +655,7 @@ function ChatPage() {
                     Chat with {msg.agentLink.name} to start your task
                   </a>
                 )}
-                {msg.qrisAction && (
-                  <button
-                    onClick={async () => {
-                      const qa = msg.qrisAction!;
-                      setLoading(true);
-                      try {
-                        const address = wallets?.[0]?.address;
-                        if (!address) throw new Error("Connect wallet first");
 
-                        // Step 1: Deduct stablecoins from Nastar wallet → settlement
-                        addMsg({ role: "system", text: "Deducting from wallet..." });
-                        const settlementAddress = "0xe94F48a8d268140108B86489A26afc4330D70666";
-                        const withdrawRes = await fetch(`${API}/v1/wallet/withdraw`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ ownerAddress: address, to: settlementAddress, token: qa.token, amount: qa.amountUsd }),
-                        });
-                        const withdrawData = await withdrawRes.json();
-                        if (!withdrawData.success) throw new Error(withdrawData.error || "Withdraw failed");
-
-                        // Step 2: Trigger off-ramp liquidation (crypto → IDR → QRIS)
-                        addMsg({ role: "system", text: "Selling on Indodax..." });
-                        const offrampRes = await fetch(`${API}/v1/offramp/execute`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ amount: qa.amountUsd, token: "USDC", merchantName: qa.merchantName }),
-                        });
-                        const offrampData = await offrampRes.json();
-
-                        addMsg({
-                          role: "assistant",
-                          text: `**Payment Complete**\n\n` +
-                            `Merchant: **${qa.merchantName}**\n` +
-                            `Paid: ${qa.amountUsd} ${qa.token}\n` +
-                            `Received: **Rp ${qa.amountIdr.toLocaleString("id-ID")}**\n` +
-                            `Rate: 1 USDC = Rp ${offrampData.transaction?.rate?.toLocaleString("id-ID") || "16,500"}\n\n` +
-                            `${offrampData.settlement?.status === "auto_settled" ? "IDR sent to merchant via QRIS." : "IDR settlement in progress."}\n` +
-                            `Celo TX: \`${withdrawData.txHash?.slice(0, 18)}...\``,
-                          txHash: withdrawData.txHash,
-                        });
-                      } catch (err) {
-                        addMsg({ role: "assistant", text: `Payment failed: ${err instanceof Error ? err.message : String(err)}` });
-                      }
-                      setQrisPayment(null);
-                      setLoading(false);
-                    }}
-                    disabled={loading}
-                    className="block mt-3 w-full py-2.5 rounded-xl bg-[#F4C430] text-[#0A0A0A] text-sm font-bold text-center hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-30 transition"
-                  >
-                    Pay {msg.qrisAction.amountUsd} cUSD → {msg.qrisAction.merchantName} (Rp {msg.qrisAction.amountIdr.toLocaleString("id-ID")})
-                  </button>
-                )}
               </div>
             </div>
           ))}
@@ -931,17 +738,7 @@ function ChatPage() {
             </svg>
           </button>
           {/* QR / Camera scanner */}
-          {/* QR / Camera scanner */}
-          <button
-            onClick={() => setShowQR(true)}
-            className="p-3 rounded-xl border bg-white/[0.04] border-white/[0.08] text-[#A1A1A1] hover:text-[#F4C430] hover:border-[#F4C430]/30 transition"
-            title="Scan QR / QRIS"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-            </svg>
-          </button>
+
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
@@ -1132,13 +929,7 @@ function ChatPage() {
           </div>
         </div>
       )}
-      {/* QR Scanner Modal */}
-      {showQR && (
-        <QRScanner
-          onScan={handleQRScan}
-          onClose={() => setShowQR(false)}
-        />
-      )}
+
     </div>
   );
 }
