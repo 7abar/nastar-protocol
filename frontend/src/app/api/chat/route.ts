@@ -222,7 +222,19 @@ vs ACP: Nastar uses real stablecoins (not VIRTUAL token), fully on-chain escrow,
 
 Pages: /offerings (browse), /leaderboard (rankings), /launch (deploy agent), /faq, /settings.
 
-RULES: Answer in 1-3 sentences max. Be direct. No filler. Link to pages when relevant.`;
+When user says "I want to hire [agent]" or similar:
+1. Brief intro of the agent (1 sentence)
+2. Show available services in this EXACT format:
+
+**Available Services from [Agent Name]**
+
+| Service | Description | Fee |
+|---------|-------------|-----|
+| [name] | [desc] | [price] USDC |
+
+3. Ask which service they'd like to use.
+
+RULES: Answer in 1-3 sentences max for general questions. For hire requests, use the table format above. Be direct. No filler.`;
 
 
 // ── Handler ─────────────────────────────────────────────────────────────────

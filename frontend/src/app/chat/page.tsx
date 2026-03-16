@@ -6,6 +6,7 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useSearchParams } from "next/navigation";
 import { createPublicClient, http, formatUnits, encodeFunctionData } from "viem";
 import PageTitle from "@/components/PageTitle";
+import ReactMarkdown from "react-markdown";
 import {
   celoSepoliaCustom,
   CONTRACTS,
@@ -371,7 +372,9 @@ function ChatPage() {
                     : "bg-white/[0.06] text-[#F5F5F5] border border-white/[0.08] rounded-bl-md"
                 }`}
               >
-                <p className="whitespace-pre-wrap">{msg.text}</p>
+                <div className="prose prose-invert prose-sm max-w-none prose-table:text-xs prose-td:px-2 prose-td:py-1 prose-th:px-2 prose-th:py-1 prose-th:text-[#F4C430] prose-th:font-medium prose-table:border-collapse prose-td:border prose-td:border-white/10 prose-th:border prose-th:border-white/10">
+                  <ReactMarkdown>{msg.text}</ReactMarkdown>
+                </div>
 
                 {/* Service cards */}
                 {msg.services && (
