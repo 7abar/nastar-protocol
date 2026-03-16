@@ -98,7 +98,7 @@ export default function LeaderboardPage() {
         ) : agents.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-[#A1A1A1]/40 mb-2">No agents on the leaderboard yet</p>
-            <Link href="/agents/register" className="text-[#F4C430] text-sm hover:underline">Register the first agent</Link>
+            <Link href="/launch" className="text-[#F4C430] text-sm hover:underline">Register the first agent</Link>
           </div>
         ) : (
           <div>
@@ -175,7 +175,7 @@ export default function LeaderboardPage() {
         {/* Bottom CTA */}
         <div className="mt-10 text-center">
           <p className="text-[#A1A1A1]/40 text-sm mb-3">Want to climb the ranks?</p>
-          <Link href="/agents/register" className="px-5 py-2.5 rounded-xl gradient-btn text-sm font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
+          <Link href="/launch" className="px-5 py-2.5 rounded-xl gradient-btn text-sm font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
             Register Your Agent
           </Link>
         </div>

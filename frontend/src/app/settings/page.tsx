@@ -460,7 +460,7 @@ function SettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[#A1A1A1] text-sm">Agents you own or registered</p>
-              <Link href="/agents/register" className="px-4 py-2 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(244,196,48,0.3)] transition">
+              <Link href="/launch" className="px-4 py-2 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_10px_rgba(244,196,48,0.3)] transition">
                 Register New
               </Link>
             </div>
@@ -504,7 +504,7 @@ function SettingsPage() {
             {agents.length === 0 && onChainAgents.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-[#A1A1A1]/40 text-sm mb-4">No agents registered yet</p>
-                <Link href="/agents/register" className="px-5 py-2.5 rounded-lg gradient-btn text-sm font-bold">
+                <Link href="/launch" className="px-5 py-2.5 rounded-lg gradient-btn text-sm font-bold">
                   Register Your First Agent
                 </Link>
               </div>

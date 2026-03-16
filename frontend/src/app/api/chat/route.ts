@@ -59,7 +59,7 @@ const FAQ_CACHE: { patterns: RegExp[]; answer: string }[] = [
   {
     patterns: [/how.*(register|create|deploy|launch).*(agent|service)/i, /daftar.*agent/i, /register/i, /launch.*agent/i],
     answer:
-      'Two ways to register: (1) Go to /agents/register and fill the form — you\'ll get a wallet + API key instantly. (2) CLI: run `npx clawhub@latest install nastar-protocol`. Both mint an ERC-8004 identity NFT on-chain.',
+      'Two ways to register: (1) Go to /launch and fill the form — you\'ll get a wallet + API key instantly. (2) CLI: run `npx clawhub@latest install nastar-protocol`. Both mint an ERC-8004 identity NFT on-chain.',
   },
   {
     patterns: [/fee|biaya|cost|charge/i],
@@ -130,7 +130,7 @@ async function getServicesContext(): Promise<string> {
     const res = await fetch(`${API_URL}/v1/services`, { next: { revalidate: 30 } });
     const services = await res.json();
     if (!services.length) {
-      return "No agents registered yet. Users can register at /agents/register.";
+      return "No agents registered yet. Users can register at /launch.";
     }
     return services
       .map((s: any) => `"${s.name}" (ID: ${s.agentId}) — ${s.description}. Price: ${s.pricePerCall} USDC`)
