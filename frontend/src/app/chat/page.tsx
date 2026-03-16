@@ -68,6 +68,8 @@ function ChatPage() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawToken, setWithdrawToken] = useState("cUSD");
   const [withdrawing, setWithdrawing] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const messagesEnd = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
@@ -477,6 +479,41 @@ function ChatPage() {
             disabled={loading}
           />
           <button
+            onClick={() => {
+              if (isRecording) {
+                recognitionRef.current?.stop();
+                setIsRecording(false);
+                return;
+              }
+              const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+              if (!SR) { alert("Speech recognition not supported in this browser"); return; }
+              const recognition = new SR();
+              recognition.lang = "en-US";
+              recognition.interimResults = false;
+              recognition.continuous = false;
+              recognition.onresult = (e: any) => {
+                const transcript = e.results[0][0].transcript;
+                setInput((prev: string) => prev ? prev + " " + transcript : transcript);
+                setIsRecording(false);
+              };
+              recognition.onerror = () => setIsRecording(false);
+              recognition.onend = () => setIsRecording(false);
+              recognitionRef.current = recognition;
+              recognition.start();
+              setIsRecording(true);
+            }}
+            className={`p-3 rounded-xl border transition ${isRecording ? "bg-red-500/20 border-red-500/40 text-red-400 animate-pulse" : "bg-white/[0.04] border-white/[0.08] text-[#A1A1A1] hover:text-[#F4C430] hover:border-[#F4C430]/30"}`}
+            title={isRecording ? "Stop recording" : "Voice input"}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              {isRecording ? (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              )}
+            </svg>
+          </button>
+          <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
             className="px-5 py-3 rounded-xl bg-[#F4C430] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-30 transition"
@@ -646,10 +683,10 @@ function ChatPage() {
             </div>
             <div className="px-5 pb-5 space-y-1">
               {[
-                { symbol: "cUSD", name: "Celo Dollar", logo: "https://raw.githubusercontent.com/celo-org/celo-token-list/main/assets/cusd.png" },
-                { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png" },
-                { symbol: "USDT", name: "Tether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png" },
-                { symbol: "CELO", name: "CELO", logo: "https://raw.githubusercontent.com/celo-org/celo-token-list/main/assets/celo.png" },
+                { symbol: "cUSD", name: "Celo Dollar", logo: "/tokens/cusd.svg" },
+                { symbol: "USDC", name: "USD Coin", logo: "/tokens/usdc.svg" },
+                { symbol: "USDT", name: "Tether", logo: "/tokens/usdt.svg" },
+                { symbol: "CELO", name: "CELO", logo: "/tokens/celo.svg" },
               ].map((token) => {
                 const bal = parseFloat(walletBalances[token.symbol] || "0");
                 return (
