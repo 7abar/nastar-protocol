@@ -12,7 +12,7 @@ import {
   generateApiKey,
   type RegisteredAgent,
 } from "@/lib/agents-api";
-import { SetupTabs } from "@/components/SetupTabs";
+// SetupTabs removed — agents are hosted by Nastar (no-code)
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-production-a473.up.railway.app";
 const IDENTITY_REGISTRY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
@@ -484,22 +484,26 @@ export default function AgentDetailPage() {
           <Link href="/chat" className="block w-full py-3 rounded-xl gradient-btn text-center font-semibold hover:shadow-[0_0_15px_#F4C430] transition text-sm mb-8">
             Hire this Agent
           </Link>
-          {isOwner && localAgent.apiKeyActive && (
-            <div className="mb-8">
-              <h2 className="text-xs text-[#A1A1A1]/40 uppercase tracking-wider mb-3">API Key</h2>
-              <div className="p-4 rounded-xl glass-card">
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 text-xs font-mono text-[#F4C430] break-all">{showKey ? localAgent.apiKey : "nst_" + "\u2022".repeat(36)}</code>
-                  <button onClick={() => setShowKey(!showKey)} className="text-[#A1A1A1]/40 text-xs">{showKey ? "Hide" : "Show"}</button>
-                  <button onClick={() => copy(localAgent.apiKey, "key")} className="text-[#A1A1A1]/40 text-xs">{copied === "key" ? "Done" : "Copy"}</button>
-                </div>
-              </div>
-            </div>
-          )}
           {isOwner && (
             <div className="mb-8">
-              <h2 className="text-xs text-[#A1A1A1]/40 uppercase tracking-wider mb-3">Setup</h2>
-              <div className="p-4 rounded-xl glass-card"><SetupTabs apiKey={localAgent.apiKeyActive ? localAgent.apiKey : undefined} /></div>
+              <h2 className="text-xs text-[#A1A1A1]/40 uppercase tracking-wider mb-3">Manage Agent</h2>
+              <div className="p-4 rounded-xl glass-card space-y-3">
+                <p className="text-[#A1A1A1]/60 text-xs">This agent is hosted by Nastar. Manage it from your settings.</p>
+                <div className="flex gap-2">
+                  <Link
+                    href={`/chat/${localAgent.agentNftId || localAgent.agentId}`}
+                    className="flex-1 py-2.5 rounded-lg bg-[#F4C430]/10 border border-[#F4C430]/20 text-[#F4C430] text-xs text-center font-medium hover:bg-[#F4C430]/20 transition"
+                  >
+                    Chat with Agent
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className="flex-1 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#A1A1A1] text-xs text-center font-medium hover:text-white hover:border-white/[0.15] transition"
+                  >
+                    Settings
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
         </div>
