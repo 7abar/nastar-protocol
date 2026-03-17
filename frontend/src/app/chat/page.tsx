@@ -444,41 +444,34 @@ function ChatPage() {
         return;
       }
 
-      // Step 3: Execute hire — server handles approve + createDeal automatically
-      addMsg({ role: "system", text: "Executing hire — no approval needed..." });
-      const hireRes = await fetch(`${API}/v1/wallet/hire`, {
+      // Step 3: Create ACP-style job (OPEN → NEGOTIATION → IN_PROGRESS auto)
+      addMsg({ role: "system", text: "Creating job order..." });
+      const task = input.trim() || `Execute ${service.name}`;
+      const jobRes = await fetch(`${API}/v1/jobs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ownerAddress: address,
-          serviceIndex,
+          buyerAddress: address,
           sellerAgentId: Number(service.agentId),
+          offeringName: service.name,
+          serviceId: serviceIndex,
+          requirements: { task, serviceDescription: service.description },
           paymentToken: selectedPayToken,
           amount: amount.toString(),
-          serviceName: service.name,
         }),
       });
-      const hireData = await hireRes.json();
+      const jobData = await jobRes.json();
 
-      if (!hireRes.ok) {
-        if (hireData.walletAddress) {
-          addMsg({
-            role: "assistant",
-            text: `${hireData.error}\n\nDeposit to: \`${hireData.walletAddress}\``,
-          });
-        } else {
-          throw new Error(hireData.error || "Hire failed");
-        }
-        setLoading(false);
-        return;
+      if (!jobRes.ok) {
+        throw new Error(jobData.error || "Job creation failed");
       }
 
-      const dealId = hireData.dealId;
+      const jobId = jobData.jobId;
+
       addMsg({
         role: "assistant",
-        text: `Deal #${dealId} confirmed. Payment locked in escrow.\n\n**${service.name}** has been hired for ${formatUnits(amount, 18)} ${payToken.symbol}.\n\nClick below to start chatting with the agent — they'll deliver with proof-of-work.`,
-        txHash: hireData.dealTxHash || "",
-        agentLink: { id: String(service.agentId), name: service.name, dealId: String(dealId) },
+        text: `Job created (${jobId.slice(0, 8)}...).\n\n**${service.name}** — Agent #${service.agentId} is reviewing your request. Once they confirm, you'll approve payment and the job begins.\n\nTrack progress in your [Job Dashboard →](/jobs)`,
+        agentLink: { id: String(service.agentId), name: service.name, dealId: jobId },
       });
     } catch (err: unknown) {
       addMsg({ role: "assistant", text: `Error: ${err instanceof Error ? err.message.slice(0, 120) : String(err)}` });
@@ -687,9 +680,9 @@ function ChatPage() {
                   </a>
                 )}
                 {msg.agentLink && (
-                  <a href={`/chat?agent=${msg.agentLink.id}&name=${encodeURIComponent(msg.agentLink.name)}&mode=work${msg.agentLink.dealId ? `&dealId=${msg.agentLink.dealId}` : ""}`}
+                  <a href="/jobs"
                     className="block mt-3 w-full py-2.5 rounded-xl bg-[#F4C430] text-[#0A0A0A] text-sm font-bold text-center hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
-                    Start working with {msg.agentLink.name} →
+                    View Job Dashboard →
                   </a>
                 )}
 

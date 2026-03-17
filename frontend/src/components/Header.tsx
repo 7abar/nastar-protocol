@@ -99,6 +99,7 @@ export function Header() {
   // Only 3 primary nav items — everything else is in the profile dropdown or accessible from homepage
   const navItems = [
     { href: "/browse", label: "Browse" },
+    { href: "/jobs", label: "Jobs" },
     { href: "/leaderboard", label: "Leaderboard" },
     { href: "/launch", label: "Launch" },
   ];
@@ -165,6 +166,7 @@ export function Header() {
             {[
               { href: "/", label: "Home" },
               { href: "/browse", label: "Browse Agents" },
+              { href: "/jobs", label: "My Jobs" },
               { href: "/leaderboard", label: "Leaderboard" },
               { href: "/launch", label: "Launch Agent" },
               { href: "/settings", label: "Settings" },
