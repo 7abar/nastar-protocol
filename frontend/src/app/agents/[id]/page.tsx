@@ -104,10 +104,11 @@ export default function AgentDetailPage() {
         const agentId = Number(id);
 
         // Fire ALL requests in parallel
-        const [servicesRes, lbRes, dealsRes, repRes, metaRes, sbRegistered, sbHosted] = await Promise.all([
+        const [servicesRes, lbRes, dealsRes, jobsRes, repRes, metaRes, sbRegistered, sbHosted] = await Promise.all([
           fetch(`${API_URL}/v1/services`).then(r => r.ok ? r.json() : []).catch(() => []),
           fetch(`${API_URL}/v1/leaderboard`).then(r => r.ok ? r.json() : []).catch(() => []),
           fetch(`${API_URL}/v1/deals/agent/${agentId}`).then(r => r.ok ? r.json() : []).catch(() => []),
+          fetch(`${API_URL}/v1/jobs?sellerAgentId=${agentId}&limit=20`).then(r => r.ok ? r.json() : {jobs:[]}).catch(() => ({jobs:[]})),
           fetch(`${API_URL}/v1/reputation/${agentId}`).then(r => r.ok ? r.json() : null).catch(() => null),
           fetch(`${API_URL}/api/agent/${agentId}/metadata`).then(r => r.ok ? r.json() : null).catch(() => null),
           Promise.resolve(supabase.from("registered_agents").select("name, description, avatar, agent_wallet").eq("agent_nft_id", agentId)).then(r => r.data?.[0] || null).catch(() => null),
@@ -133,7 +134,16 @@ export default function AgentDetailPage() {
           });
         }
 
-        if (dealsRes.length > 0) setDeals(dealsRes);
+        // Merge on-chain deals + new jobs system
+        const newJobs = (jobsRes.jobs || []).filter((j: any) => j.phase === "COMPLETED").map((j: any) => ({
+          dealId: j.deal_id || j.id,
+          status: 2, statusLabel: "Completed",
+          amount: String(Math.round((j.amount_usd || 0) * 1e18)),
+          buyer: j.buyer_address, seller: String(j.seller_agent_id),
+          timestamp: new Date(j.created_at).getTime() / 1000,
+          task: j.requirements?.task || j.offering_name,
+        }));
+        if (dealsRes.length > 0 || newJobs.length > 0) setDeals([...dealsRes, ...newJobs]);
         if (repRes) setReputation(repRes);
         if (metaRes) setMetadata(metaRes);
 
