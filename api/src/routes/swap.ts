@@ -17,11 +17,15 @@ const router = Router();
 
 // ─── Mento SDK singleton (lazy init) ──────────────────────────────────────────
 
+import { createWalletClient, createPublicClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { celo } from "viem/chains";
+
 let _mento: any | null = null;
 
 async function getMento(): Promise<any> {
   if (!_mento) {
-    _mento = await Mento.create(ChainId.CELO_SEPOLIA);
+    _mento = await Mento.create(ChainId.CELO);
   }
   return _mento;
 }
@@ -172,6 +176,113 @@ router.post("/build", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "No trading route found for this pair" });
     }
     return res.status(500).json({ error: msg });
+  }
+});
+
+// ─── POST /v1/swap/execute ────────────────────────────────────────────────────
+// Body: { ownerAddress, amount, fromToken, toToken }
+// Uses the custodial wallet to execute swap via Mento
+
+router.post("/execute", async (req: Request, res: Response) => {
+  try {
+    const { ownerAddress, amount, fromToken, toToken } = req.body;
+
+    if (!amount || !fromToken || !toToken) {
+      return res.status(400).json({ error: "amount, fromToken, toToken required" });
+    }
+
+    // Resolve token symbols to addresses
+    const resolvedFrom = (CELO_TOKENS as Record<string, string>)[fromToken] || fromToken;
+    const resolvedTo = (CELO_TOKENS as Record<string, string>)[toToken] || toToken;
+
+    if (!isAddress(resolvedFrom) || !isAddress(resolvedTo)) {
+      return res.status(400).json({ error: `Unknown tokens: ${fromToken} → ${toToken}` });
+    }
+
+    const metaFrom = getTokenMeta(resolvedFrom);
+    const metaTo = getTokenMeta(resolvedTo);
+    const amountInWei = parseUnits(String(amount), metaFrom.decimals);
+
+    // Get quote first
+    const mento = await getMento();
+    let expectedOut: bigint;
+    try {
+      expectedOut = await mento.quotes.getAmountOut(resolvedFrom, resolvedTo, amountInWei);
+    } catch {
+      return res.status(404).json({ error: `No Mento trading route for ${fromToken} → ${toToken}` });
+    }
+
+    const amountOutFormatted = formatUnits(expectedOut, metaTo.decimals);
+
+    // Get wallet for this user (custodial)
+    const supabaseUrl = process.env.SUPABASE_URL || "";
+    const supabaseKey = process.env.SUPABASE_SERVICE_KEY || "";
+    if (!supabaseUrl || !supabaseKey) {
+      return res.status(503).json({ error: "Database not configured" });
+    }
+
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data: walletData } = await supabase
+      .from("user_wallets")
+      .select("wallet_address, encrypted_key")
+      .eq("owner_address", ownerAddress)
+      .limit(1);
+
+    if (!walletData?.length) {
+      return res.status(404).json({ error: "No custodial wallet found for this address" });
+    }
+
+    // Decrypt wallet key
+    const crypto = await import("crypto");
+    const encKey = process.env.WALLET_ENCRYPTION_KEY || process.env.PRIVATE_KEY?.slice(0, 32) || "";
+    const [ivHex, encrypted] = walletData[0].encrypted_key.split(":");
+    const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(encKey.padEnd(32, "0").slice(0, 32)), Buffer.from(ivHex, "hex"));
+    let decryptedPK = decipher.update(encrypted, "hex", "utf8") + decipher.final("utf8");
+    if (!decryptedPK.startsWith("0x")) decryptedPK = "0x" + decryptedPK;
+
+    // Build swap transaction
+    const account = privateKeyToAccount(decryptedPK as `0x${string}`);
+    const walletAddress = walletData[0].wallet_address;
+
+    const { approval, swap } = await mento.swap.buildSwapTransaction(
+      resolvedFrom, resolvedTo, amountInWei, walletAddress, walletAddress,
+      { slippageTolerance: 1, deadline: deadlineFromMinutes(10) }
+    );
+
+    const publicClientViem = createPublicClient({ chain: celo, transport: http() });
+    const walletClientViem = createWalletClient({ account, chain: celo, transport: http() });
+
+    // Step 1: Approve if needed
+    if (approval) {
+      const approveTx = await walletClientViem.sendTransaction({
+        to: approval.to as `0x${string}`,
+        data: approval.data as `0x${string}`,
+        value: BigInt(approval.value || 0),
+      });
+      await publicClientViem.waitForTransactionReceipt({ hash: approveTx });
+    }
+
+    // Step 2: Execute swap
+    const swapTx = await walletClientViem.sendTransaction({
+      to: swap.params.to as `0x${string}`,
+      data: swap.params.data as `0x${string}`,
+      value: BigInt(swap.params.value || 0),
+    });
+    const receipt = await publicClientViem.waitForTransactionReceipt({ hash: swapTx });
+
+    return res.json({
+      success: true,
+      fromAmount: amount,
+      fromToken: metaFrom.symbol || fromToken,
+      toAmount: amountOutFormatted,
+      toToken: metaTo.symbol || toToken,
+      txHash: swapTx,
+      blockNumber: receipt.blockNumber?.toString(),
+    });
+  } catch (err) {
+    return res.status(500).json({ error: (err as Error).message?.slice(0, 200) });
   }
 });
 

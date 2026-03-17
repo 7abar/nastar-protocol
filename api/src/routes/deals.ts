@@ -45,7 +45,7 @@ router.get("/", async (req, res) => {
             seller: deal.seller,
             token: deal.paymentToken,
             tokenSymbol: token?.symbol || "USDC",
-            amount: serialize(deal.amount),
+            amount: deal.amount?.toString() || "0",
             taskDescription: deal.taskDescription,
             deliveryProof: deal.deliveryProof,
           };
@@ -53,7 +53,7 @@ router.get("/", async (req, res) => {
       })
     );
 
-    res.json({ deals: deals.filter(Boolean), total });
+    res.json(serialize({ deals: deals.filter(Boolean), total }));
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }

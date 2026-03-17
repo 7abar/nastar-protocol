@@ -111,6 +111,46 @@ const FAQ_CACHE: { patterns: RegExp[]; answer: string }[] = [
     answer:
       "I can help you: (1) Find AI agents for your task, (2) Explain how escrow and payments work, (3) Guide you through hiring an agent, (4) Answer questions about Nastar. Just tell me what you need!",
   },
+  {
+    patterns: [/hello|hi |hey|halo|good morning|good afternoon/i],
+    answer:
+      "Hey! I'm the Nastar Butler. I can help you find and hire AI agents on Celo. Browse agents at /browse, or tell me what you need — I'll match you with the right agent.",
+  },
+  {
+    patterns: [/how.*many.*agent|berapa.*agent|agent.*available/i],
+    answer:
+      "There are currently 8 agents on the marketplace: CeloTrader (trading), PayFlow (payments), CeloScope (research), RemitCelo (remittance), HedgeBot (FX hedging), Anya (content), DAOkeeper (DAO ops), and YieldMax (DeFi yield). Browse them all at /browse.",
+  },
+  {
+    patterns: [/agent.*to.*agent|a2a|agent.*hire.*agent|multi.*agent/i],
+    answer:
+      "Yes! Agents can hire other agents using their own wallets. For example, CeloTrader can hire CeloScope for market research — payment goes through the same on-chain escrow. This enables autonomous multi-agent collaboration.",
+  },
+  {
+    patterns: [/mcp|model.*context.*protocol/i],
+    answer:
+      "Nastar exposes a Model Context Protocol (MCP) server at /.well-known/mcp.json with 7 tools (browse_agents, get_agent, create_deal, check_deal, get_reputation, list_services, get_balance) and 3 prompts. Any MCP-compatible client can interact with the marketplace.",
+  },
+  {
+    patterns: [/a2a|agent.*card|google.*a2a/i],
+    answer:
+      "Nastar supports Google's Agent-to-Agent (A2A) protocol. The agent card is at /.well-known/agent-card.json with 4 skills: browse_marketplace, hire_agent, check_reputation, resolve_dispute.",
+  },
+  {
+    patterns: [/how.*hire|cara.*hire|how.*do.*i.*use/i],
+    answer:
+      "To hire an agent: (1) Browse agents at /browse, (2) Click 'Hire this Agent', (3) I'll show you their services and prices, (4) Click 'Hire' — your Nastar wallet pays via escrow, (5) Chat with the agent to describe your task, (6) Agent delivers with proof-of-work.",
+  },
+  {
+    patterns: [/celo|why.*celo|kenapa.*celo/i],
+    answer:
+      "Nastar runs on Celo because: (1) Lowest gas fees (<$0.001 per transaction), (2) 16+ native stablecoins via Mento (cKES, cNGN, cBRL, etc.), (3) MiniPay has 10M+ users in Global South markets, (4) ERC-8004 identity standard is native to Celo, (5) Carbon-negative blockchain.",
+  },
+  {
+    patterns: [/open.*source|github|source.*code|repo/i],
+    answer:
+      "Nastar is fully open source: github.com/7abar/nastar-protocol. 242+ commits, Solidity contracts with 37/37 tests, Express API, Next.js frontend. MIT license.",
+  },
 ];
 
 function checkFAQCache(message: string): string | null {
