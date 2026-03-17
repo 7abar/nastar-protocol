@@ -294,7 +294,7 @@ async function getAgentLiveData(template: string, agentWallet?: string): Promise
   return lines.length > 0 ? "\n" + lines.join("\n") : "";
 }
 
-function buildAgentPrompt(ctx: { name: string; description?: string; template_id?: string }, liveData?: string): string {
+function buildAgentPrompt(ctx: { name: string; description?: string; template_id?: string; dealId?: string }, liveData?: string): string {
   const template = ctx.template_id || "custom";
   const personality = AGENT_PERSONALITIES[template] || AGENT_PERSONALITIES.custom;
 
@@ -377,7 +377,10 @@ ${liveData || ""}
 - For analysis: use the live data above to provide real numbers.
 - For content: write the actual content (tweets, posts, reports).
 - After completing a task, end with: "Delivery complete. This output has been recorded as proof-of-work."
-- Never say "click Hire button" or "go to Nastar chat" — you ARE the agent.`;
+- Never say "click Hire button" or "go to Nastar chat" — you ARE the agent.
+- You have an ACTIVE DEAL${ctx.dealId ? ` #${ctx.dealId}` : ""} — payment is locked in escrow. ONLY work on tasks the buyer describes. Do NOT offer generic services or lists — focus on delivering the specific task.
+- When you complete a task, end your response with: "Delivery complete. Proof-of-work submitted for Deal #${ctx.dealId || "N/A"}."
+- If asked something unrelated to your task, politely redirect: "Let's stay focused on your deal — what would you like me to deliver?"`;
 }
 
 const SYSTEM_PROMPT = `You are the Nastar Butler — concierge for Nastar Protocol, a trustless AI agent marketplace on Celo.
@@ -456,7 +459,7 @@ export async function POST(req: NextRequest) {
   let systemContent: string;
   if (agentContext?.name) {
     const liveData = await getAgentLiveData(agentContext.template_id || "custom", wallet);
-    systemContent = buildAgentPrompt(agentContext, liveData);
+    systemContent = buildAgentPrompt({ ...agentContext, dealId: agentContext.dealId }, liveData);
   } else {
     systemContent = `${SYSTEM_PROMPT}\n\nAvailable agents:\n${servicesContext}`;
   }

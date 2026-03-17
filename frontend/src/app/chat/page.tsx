@@ -44,7 +44,7 @@ interface Message {
   services?: Service[];
   serviceIndex?: number;
   txHash?: string;
-  agentLink?: { id: string; name: string };
+  agentLink?: { id: string; name: string; dealId?: string };
 
 }
 
@@ -207,14 +207,39 @@ function ChatPage() {
     const agentName = hireName || searchParams.get("name");
     const mode = searchParams.get("mode");
 
-    // Agent work mode — direct chat with agent personality
+    // Agent work mode — requires a confirmed deal
     if (mode === "work" && agentId && agentName) {
+      const dealId = searchParams.get("dealId");
       setPrefilled(true);
       setAgentMode({ id: agentId, name: agentName });
-      addMsg({
-        role: "assistant",
-        text: `Hi! I'm **${agentName}**. Your deal is active and payment is secured in escrow.\n\nDescribe your task and I'll get to work. Once I deliver, you'll receive the output here with proof-of-work.`,
-      });
+
+      if (dealId) {
+        // Real deal exists — show working state
+        addMsg({
+          role: "assistant",
+          text: `Hi! I'm **${agentName}**. Deal #${dealId} is confirmed — payment is locked in escrow.\n\nDescribe exactly what you need and I'll deliver with proof-of-work. Payment auto-releases on delivery.`,
+        });
+      } else {
+        // No deal — show agent's services and force hire first
+        const agentServices = services.filter((s) => String(s.agentId) === String(agentId));
+        if (agentServices.length > 0) {
+          const serviceList = agentServices.map((s) => {
+            const price = formatUnits(s.pricePerCall, 18);
+            return `- **${s.name}** — ${s.description || "Service"}\n  Price: **${price} USD**`;
+          }).join("\n");
+          addMsg({
+            role: "assistant",
+            text: `**${agentName}** (Agent #${agentId})\n\nTo start working with this agent, you need to create a deal first. Payment will be locked in escrow — agent only gets paid when they deliver.\n\n**Available services:**\n${serviceList}\n\nSelect a service below to hire and lock payment in escrow:`,
+            services: agentServices,
+            serviceIndex: services.indexOf(agentServices[0]),
+          });
+        } else {
+          addMsg({
+            role: "assistant",
+            text: `**${agentName}** (Agent #${agentId}) hasn't registered on-chain services yet.\n\nThey can't accept paid work until they register a service. Check back later or browse other agents at /browse.`,
+          });
+        }
+      }
       return;
     }
 
@@ -259,6 +284,17 @@ function ChatPage() {
     const userText = input.trim();
     setInput("");
 
+    // In agent work mode, require a confirmed deal before accepting tasks
+    const dealId = searchParams.get("dealId");
+    if (agentMode && !dealId) {
+      addMsg({ role: "user", text: userText });
+      addMsg({
+        role: "assistant",
+        text: `I can't start working without a confirmed deal. Create a deal above — payment will be locked in escrow and I'll get to work immediately once it's confirmed.`,
+      });
+      return;
+    }
+
     addMsg({ role: "user", text: userText });
     setLoading(true);
 
@@ -281,7 +317,7 @@ function ChatPage() {
           messages: chatHistory,
           services: servicesContext,
           wallet,
-          ...(agentMode ? { agentContext: { name: agentMode.name, template_id: agentMode.template_id, description: agentMode.description } } : {}),
+          ...(agentMode ? { agentContext: { name: agentMode.name, template_id: agentMode.template_id, description: agentMode.description, dealId: searchParams.get("dealId") } } : {}),
         }),
       });
 
@@ -437,11 +473,12 @@ function ChatPage() {
         return;
       }
 
+      const dealId = hireData.dealId;
       addMsg({
         role: "assistant",
-        text: `Done! "${service.name}" hired for ${formatUnits(amount, 18)} ${payToken.symbol}. Payment is locked in escrow.\n\n**What happens next:**\n1. Chat with the agent to describe your task\n2. Agent delivers the work with proof\n3. Payment auto-releases after delivery\n4. You can dispute within 3 days if unsatisfied`,
+        text: `Deal #${dealId} confirmed. Payment locked in escrow.\n\n**${service.name}** has been hired for ${formatUnits(amount, 18)} ${payToken.symbol}.\n\nClick below to start chatting with the agent — they'll deliver with proof-of-work.`,
         txHash: hireData.dealTxHash || "",
-        agentLink: { id: String(service.agentId), name: service.name },
+        agentLink: { id: String(service.agentId), name: service.name, dealId: String(dealId) },
       });
     } catch (err: unknown) {
       addMsg({ role: "assistant", text: `Error: ${err instanceof Error ? err.message.slice(0, 120) : String(err)}` });
@@ -650,9 +687,9 @@ function ChatPage() {
                   </a>
                 )}
                 {msg.agentLink && (
-                  <a href={`/chat?agent=${msg.agentLink.id}&name=${encodeURIComponent(msg.agentLink.name)}&mode=work`}
+                  <a href={`/chat?agent=${msg.agentLink.id}&name=${encodeURIComponent(msg.agentLink.name)}&mode=work${msg.agentLink.dealId ? `&dealId=${msg.agentLink.dealId}` : ""}`}
                     className="block mt-3 w-full py-2.5 rounded-xl bg-[#F4C430] text-[#0A0A0A] text-sm font-bold text-center hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
-                    Chat with {msg.agentLink.name} to start your task
+                    Start working with {msg.agentLink.name} →
                   </a>
                 )}
 
