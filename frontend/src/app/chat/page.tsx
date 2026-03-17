@@ -844,7 +844,10 @@ function ChatPage() {
                       className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F4C430]/30"
                     />
                     <button
-                      onClick={() => setWithdrawAmount(walletBalances[withdrawToken] || "0")}
+                      onClick={() => {
+                        const bal = parseFloat(walletBalances[withdrawToken] || "0");
+                        setWithdrawAmount(bal.toFixed(withdrawToken === "USDC" || withdrawToken === "USDT" ? 6 : 18).replace(/\.?0+$/, "") || "0");
+                      }}
                       className="px-2 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#A1A1A1] text-xs hover:text-[#F4C430] transition"
                     >
                       MAX
@@ -887,7 +890,7 @@ function ChatPage() {
                     }
                     setWithdrawing(false);
                   }}
-                  disabled={!withdrawTo || !withdrawAmount || withdrawing}
+                  disabled={!wallets[0]?.address || !withdrawAmount || withdrawing}
                   className="w-full py-2.5 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/30 transition disabled:opacity-30"
                 >
                   {withdrawing ? "Sending..." : `Withdraw ${withdrawAmount || "0"} ${withdrawToken}`}
