@@ -242,9 +242,11 @@ router.post("/:id/pay", async (req: Request, res: Response) => {
       updated_at: new Date().toISOString(),
     }).eq("id", req.params.id);
 
-    // Trigger hosted agent execution
+    // Trigger hosted agent execution (fire and forget, log errors)
     const updatedJob = { ...job, phase: "IN_PROGRESS", deal_id: dealId };
-    triggerHostedAgent(updatedJob, job.seller_agent_id, job.requirements).catch(() => {});
+    triggerHostedAgent(updatedJob, job.seller_agent_id, job.requirements).catch((err) => {
+      console.error("triggerHostedAgent error:", err.message);
+    });
 
     return res.json({
       success: true,
@@ -324,11 +326,24 @@ router.post("/:id/reject", async (req: Request, res: Response) => {
   }
 });
 
+// ── POST /v1/jobs/:id/trigger — force re-trigger execution (debug/recovery) ──
+router.post("/:id/trigger", async (req: Request, res: Response) => {
+  try {
+    const supabase = supabaseClient();
+    const { data: job } = await supabase.from("jobs").select("*").eq("id", req.params.id).single();
+    if (!job) return res.status(404).json({ error: "Job not found" });
+    if (job.phase !== "IN_PROGRESS") return res.status(400).json({ error: `Job must be IN_PROGRESS, currently ${job.phase}` });
+
+    await triggerHostedAgent(job, job.seller_agent_id, job.requirements);
+    const { data: updated } = await supabase.from("jobs").select("phase, deliverable").eq("id", req.params.id).single();
+    return res.json({ success: true, phase: updated?.phase, hasDeliverable: !!updated?.deliverable });
+  } catch (e: any) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
 // ─── Hosted Agent Auto-Executor ───────────────────────────────────────────────
 async function triggerHostedAgent(job: any, agentId: number, requirements: any) {
-  // Skip if already past OPEN or no hosted agent
-  if (!["OPEN", "IN_PROGRESS"].includes(job.phase)) return;
-
   const supabase = supabaseClient();
   const { data: agent } = await supabase
     .from("hosted_agents")
@@ -336,76 +351,70 @@ async function triggerHostedAgent(job: any, agentId: number, requirements: any) 
     .eq("agent_nft_id", agentId)
     .limit(1);
 
-  if (!agent?.length) return;
+  // Use hosted agent or fall back to virtual agent based on offering name
+  const agentRecord = agent?.[0] || {
+    name: job.offering_name,
+    agent_nft_id: agentId,
+    template_id: SERVICE_TEMPLATE_MAP[job.offering_name?.toLowerCase()] || "custom",
+  };
 
-  const a = agent[0];
-  const templateId = a.template_id || "custom";
-  const task = requirements.task || requirements.description || requirements.prompt || JSON.stringify(requirements);
+  const templateId = agentRecord.template_id || "custom";
+  const task = (requirements as any)?.task || requirements.description || requirements.prompt || JSON.stringify(requirements);
 
-  // 1. Move to NEGOTIATION automatically (fixed price, no negotiation needed)
-  await supabase.from("jobs").update({
-    phase: "NEGOTIATION",
-    payment_request: {
-      amount: job.amount,
-      token: job.payment_token,
-      usd_value: job.amount_usd,
-      message: `${a.name} accepts this task. Payment required to proceed.`,
-    },
-    memo_history: addMemo(job.memo_history || [], "NEGOTIATION", `${a.name} confirmed they can complete this task.`),
-    updated_at: new Date().toISOString(),
-  }).eq("id", job.id);
+  if (job.phase === "OPEN") {
+    // Move to NEGOTIATION — agent confirms they can do it
+    await supabase.from("jobs").update({
+      phase: "NEGOTIATION",
+      payment_request: {
+        amount: job.amount,
+        token: job.payment_token,
+        usd_value: job.amount_usd,
+        message: `${agentRecord.name} accepts this task. Payment required to proceed.`,
+      },
+      memo_history: addMemo(job.memo_history || [], "NEGOTIATION", `${agentRecord.name} confirmed they can complete this task.`),
+      updated_at: new Date().toISOString(),
+    }).eq("id", job.id);
 
-  // If already IN_PROGRESS (payment approved), execute now
-  if (job.phase === "IN_PROGRESS") {
-    await executeHostedAgent(job, a, templateId, task);
+  } else if (job.phase === "IN_PROGRESS") {
+    // Payment approved — execute the task
+    await executeHostedAgent(job, agentRecord, templateId, task);
   }
 }
 
-async function executeHostedAgent(job: any, agent: any, templateId: string, task: string) {
-  // Call the LLM with agent personality to produce deliverable
-  const OPENAI_KEY = process.env.OPENAI_API_KEY;
-  const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!OPENAI_KEY && !ANTHROPIC_KEY) return;
+// Map service names → template IDs for demo agents not in hosted_agents
+const SERVICE_TEMPLATE_MAP: Record<string, string> = {
+  celotrader: "trading", celoscope: "research", payflow: "payments",
+  remitcelo: "remittance", hedgebot: "fx-hedge", anya: "social",
+  daokeeper: "custom", yieldmax: "trading",
+};
 
+async function executeHostedAgent(job: any, agent: any, templateId: string, task: string) {
   const supabase = supabaseClient();
 
   try {
+    const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+    if (!ANTHROPIC_KEY) { console.error("No ANTHROPIC_API_KEY set"); return; }
+
     const systemPrompt = buildAgentSystemPrompt(agent.name, templateId, job.offering_name);
     let deliverable = "";
 
-    if (ANTHROPIC_KEY) {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_KEY,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-3-haiku-20240307",
-          max_tokens: 800,
-          system: systemPrompt,
-          messages: [{ role: "user", content: task }],
-        }),
-      });
-      const data: any = await res.json();
-      deliverable = data.content?.[0]?.text || "";
-    } else if (OPENAI_KEY) {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${OPENAI_KEY}` },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          max_tokens: 800,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: task },
-          ],
-        }),
-      });
-      const data: any = await res.json();
-      deliverable = data.choices?.[0]?.message?.content || "";
-    }
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-3-haiku-20240307",
+        max_tokens: 800,
+        system: systemPrompt,
+        messages: [{ role: "user", content: task }],
+      }),
+    });
+    const data: any = await res.json();
+    console.log("Anthropic status:", res.status);
+    deliverable = data.content?.[0]?.text || data.error?.message || JSON.stringify(data).slice(0, 200);
 
     if (deliverable) {
       const memo = addMemo(job.memo_history || [], "COMPLETED", `${agent.name} completed the task.`);
@@ -418,8 +427,15 @@ async function executeHostedAgent(job: any, agent: any, templateId: string, task
         updated_at: new Date().toISOString(),
       }).eq("id", job.id);
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Hosted agent execution failed:", err);
+    // Store error as deliverable for debugging
+    await supabase.from("jobs").update({
+      phase: "COMPLETED",
+      deliverable: `[EXECUTION ERROR] ${err.message}`,
+      delivery_proof: "Error — see logs",
+      updated_at: new Date().toISOString(),
+    }).eq("id", job.id);
   }
 }
 
