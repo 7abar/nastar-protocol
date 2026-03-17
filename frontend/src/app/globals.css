@@ -36,10 +36,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
-body {
+html, body {
   background: #0A0A0A;
   color: #F5F5F5;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 .neon-glow {

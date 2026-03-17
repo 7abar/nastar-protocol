@@ -23,7 +23,8 @@ export function ChatFAB() {
   return (
     <button
       onClick={handleClick}
-      className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-[0_4px_24px_rgba(244,196,48,0.4)] hover:shadow-[0_4px_32px_rgba(244,196,48,0.6)] hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center group overflow-hidden"
+      className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-50 w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-[0_4px_24px_rgba(244,196,48,0.4)] hover:shadow-[0_4px_32px_rgba(244,196,48,0.6)] hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center group overflow-hidden"
+      style={{ right: "max(1rem, env(safe-area-inset-right, 1rem))", bottom: "max(1.25rem, env(safe-area-inset-bottom, 1.25rem))" }}
       aria-label="Chat with Nastar"
     >
       <Image
