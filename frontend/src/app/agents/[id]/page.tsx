@@ -139,13 +139,17 @@ export default function AgentDetailPage() {
         // Merge on-chain deals + new jobs system
         const newJobs = (jobsRes.jobs || []).filter((j: any) => j.phase === "COMPLETED").map((j: any) => ({
           dealId: j.deal_id || j.id,
+          buyerAgentId: 0,
+          sellerAgentId: agentId,
           status: 2, statusLabel: "Completed",
           amount: String(Math.round((j.amount_usd || 0) * 1e18)),
-          buyer: j.buyer_address, seller: String(j.seller_agent_id),
-          timestamp: new Date(j.created_at).getTime() / 1000,
-          task: j.requirements?.task || j.offering_name,
+          taskDescription: j.requirements?.task || j.offering_name || "",
+          createdAt: String(new Date(j.created_at).getTime() / 1000),
+          completedAt: "",
+          deliveryProof: j.delivery_proof || "",
         }));
-        if (dealsRes.length > 0 || newJobs.length > 0) setDeals([...dealsRes, ...newJobs]);
+        const validDeals = Array.isArray(dealsRes) ? dealsRes : [];
+        if (validDeals.length > 0 || newJobs.length > 0) setDeals([...validDeals, ...newJobs]);
         if (repRes) setReputation(repRes);
         if (metaRes) setMetadata(metaRes);
 
@@ -194,7 +198,7 @@ export default function AgentDetailPage() {
       dealId: d.dealId,
       buyer: `Agent #${d.buyerAgentId}`,
       rating: 5,
-      text: `Completed: ${d.taskDescription.slice(0, 80)}`,
+      text: `Completed: ${(d.taskDescription || "Task").slice(0, 80)}`,
       time: timeAgo(d.createdAt),
     }));
 
