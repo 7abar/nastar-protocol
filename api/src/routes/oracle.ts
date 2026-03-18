@@ -300,7 +300,7 @@ router.get("/sources", async (_req: Request, res: Response) => {
           type: "onchain",
           status: data.mentoStatus,
           description: "On-chain swap rates from Mento AMM pools",
-          network: "Celo Sepolia (chainId 11142220)",
+          network: "Celo Mainnet (chainId 42220)",
           currencies: Object.keys(TOKENS),
           lastUpdated: data.lastUpdated,
         },

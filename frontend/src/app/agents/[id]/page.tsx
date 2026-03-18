@@ -90,7 +90,7 @@ export default function AgentDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"reviews" | "transactions">("reviews");
+  const [activeTab, setActiveTab] = useState<"reviews" | "jobs">("reviews");
   const [storedAgent, setStoredAgent] = useState<{ name: string; description: string | null; avatar: string | null; agent_wallet: string | null } | null>(null);
   const [reputation, setReputation] = useState<{ score: number; tier: string } | null>(null);
   const [metadata, setMetadata] = useState<any>(null);
@@ -121,19 +121,10 @@ export default function AgentDetailPage() {
         const leaderboard = lbRes;
         const agentServices = services.filter((s: any) => s.agentId === agentId);
 
-        // Compute real stats from jobs API
-        const allJobs = jobsRes.jobs || [];
-        const completedJobs = allJobs.filter((j: any) => j.phase === "COMPLETED");
-        const realRevenue = completedJobs.reduce((sum: number, j: any) => sum + (j.amount_usd || 0), 0);
-        const realJobsTotal = allJobs.length;
-        const realJobsCompleted = completedJobs.length;
-        const realCompletionRate = realJobsTotal > 0 ? Math.round((realJobsCompleted / realJobsTotal) * 100) : 0;
-
-        // Also check leaderboard for on-chain data (merge both)
+        // Stats from on-chain leaderboard (real escrow data only)
         const lb = leaderboard.find((a: any) => a.agentId === agentId);
-        const totalRevenue = realRevenue + parseFloat(lb?.revenue || "0");
-        const totalJobs = realJobsTotal + (lb?.jobsTotal || 0);
-        const totalCompleted = realJobsCompleted + (lb?.jobsCompleted || 0);
+        // Jobs from Supabase (for display, not revenue)
+        const allJobs = jobsRes.jobs || [];
 
         if (agentServices.length > 0) {
           setOnChainAgent({
@@ -142,14 +133,14 @@ export default function AgentDetailPage() {
             description: agentServices[0].description,
             address: agentServices[0].provider,
             services: agentServices,
-            revenue: totalRevenue > 0 ? totalRevenue.toFixed(2) : "0",
-            jobsCompleted: totalCompleted,
-            jobsTotal: totalJobs,
-            completionRate: totalJobs > 0 ? Math.round((totalCompleted / totalJobs) * 100) : 0,
+            revenue: lb?.revenue || "0",
+            jobsCompleted: lb?.jobsCompleted || 0,
+            jobsTotal: (lb?.jobsTotal || 0) + allJobs.length,
+            completionRate: lb?.completionRate || 0,
           });
         }
 
-        // Build deals list from all jobs
+        // Build job history for this agent
         const phaseToLabel: Record<string, string> = {
           OPEN: "Open", NEGOTIATION: "Negotiation", IN_PROGRESS: "Active",
           COMPLETED: "Completed", REJECTED: "Rejected", EXPIRED: "Expired",
@@ -351,7 +342,7 @@ export default function AgentDetailPage() {
 
           {/* Tab navigation */}
           <div className="flex gap-0 border-b border-white/[0.08] mb-6">
-            {(["reviews", "transactions"] as const).map((tab) => (
+            {(["reviews", "jobs"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -363,7 +354,7 @@ export default function AgentDetailPage() {
               >
                 {tab}
                 {tab === "reviews" && ` (${reviews.length})`}
-                {tab === "transactions" && ` (${onChainAgent.jobsTotal})`}
+                {tab === "jobs" && ` (${deals.length})`}
               </button>
             ))}
           </div>
@@ -425,33 +416,31 @@ export default function AgentDetailPage() {
             </div>
           )}
 
-          {/* Tab content: Transactions */}
-          {activeTab === "transactions" && (
+          {/* Tab content: Jobs */}
+          {activeTab === "jobs" && (
             <div className="space-y-2">
               {deals.map((deal) => (
-                <div key={deal.dealId} className="flex items-center justify-between p-3 rounded-xl glass-card">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-2 h-2 rounded-full shrink-0 ${deal.statusLabel === "Completed" ? "bg-[#F4C430]" : deal.statusLabel === "Active" ? "bg-green-400" : "bg-[#A1A1A1]/30"}`} />
-                    <div className="min-w-0">
-                      <p className="text-[#F5F5F5] text-sm truncate">{deal.taskDescription || `Deal #${deal.dealId}`}</p>
-                      <p className="text-[#A1A1A1]/40 text-[10px]">Buyer Agent #{deal.buyerAgentId} · {timeAgo(deal.createdAt)}</p>
+                <div key={deal.dealId} className="p-4 rounded-xl glass-card">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[#F5F5F5] text-sm font-medium truncate">{deal.taskDescription || `Job #${String(deal.dealId).slice(0, 8)}`}</p>
+                      <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">{timeAgo(deal.createdAt)}</p>
                     </div>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${
+                      deal.statusLabel === "Completed" ? "text-green-400 bg-green-500/10" :
+                      deal.statusLabel === "Active" || deal.statusLabel === "Negotiation" ? "text-blue-400 bg-blue-500/10" :
+                      deal.statusLabel === "Open" ? "text-yellow-400 bg-yellow-500/10" :
+                      "text-[#A1A1A1] bg-white/[0.04]"
+                    }`}>{deal.statusLabel}</span>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${deal.statusLabel === "Completed" ? "text-[#F4C430] bg-[#F4C430]/10" : deal.statusLabel === "Active" ? "text-green-400 bg-green-500/10" : "text-[#A1A1A1] bg-white/[0.04]"}`}>{deal.statusLabel}</span>
-                    <a
-                      href={`https://celoscan.io/address/${ESCROW}`}
-                      target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] text-[#A1A1A1]/30 hover:text-[#F4C430] transition"
-                    >
-                      #{deal.dealId}
-                    </a>
-                  </div>
+                  {deal.deliveryProof && (
+                    <p className="text-[#A1A1A1]/50 text-xs mt-1 line-clamp-2">{deal.deliveryProof}</p>
+                  )}
                 </div>
               ))}
 
               {deals.length === 0 && (
-                <p className="text-center text-[#A1A1A1]/30 text-sm py-8">No transactions yet</p>
+                <p className="text-center text-[#A1A1A1]/30 text-sm py-8">No jobs yet</p>
               )}
             </div>
           )}

@@ -16,11 +16,11 @@
 import { Router, Request, Response } from "express";
 import { db } from "../lib/supabase.js";
 import { createPublicClient, http, formatUnits } from "viem";
-import { celoAlfajores as celoSepolia, CONTRACTS } from "../config.js";
+import { celoMainnet as celo, CONTRACTS } from "../config.js";
 
 const router = Router();
 
-const publicClient = createPublicClient({ chain: celoSepolia, transport: http() });
+const publicClient = createPublicClient({ chain: celo, transport: http() });
 
 const ESCROW = CONTRACTS.NASTAR_ESCROW;
 

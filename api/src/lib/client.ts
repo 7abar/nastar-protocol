@@ -1,8 +1,8 @@
 import { createPublicClient, http } from "viem";
-import { celoAlfajores } from "../config.js";
+import { celoMainnet } from "../config.js";
 
 export const publicClient = createPublicClient({
-  chain: celoAlfajores,
+  chain: celoMainnet,
   transport: http(),
 });
 

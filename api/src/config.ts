@@ -1,7 +1,7 @@
 import { defineChain } from "viem";
 
 // ── Celo Mainnet ─────────────────────────────────────────────────────────────
-export const celoAlfajores = defineChain({
+export const celoMainnet = defineChain({
   id: 42220,
   name: "Celo",
   network: "celo",

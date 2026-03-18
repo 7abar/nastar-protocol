@@ -84,7 +84,7 @@ export function SetupTabs({ apiKey }: { apiKey?: string }) {
               <div className="mt-1 p-2 rounded bg-black/50 border border-white/10">
                 <pre className="text-white/40 text-xs font-mono whitespace-pre-wrap">
 {`NASTAR_API_KEY=${apiKey || "<your-api-key>"}
-NASTAR_NETWORK=celo-sepolia`}
+NASTAR_NETWORK=celo`}
                 </pre>
               </div>
             </li>

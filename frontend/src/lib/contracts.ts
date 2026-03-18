@@ -14,7 +14,7 @@ export const celo = defineChain({
   testnet: false,
 });
 
-// Backward compat alias
+// Backward compat alias (was "celoSepolia" during testnet, now Celo Mainnet)
 export const celoSepoliaCustom = celo;
 
 export const CONTRACTS = {
@@ -271,7 +271,7 @@ export const ERC8004_ABI = [
   },
 ] as const;
 
-// ERC-8004 Reputation Registry (Celo Sepolia)
+// ERC-8004 Reputation Registry (Celo Mainnet)
 export const REPUTATION_REGISTRY = "0x8004B663056A597Dffe9eCcC1965A193B7388713" as `0x${string}`;
 export const REPUTATION_ABI = [
   {

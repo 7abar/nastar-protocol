@@ -6,7 +6,7 @@
 import { Router, Request, Response } from "express";
 import { createWalletClient, createPublicClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { celoAlfajores as celoSepolia, CONTRACTS } from "../config.js";
+import { celoMainnet as celo, CONTRACTS } from "../config.js";
 import { db, dbGet, dbUpsert, dbUpdate } from "../lib/supabase.js";
 
 const router = Router();
@@ -76,7 +76,7 @@ router.post("/:dealId/request", async (req: Request, res: Response) => {
   // Fetch deal from chain
   let deal: any;
   try {
-    const publicClient = createPublicClient({ chain: celoSepolia, transport: http() });
+    const publicClient = createPublicClient({ chain: celo, transport: http() });
     deal = await publicClient.readContract({ address: ESCROW_ADDRESS, abi: GET_DEAL_ABI, functionName: "getDeal", args: [BigInt(dealId)] });
   } catch { return res.status(500).json({ error: "Failed to fetch deal from chain" }); }
 
@@ -178,7 +178,7 @@ async function executeVerdict(dealId: string, verdict: any): Promise<void> {
   if (!judgeKey) return;
   try {
     const account = privateKeyToAccount(judgeKey as `0x${string}`);
-    const walletClient = createWalletClient({ account, chain: celoSepolia, transport: http() });
+    const walletClient = createWalletClient({ account, chain: celo, transport: http() });
     const hash = await walletClient.writeContract({
       address: ESCROW_ADDRESS, abi: RESOLVE_ABI, functionName: "resolveDisputeWithJudge",
       args: [BigInt(dealId), BigInt(verdict.sellerBps), verdict.reasoning],
