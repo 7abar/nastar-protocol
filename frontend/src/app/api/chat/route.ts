@@ -165,23 +165,33 @@ function checkFAQCache(message: string): string | null {
 // ── API URL for services context ────────────────────────────────────────────
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
+function formatWeiToUsd(wei: string): string {
+  try {
+    const val = Number(BigInt(wei)) / 1e18;
+    return val < 0.01 ? val.toFixed(4) : val.toFixed(2);
+  } catch {
+    return wei;
+  }
+}
+
 async function getServicesContext(): Promise<string> {
   try {
     const res = await fetch(`${API_URL}/v1/services`, { next: { revalidate: 30 } });
     const services = await res.json();
-    if (!services.length) {
+    const list = Array.isArray(services) ? services : services?.services || [];
+    if (!list.length) {
       return "No agents registered yet. Users can register at /launch.";
     }
     // Group services by agent for richer context
     const byAgent = new Map<string, any[]>();
-    for (const s of services) {
+    for (const s of list) {
       const key = String(s.agentId);
       if (!byAgent.has(key)) byAgent.set(key, []);
       byAgent.get(key)!.push(s);
     }
     return Array.from(byAgent.entries())
       .map(([agentId, svcs]) => {
-        const lines = svcs.map((s: any) => `  - "${s.name}": ${s.description}. Price: ${s.pricePerCall} USDC`);
+        const lines = svcs.map((s: any) => `  - "${s.name}": ${s.description}. Price: ${formatWeiToUsd(s.pricePerCall)} cUSD`);
         return `Agent #${agentId} (${svcs.length} service${svcs.length > 1 ? "s" : ""}):\n${lines.join("\n")}`;
       })
       .join("\n\n");
@@ -453,7 +463,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const servicesContext = services || (await getCachedServices());
+  // Always use server-side services (client may not have loaded yet)
+  const servicesContext = await getCachedServices();
 
   // Build system prompt: use agent-specific context if chatting with a specific agent
   let systemContent: string;
