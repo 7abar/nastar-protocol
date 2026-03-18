@@ -4,25 +4,15 @@ export const dynamic = "force-dynamic";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useSearchParams } from "next/navigation";
-import { createPublicClient, http, formatUnits, encodeFunctionData } from "viem";
+import { formatUnits } from "viem";
 import PageTitle from "@/components/PageTitle";
 import ReactMarkdown from "react-markdown";
 
 import {
-  celoSepoliaCustom,
-  CONTRACTS,
-  SERVICE_REGISTRY_ABI,
-  ESCROW_ABI,
-  ERC20_ABI,
-  ERC8004_ABI,
   CELO_TOKENS,
-  getTokenByAddress,
 } from "@/lib/contracts";
 
-const client = createPublicClient({
-  chain: celoSepoliaCustom,
-  transport: http(),
-});
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
 interface Service {
   agentId: bigint;
@@ -34,7 +24,7 @@ interface Service {
   pricePerCall: bigint;
   active: boolean;
   createdAt: bigint;
-  updatedAt: bigint;
+  updatedAt?: bigint;
 }
 
 interface Message {
@@ -186,13 +176,17 @@ function ChatPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [result] = (await client.readContract({
-          address: CONTRACTS.SERVICE_REGISTRY,
-          abi: SERVICE_REGISTRY_ABI,
-          functionName: "getActiveServices",
-          args: [0n, 50n],
-        })) as [Service[], bigint];
-        setServices(result);
+        const res = await fetch(`${API_URL}/v1/services`);
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : data.services || [];
+        // Convert API string values to bigint for compatibility
+        const mapped: Service[] = list.map((s: any) => ({
+          ...s,
+          agentId: BigInt(s.agentId),
+          pricePerCall: BigInt(s.pricePerCall),
+          createdAt: BigInt(s.createdAt || 0),
+        }));
+        setServices(mapped);
       } catch {}
     }
     load();
@@ -674,7 +668,7 @@ function ChatPage() {
                 )}
 
                 {msg.txHash && (
-                  <a href={`https://celoscan.io/tx/${msg.txHash}`} target="_blank"
+                  <a href={`https://celoscan.io/tx/${msg.txHash}`} target="_blank" rel="noopener noreferrer"
                     className="inline-block mt-2 text-xs text-[#F4C430] hover:underline">
                     View on CeloScan
                   </a>

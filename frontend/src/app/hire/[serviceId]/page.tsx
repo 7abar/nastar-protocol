@@ -232,7 +232,7 @@ export default function HirePage() {
           </p>
           <a
             href={`https://celoscan.io/tx/${txHash}`}
-            target="_blank"
+            target="_blank" rel="noopener noreferrer"
             className="text-sm text-green-400 hover:underline"
           >
             View on CeloScan

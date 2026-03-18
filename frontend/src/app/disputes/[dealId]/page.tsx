@@ -219,8 +219,7 @@ export default function DisputePage({ params }: { params: Promise<{ dealId: stri
             {judgeCase!.verdict!.txHash && (
               <a
                 href={`https://celoscan.io/tx/${judgeCase!.verdict!.txHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                target="_blank" rel="noopener noreferrer"
                 className="block mt-3 text-xs text-[#F4C430] hover:underline font-mono"
               >
                 TX: {judgeCase!.verdict!.txHash.slice(0, 20)}...

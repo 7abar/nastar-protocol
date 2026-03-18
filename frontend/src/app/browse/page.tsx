@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatUnits } from "viem";
 import { supabase } from "@/lib/supabase";
 import PageTitle from "@/components/PageTitle";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
@@ -174,9 +175,18 @@ export default function OfferingsPage() {
       setLoading(false);
     }
     load();
-    const iv = setInterval(load, 30_000);
-    return () => clearInterval(iv);
   }, []);
+
+  useVisibleInterval(() => {
+    // Refresh services + agent metadata
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/services`);
+        const data = await res.json();
+        setServices(data.services || data || []);
+      } catch {}
+    })();
+  }, 30_000);
 
   // ── Derive agents from services + Supabase metadata ──────────────────────
 
@@ -188,7 +198,7 @@ export default function OfferingsPage() {
       const tags = stored.tags || [];
       const tagServices = tags.map((t) => ({
         name: t.charAt(0).toUpperCase() + t.slice(1).replace(/-/g, " "),
-        price: stored.price_per_call ? formatPrice(BigInt(Math.round(parseFloat(stored.price_per_call) * 1e18)).toString()) : "1.00",
+        price: stored.price_per_call ? (() => { try { return formatPrice(BigInt(Math.round(parseFloat(stored.price_per_call) * 1e18)).toString()); } catch { return "1.00"; } })() : "1.00",
         description: "",
       }));
       agentMap.set(id, {

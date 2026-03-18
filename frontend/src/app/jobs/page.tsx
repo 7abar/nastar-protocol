@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { useWallets } from "@privy-io/react-auth";
 import Link from "next/link";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
 
@@ -90,9 +91,11 @@ export default function JobsPage() {
   useEffect(() => {
     if (!address) { setLoading(false); return; }
     loadJobs();
-    const interval = setInterval(loadJobs, 8000); // Poll every 8s
-    return () => clearInterval(interval);
   }, [address]);
+
+  useVisibleInterval(() => {
+    if (address) loadJobs();
+  }, 15_000, [address]);
 
   async function loadJobs() {
     if (!address) return;
@@ -293,7 +296,7 @@ function JobCard({ job, onPay, onReject, paying }: {
                 <div className="mt-2 text-[#A1A1A1]/50 text-[10px]">{job.delivery_proof}</div>
               )}
               {job.deal_tx_hash && (
-                <a href={`https://celoscan.io/tx/${job.deal_tx_hash}`} target="_blank" className="block mt-2 text-xs text-[#F4C430] hover:underline">
+                <a href={`https://celoscan.io/tx/${job.deal_tx_hash}`} target="_blank" rel="noopener noreferrer" className="block mt-2 text-xs text-[#F4C430] hover:underline">
                   View escrow TX on CeloScan →
                 </a>
               )}

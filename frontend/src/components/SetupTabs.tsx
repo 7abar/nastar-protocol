@@ -72,7 +72,7 @@ export function SetupTabs({ apiKey }: { apiKey?: string }) {
               Follow the installation guide from{" "}
               <a
                 href="https://github.com/7abar/nastar"
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 className="text-green-400 hover:underline"
               >
                 README.md

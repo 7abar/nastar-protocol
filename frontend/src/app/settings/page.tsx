@@ -373,7 +373,7 @@ function SettingsPage() {
                 <button onClick={handleSave} className="px-5 py-2 rounded-lg bg-[#F4C430] text-[#0A0A0A] font-bold text-sm hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition">
                   {saved ? "Saved!" : "Save Profile"}
                 </button>
-                <Link href={`/profile/${address}`} target="_blank"
+                <Link href={`/profile/${address}`} target="_blank" rel="noopener noreferrer"
                   className="px-4 py-2 rounded-lg border border-white/10 text-sm text-[#A1A1A1] hover:text-[#F4C430] hover:border-[#F4C430]/30 transition">
                   View Public Profile →
                 </Link>
@@ -404,7 +404,7 @@ function SettingsPage() {
                           <p className="text-[#F5F5F5] text-sm font-medium">{p.key}</p>
                           {connected ? (
                             <div className="flex items-center gap-2">
-                              <a href={connected.url} target="_blank" className="text-[#F4C430] text-xs hover:underline">
+                              <a href={connected.url} target="_blank" rel="noopener noreferrer" className="text-[#F4C430] text-xs hover:underline">
                                 @{connected.username}
                               </a>
                               {connected.followers !== undefined && (
@@ -557,7 +557,7 @@ function SettingsPage() {
                       <span className="text-[#A1A1A1]/30 text-[10px] font-mono">
                         {isBuyer ? `Seller: ${deal.seller.slice(0, 8)}...` : `Buyer: ${deal.buyer.slice(0, 8)}...`}
                       </span>
-                      <a href={`https://celoscan.io/address/${CONTRACTS.NASTAR_ESCROW}`} target="_blank"
+                      <a href={`https://celoscan.io/address/${CONTRACTS.NASTAR_ESCROW}`} target="_blank" rel="noopener noreferrer"
                         className="text-[10px] text-[#A1A1A1]/30 hover:text-[#F4C430] transition">
                         View on CeloScan
                       </a>
@@ -606,7 +606,7 @@ function SettingsPage() {
               </svg>
             </button>
 
-            <a href={`https://celoscan.io/address/${address}`} target="_blank"
+            <a href={`https://celoscan.io/address/${address}`} target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#F4C430]/30 transition group">
               <span className="text-[#F5F5F5] text-sm">View on CeloScan</span>
               <svg className="w-4 h-4 text-[#A1A1A1]/30 group-hover:text-[#F4C430] transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

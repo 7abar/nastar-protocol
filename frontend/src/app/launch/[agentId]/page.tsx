@@ -173,7 +173,7 @@ function JobCard({ job, agentNftId, ownerAddress, onRefresh }: {
                 <div className="mt-1.5 text-[#A1A1A1]/40 text-[10px]">{job.delivery_proof}</div>
               )}
               {job.deal_tx_hash && (
-                <a href={`https://celoscan.io/tx/${job.deal_tx_hash}`} target="_blank"
+                <a href={`https://celoscan.io/tx/${job.deal_tx_hash}`} target="_blank" rel="noopener noreferrer"
                   className="block mt-1.5 text-[10px] text-[#F4C430] hover:underline">
                   View on CeloScan →
                 </a>

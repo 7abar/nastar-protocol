@@ -14,9 +14,11 @@ import {
 } from "@/lib/agents-api";
 // SetupTabs removed — agents are hosted by Nastar (no-code)
 
+import { CONTRACTS } from "@/lib/contracts";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nastar.fun";
-const IDENTITY_REGISTRY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
-const ESCROW = "0x132aB4B07849a5cEe5104c2be32B32f9240b97FF";
+const IDENTITY_REGISTRY = CONTRACTS.IDENTITY_REGISTRY;
+const ESCROW = CONTRACTS.NASTAR_ESCROW;
 
 interface OnChainAgent {
   agentId: number;
@@ -263,10 +265,27 @@ export default function AgentDetailPage() {
                   className="px-6 py-2 rounded-full bg-[#F4C430] text-[#0A0A0A] text-sm font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition text-center">
                   Hire
                 </a>
-                <a href={`https://celoscan.io/address/${agentAddress}`} target="_blank" rel="noopener noreferrer"
-                  className="px-6 py-2 rounded-full border border-white/[0.15] text-[#A1A1A1] text-sm hover:text-[#F5F5F5] hover:border-white/[0.3] transition text-center">
-                  CeloScan
-                </a>
+                <div className="flex gap-2">
+                  <a href={`https://celoscan.io/address/${agentAddress}`} target="_blank" rel="noopener noreferrer"
+                    className="flex-1 px-4 py-2 rounded-full border border-white/[0.15] text-[#A1A1A1] text-xs hover:text-[#F5F5F5] hover:border-white/[0.3] transition text-center">
+                    CeloScan
+                  </a>
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/agents/${id}`;
+                      if (navigator.share) {
+                        navigator.share({ title: storedAgent?.name || onChainAgent.name, url });
+                      } else {
+                        navigator.clipboard.writeText(url);
+                        setCopied("share");
+                      }
+                    }}
+                    className="px-4 py-2 rounded-full border border-white/[0.15] text-[#A1A1A1] text-xs hover:text-[#F5F5F5] hover:border-white/[0.3] transition"
+                    title="Share"
+                  >
+                    {copied === "share" ? "Copied!" : "Share"}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -277,7 +296,7 @@ export default function AgentDetailPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-3 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
             {[
               { label: "Total Revenue", value: `$${onChainAgent.revenue}`, sub: onChainAgent.jobsCompleted > 0 ? `${onChainAgent.jobsCompleted} jobs` : undefined },
               { label: "Total Jobs", value: String(onChainAgent.jobsTotal) },
@@ -381,14 +400,14 @@ export default function AgentDetailPage() {
                     <div className="flex gap-2 mt-2">
                       <a
                         href={`https://celoscan.io/address/${ESCROW}`}
-                        target="_blank"
+                        target="_blank" rel="noopener noreferrer"
                         className="text-[10px] px-2 py-0.5 rounded bg-white/[0.04] text-[#A1A1A1]/40 hover:text-[#F4C430] transition"
                       >
                         Job #{r.dealId}
                       </a>
                       <a
                         href={`https://celoscan.io/address/${IDENTITY_REGISTRY}`}
-                        target="_blank"
+                        target="_blank" rel="noopener noreferrer"
                         className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition inline-flex items-center gap-1"
                       >
                         <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
@@ -421,7 +440,7 @@ export default function AgentDetailPage() {
                     <span className={`text-xs px-2 py-0.5 rounded-full ${deal.statusLabel === "Completed" ? "text-[#F4C430] bg-[#F4C430]/10" : deal.statusLabel === "Active" ? "text-green-400 bg-green-500/10" : "text-[#A1A1A1] bg-white/[0.04]"}`}>{deal.statusLabel}</span>
                     <a
                       href={`https://celoscan.io/address/${ESCROW}`}
-                      target="_blank"
+                      target="_blank" rel="noopener noreferrer"
                       className="text-[10px] text-[#A1A1A1]/30 hover:text-[#F4C430] transition"
                     >
                       #{deal.dealId}
@@ -451,7 +470,7 @@ export default function AgentDetailPage() {
                 <div key={row.label} className="flex justify-between items-center px-4 py-3">
                   <span className="text-[#A1A1A1]/50 text-xs">{row.label}</span>
                   {row.link ? (
-                    <a href={row.link} target="_blank" className={`text-[#F4C430] text-xs hover:underline ${row.mono ? "font-mono" : ""}`}>
+                    <a href={row.link} target="_blank" rel="noopener noreferrer" className={`text-[#F4C430] text-xs hover:underline ${row.mono ? "font-mono" : ""}`}>
                       {row.value}
                     </a>
                   ) : (

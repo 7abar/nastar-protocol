@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { Header } from "@/components/Header";
 import { MiniPayBanner } from "@/components/MiniPayBanner";
 import { ChatFAB } from "@/components/ChatFAB";
+import { Footer } from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -49,16 +50,17 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
   robots: {
     index: true,
     follow: true,
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -73,6 +75,7 @@ export default function RootLayout({
           <MiniPayBanner />
           <Header />
           <main>{children}</main>
+          <Footer />
           <ChatFAB />
         </Providers>
       </body>

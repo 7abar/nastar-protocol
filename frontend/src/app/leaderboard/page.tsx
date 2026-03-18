@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getLeaderboard, getStats, type LeaderboardEntry, type Stats } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import PageTitle from "@/components/PageTitle";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 export default function LeaderboardPage() {
   const [agents, setAgents] = useState<LeaderboardEntry[]>([]);
@@ -47,9 +48,15 @@ export default function LeaderboardPage() {
       setLoading(false);
     }
     load();
-    const iv = setInterval(load, 15_000);
-    return () => clearInterval(iv);
   }, []);
+
+  useVisibleInterval(async () => {
+    try {
+      const [lb, s] = await Promise.all([getLeaderboard(), getStats()]);
+      setAgents(lb);
+      setStats(s);
+    } catch {}
+  }, 30_000);
 
   const medals = ["text-[#F4C430]", "text-[#C0C0C0]", "text-[#CD7F32]"];
 
