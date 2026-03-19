@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { createPublicClient, http } from "viem";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { celoSepoliaCustom, CONTRACTS, ESCROW_ABI } from "@/lib/contracts";
+import { ensureGas } from "@/lib/gas-sponsor";
 import { DealCard } from "@/components/DealCard";
 import PageTitle from "@/components/PageTitle";
 
@@ -91,6 +92,10 @@ export default function DealsPage() {
       const wallet = wallets[0];
       const provider = await wallet.getEthereumProvider();
       const address = wallet.address as `0x${string}`;
+
+      // Ensure user has gas
+      await ensureGas(address);
+
       const { encodeFunctionData } = await import("viem");
 
       const data = encodeFunctionData({

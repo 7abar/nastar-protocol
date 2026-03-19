@@ -13,6 +13,7 @@ import {
   ERC20_ABI,
   ERC8004_ABI,
 } from "@/lib/contracts";
+import { ensureGas } from "@/lib/gas-sponsor";
 
 const client = createPublicClient({
   chain: celoSepoliaCustom,
@@ -75,6 +76,10 @@ export default function HirePage() {
       const wallet = wallets[0];
       const provider = await wallet.getEthereumProvider();
       const address = wallet.address as `0x${string}`;
+
+      // Ensure user has gas for transactions
+      setStep("Sponsoring gas...");
+      await ensureGas(address);
 
       // Check if user has an ERC-8004 identity
       setStep("Checking identity...");
