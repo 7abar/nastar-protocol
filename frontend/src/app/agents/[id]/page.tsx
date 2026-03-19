@@ -2,7 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -84,6 +84,8 @@ function StarRating({ rating }: { rating: number }) {
 export default function AgentDetailPage() {
   const { id } = useParams();
   const { user } = usePrivy();
+  const { wallets } = useWallets();
+  const [isOwner, setIsOwner] = useState(false);
   const [localAgent, setLocalAgent] = useState<RegisteredAgent | null>(null);
   const [onChainAgent, setOnChainAgent] = useState<OnChainAgent | null>(null);
   const [deals, setDeals] = useState<DealInfo[]>([]);
@@ -114,7 +116,7 @@ export default function AgentDetailPage() {
           fetch(`${API_URL}/v1/reputation/${agentId}`).then(r => r.ok ? r.json() : null).catch(() => null),
           fetch(`${API_URL}/api/agent/${agentId}/metadata`).then(r => r.ok ? r.json() : null).catch(() => null),
           Promise.resolve(supabase.from("registered_agents").select("name, description, avatar, agent_wallet").eq("agent_nft_id", agentId)).then(r => r.data?.[0] || null).catch(() => null),
-          Promise.resolve(supabase.from("hosted_agents").select("name, description, agent_wallet").eq("agent_nft_id", agentId)).then(r => r.data?.[0] || null).catch(() => null),
+          Promise.resolve(supabase.from("hosted_agents").select("name, description, agent_wallet, owner_address").eq("agent_nft_id", agentId)).then(r => r.data?.[0] || null).catch(() => null),
           fetch(`${API_URL}/v1/jobs?sellerAgentId=${agentId}&limit=20`).then(r => r.ok ? r.json() : { jobs: [] }).catch(() => ({ jobs: [] })),
         ]);
 
@@ -153,6 +155,14 @@ export default function AgentDetailPage() {
         const sbAgent = sbRegistered || (sbHosted ? { ...sbHosted, avatar: null } : null);
         if (sbAgent) setStoredAgent(sbAgent);
         const sbAgentName = sbAgent?.name || "";
+
+        // Check ownership for manage button
+        if (sbHosted?.owner_address) {
+          const connAddr = wallets[0]?.address?.toLowerCase() || "";
+          if (connAddr && sbHosted.owner_address.toLowerCase() === connAddr) {
+            setIsOwner(true);
+          }
+        }
 
         // Resolve Agentscan UUID (non-blocking — don't hold up page render)
         const resolvedName = sbAgentName || agentServices[0]?.name || `Agent ${agentId}`;
@@ -259,8 +269,14 @@ export default function AgentDetailPage() {
                 </div>
               </div>
 
-              {/* Hire button */}
-              <div className="shrink-0">
+              {/* Action buttons */}
+              <div className="shrink-0 flex gap-2">
+                {isOwner && (
+                  <Link href={`/agents/${id}/manage`}
+                    className="px-4 py-2 rounded-full bg-white/[0.06] border border-white/[0.1] text-[#F5F5F5] text-sm font-medium hover:border-[#F4C430]/50 hover:text-[#F4C430] transition text-center block">
+                    Manage
+                  </Link>
+                )}
                 <a href={`/chat?hire=${id}&name=${encodeURIComponent(storedAgent?.name || onChainAgent.name)}`}
                   className="px-6 py-2 rounded-full bg-[#F4C430] text-[#0A0A0A] text-sm font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] transition text-center block">
                   Hire
