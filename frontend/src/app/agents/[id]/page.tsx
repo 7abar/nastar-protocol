@@ -455,7 +455,7 @@ export default function AgentDetailPage() {
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="min-w-0 flex-1">
                       <p className="text-[#F5F5F5] text-sm font-medium truncate">{job.requirements?.task || job.offering_name || `Job ${job.id.slice(0, 8)}`}</p>
-                      <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">{job.created_at ? timeAgo(Math.floor(new Date(job.created_at).getTime() / 1000)) : ""}</p>
+                      <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">{job.created_at ? timeAgo(String(Math.floor(new Date(job.created_at).getTime() / 1000))) : ""}</p>
                     </div>
                     <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${
                       job.phase === "COMPLETED" ? "text-green-400 bg-green-500/10" :
