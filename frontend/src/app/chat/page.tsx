@@ -420,7 +420,7 @@ function ChatPage() {
 
     const amount = service.pricePerCall;
     const payToken = PAY_TOKENS.find(t => t.address.toLowerCase() === selectedPayToken.toLowerCase()) || PAY_TOKENS[0];
-    addMsg({ role: "user", text: `Hire ${service.name} for ${amount} ${payToken.symbol}` });
+    addMsg({ role: "user", text: `Hire ${service.name} (sponsored)` });
     setLoading(true);
 
     try {
@@ -428,7 +428,7 @@ function ChatPage() {
       const task = input.trim() || `Execute ${service.name}`;
 
       // Step 1: Create job + execute via server-sponsored flow
-      addMsg({ role: "system", text: "Creating job and executing agent..." });
+      addMsg({ role: "system", text: "Creating sponsored job..." });
 
       const jobRes = await fetch(`${API_URL}/v1/jobs`, {
         method: "POST",
@@ -642,29 +642,16 @@ function ChatPage() {
                             <span className="text-[#F4C430] text-xs font-medium">{svc.pricePerCall} USD</span>
                           </div>
                           <p className="text-[#A1A1A1] text-xs mb-2 line-clamp-2">{svc.description}</p>
-                          {/* Token selector */}
-                          <div className="flex gap-1.5 mb-2">
-                            {PAY_TOKENS.map((tk) => (
-                              <button
-                                key={tk.symbol}
-                                onClick={() => setSelectedPayToken(tk.address)}
-                                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium border transition ${
-                                  selectedPayToken.toLowerCase() === tk.address.toLowerCase()
-                                    ? "bg-[#F4C430]/20 border-[#F4C430]/50 text-[#F4C430]"
-                                    : "bg-white/[0.03] border-white/[0.08] text-[#A1A1A1] hover:border-white/[0.15]"
-                                }`}
-                              >
-                                <img src={tk.logo} alt={tk.symbol} className="w-3.5 h-3.5" />
-                                {tk.symbol}
-                              </button>
-                            ))}
-                          </div>
+                          {/* Price info */}
+                          <p className="text-[10px] text-[#A1A1A1]/60 mb-2">
+                            Regular price: {svc.pricePerCall} cUSD — <span className="text-green-400">Free during launch</span>
+                          </p>
                           <button
                             onClick={() => handleHire(svc, i)}
                             disabled={loading}
                             className="w-full py-1.5 rounded-lg bg-[#F4C430] text-[#0A0A0A] text-xs font-bold hover:shadow-[0_0_15px_rgba(244,196,48,0.3)] disabled:opacity-50 transition"
                           >
-                            Hire — {svc.pricePerCall} {selToken.symbol}
+                            Hire {svc.name} — Free (Sponsored)
                           </button>
                         </div>
                       );
