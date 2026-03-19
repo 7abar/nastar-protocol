@@ -397,8 +397,9 @@ function ChatPage() {
     }
 
     const amount = service.pricePerCall;
+    const amountNum = parseFloat(amount);
     const payToken = PAY_TOKENS.find(t => t.address.toLowerCase() === selectedPayToken.toLowerCase()) || PAY_TOKENS[0];
-    addMsg({ role: "user", text: `Hire ${service.name} for ${formatUnits(amount, 18)} ${payToken.symbol}` });
+    addMsg({ role: "user", text: `Hire ${service.name} for ${amount} ${payToken.symbol}` });
     setLoading(true);
 
     try {
@@ -421,7 +422,7 @@ function ChatPage() {
       const balRes = await fetch(`${API}/v1/wallet/balance?ownerAddress=${address}`);
       const balData = await balRes.json();
       const available = parseFloat(balData.balances?.cUSD || "0") + parseFloat(balData.balances?.USDC || "0") + parseFloat(balData.balances?.USDT || "0");
-      const needed = parseFloat(formatUnits(amount, 18));
+      const needed = amountNum;
 
       if (available < needed) {
         addMsg({
