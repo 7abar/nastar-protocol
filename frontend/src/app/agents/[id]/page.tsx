@@ -95,6 +95,7 @@ export default function AgentDetailPage() {
   const [reputation, setReputation] = useState<{ score: number; tier: string } | null>(null);
   const [metadata, setMetadata] = useState<any>(null);
   const [agentscanUrl, setAgentscanUrl] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<any[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -106,7 +107,7 @@ export default function AgentDetailPage() {
         const agentId = Number(id);
 
         // Fire ALL requests in parallel
-        const [servicesRes, lbRes, dealsRes, repRes, metaRes, sbRegistered, sbHosted] = await Promise.all([
+        const [servicesRes, lbRes, dealsRes, repRes, metaRes, sbRegistered, sbHosted, jobsRes] = await Promise.all([
           fetch(`${API_URL}/v1/services`).then(r => r.ok ? r.json() : []).catch(() => []),
           fetch(`${API_URL}/v1/leaderboard`).then(r => r.ok ? r.json() : []).catch(() => []),
           fetch(`${API_URL}/v1/deals/agent/${agentId}`).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -114,6 +115,7 @@ export default function AgentDetailPage() {
           fetch(`${API_URL}/api/agent/${agentId}/metadata`).then(r => r.ok ? r.json() : null).catch(() => null),
           Promise.resolve(supabase.from("registered_agents").select("name, description, avatar, agent_wallet").eq("agent_nft_id", agentId)).then(r => r.data?.[0] || null).catch(() => null),
           Promise.resolve(supabase.from("hosted_agents").select("name, description, agent_wallet").eq("agent_nft_id", agentId)).then(r => r.data?.[0] || null).catch(() => null),
+          fetch(`${API_URL}/v1/jobs?sellerAgentId=${agentId}&limit=20`).then(r => r.ok ? r.json() : { jobs: [] }).catch(() => ({ jobs: [] })),
         ]);
 
         const services = servicesRes;
@@ -140,6 +142,10 @@ export default function AgentDetailPage() {
         // On-chain deals only (from mainnet escrow contract)
         const validDeals = Array.isArray(dealsRes) ? dealsRes : [];
         if (validDeals.length > 0) setDeals(validDeals);
+
+        // Jobs from Supabase (butler chat flow)
+        const jobsList = jobsRes?.jobs || [];
+        if (jobsList.length > 0) setJobs(jobsList);
         if (repRes) setReputation(repRes);
         if (metaRes) setMetadata(metaRes);
 
@@ -358,7 +364,7 @@ export default function AgentDetailPage() {
               >
                 {tab}
                 {tab === "reviews" && ` (${reviews.length})`}
-                {tab === "jobs" && ` (${deals.length})`}
+                {tab === "jobs" && ` (${deals.length + jobs.length})`}
               </button>
             ))}
           </div>
@@ -443,7 +449,29 @@ export default function AgentDetailPage() {
                 </div>
               ))}
 
-              {deals.length === 0 && (
+              {/* Jobs from butler chat flow */}
+              {jobs.map((job: any) => (
+                <div key={job.id} className="p-4 rounded-xl glass-card">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[#F5F5F5] text-sm font-medium truncate">{job.requirements?.task || job.offering_name || `Job ${job.id.slice(0, 8)}`}</p>
+                      <p className="text-[#A1A1A1]/40 text-[10px] mt-0.5">{job.created_at ? timeAgo(Math.floor(new Date(job.created_at).getTime() / 1000)) : ""}</p>
+                    </div>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${
+                      job.phase === "COMPLETED" ? "text-green-400 bg-green-500/10" :
+                      job.phase === "IN_PROGRESS" ? "text-blue-400 bg-blue-500/10" :
+                      job.phase === "NEGOTIATION" ? "text-purple-400 bg-purple-500/10" :
+                      job.phase === "OPEN" ? "text-yellow-400 bg-yellow-500/10" :
+                      "text-[#A1A1A1] bg-white/[0.04]"
+                    }`}>{job.phase}</span>
+                  </div>
+                  {job.deliverable && (
+                    <p className="text-[#A1A1A1]/50 text-xs mt-1 line-clamp-3">{job.deliverable.slice(0, 200)}</p>
+                  )}
+                </div>
+              ))}
+
+              {deals.length === 0 && jobs.length === 0 && (
                 <p className="text-center text-[#A1A1A1]/30 text-sm py-8">No jobs yet</p>
               )}
             </div>
