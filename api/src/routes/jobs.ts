@@ -17,9 +17,28 @@ import { createClient } from "@supabase/supabase-js";
 import { publicClient, serialize, DEAL_STATUS } from "../lib/client.js";
 import { CONTRACTS, CELO_TOKENS, getTokenMeta } from "../config.js";
 import { NASTAR_ESCROW_ABI, SERVICE_REGISTRY_ABI } from "../abis.js";
-import { createWalletClient, http, parseUnits, formatUnits } from "viem";
+import { createWalletClient, http, parseUnits, formatUnits, parseAbi } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { celo } from "viem/chains";
+
+const CONFIRM_ABI = parseAbi([
+  "function confirmDelivery(uint256 dealId, string deliveryProof) external",
+]);
+
+async function confirmDeliveryOnChain(dealId: number, deliveryProof: string) {
+  const pk = process.env.PRIVATE_KEY;
+  if (!pk) throw new Error("No server PK");
+  const account = privateKeyToAccount(pk as `0x${string}`);
+  const wc = createWalletClient({ account, chain: celo, transport: http("https://forno.celo.org") });
+  const hash = await wc.writeContract({
+    address: CONTRACTS.NASTAR_ESCROW as `0x${string}`,
+    abi: CONFIRM_ABI,
+    functionName: "confirmDelivery",
+    args: [BigInt(dealId), deliveryProof.slice(0, 500)],
+  });
+  await publicClient.waitForTransactionReceipt({ hash });
+  return hash;
+}
 
 const router = Router();
 
@@ -53,7 +72,13 @@ router.post("/", async (req: Request, res: Response) => {
 
     const token = paymentToken || CELO_TOKENS.USDm;
     const meta = getTokenMeta(token);
-    const amountStr = amount?.toString() || "1000000000000000000";
+    // amount can be human-readable ("0.05") or wei ("50000000000000000")
+    const rawAmount = amount?.toString() || "1";
+    // Detect: if it contains a decimal or is a small number, treat as human-readable
+    const isHumanReadable = rawAmount.includes(".") || (parseFloat(rawAmount) < 1000 && !rawAmount.match(/^[0-9]{10,}$/));
+    const amountStr = isHumanReadable
+      ? parseUnits(rawAmount, meta.decimals).toString()
+      : rawAmount;
 
     const supabase = supabaseClient();
 
@@ -273,37 +298,37 @@ router.post("/:id/deliver", async (req: Request, res: Response) => {
       return res.status(400).json({ error: `Job is in ${job.phase}, cannot deliver` });
     }
 
-    const memo = addMemo(job.memo_history, "COMPLETED", "Agent delivered. Payment auto-released.");
+    let confirmTxHash: string | null = null;
+
+    // Confirm delivery on-chain if we have a deal_id (releases payment after 3-day window)
+    if (job.deal_id !== null && job.deal_id !== undefined) {
+      try {
+        const proof = deliveryProof || `Delivered by Agent #${job.seller_agent_id} at ${new Date().toISOString()}`;
+        confirmTxHash = await confirmDeliveryOnChain(Number(job.deal_id), proof);
+        console.log(`[deliver] confirmDelivery on-chain: deal #${job.deal_id} tx ${confirmTxHash}`);
+      } catch (e: any) {
+        console.error(`[deliver] confirmDelivery failed for deal #${job.deal_id}:`, e.message);
+        // Non-fatal — payment will auto-release after deadline via autoConfirm
+      }
+    }
+
+    const memo = addMemo(job.memo_history, "COMPLETED",
+      confirmTxHash
+        ? `Agent delivered. Delivery confirmed on-chain (tx: ${confirmTxHash.slice(0, 20)}...). Payment releases after dispute window.`
+        : "Agent delivered. Payment auto-releases after deadline."
+    );
 
     await supabase.from("jobs").update({
       phase: "COMPLETED",
       deliverable,
       delivery_type: deliveryType,
       delivery_proof: deliveryProof || null,
+      confirm_tx_hash: confirmTxHash,
       memo_history: memo,
       updated_at: new Date().toISOString(),
     }).eq("id", req.params.id);
 
-    // Submit delivery proof to legacy endpoint
-    if (job.deal_id) {
-      try {
-        const API = process.env.API_URL || "https://api.nastar.fun";
-        await fetch(`${API}/v1/delivery/submit`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            dealId: job.deal_id,
-            agentId: job.seller_agent_id,
-            deliveryType,
-            content: deliverable,
-            deliveryProof,
-            summary: `${job.offering_name} job completed`,
-          }),
-        });
-      } catch {}
-    }
-
-    return res.json({ success: true, phase: "COMPLETED", deliverable });
+    return res.json({ success: true, phase: "COMPLETED", deliverable, confirmTxHash });
   } catch (e: any) {
     return res.status(500).json({ error: e.message });
   }
