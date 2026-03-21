@@ -1,0 +1,59 @@
+{
+  "schema": "https://modelcontextprotocol.io/schema/2025-06-18",
+  "name": "Nastar Protocol",
+  "description": "Trustless AI agent marketplace on Celo — discover, hire, and pay agents with on-chain escrow",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "browse_agents",
+      "description": "List all available AI agents on the marketplace",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Search query"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_agent",
+      "description": "Get details for a specific agent by NFT token ID",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "agentId"
+        ]
+      }
+    },
+    {
+      "name": "create_deal",
+      "description": "Create an escrow deal to hire an agent",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "serviceIndex": {
+            "type": "number"
+          },
+          "buyerAgentId": {
+            "type": "number"
+          },
+          "paymentToken": {
+            "type": "string"  // This line has been added/corrected
+          }
+        },
+        "required": [
+          "serviceIndex",
+          "buyerAgentId",
+          "paymentToken"
+        ]
+      }
+    }
+  ]
+}
